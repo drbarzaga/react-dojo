@@ -7,20 +7,25 @@ import {
   Component,
   Gauge,
   Hourglass,
+  LogOut,
   MessageCircleQuestion,
   RefreshCw,
+  Users,
 } from "lucide-react"
 import type { ComponentType } from "react"
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { Sidebar as ShadcnSidebar, SidebarContent } from "@/components/ui/sidebar"
+import Image from "next/image"
+import { Sidebar as ShadcnSidebar, SidebarContent, SidebarFooter } from "@/components/ui/sidebar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useContent } from "@/providers/content-provider"
 import { type Difficulty } from "@/content/exercises"
 import { type QuizDifficulty } from "@/content/quiz"
 import { useProgress } from "@/hooks/use-progress"
 import { useLocaleRouter } from "@/hooks/use-locale-router"
+import { authClient, useSession } from "@/lib/auth-client"
+import { GitHubIcon } from "@/components/svg-icons"
 
 type IconC = ComponentType<{ className?: string; strokeWidth?: number }>
 
@@ -124,6 +129,7 @@ export function Sidebar() {
   const { locale, push } = useLocaleRouter()
   const { allConcepts, categories, conceptIndex, allExercises, allQuizzes } = useContent()
   const { visitedConcepts, completedExercises, quizScores } = useProgress()
+  const { data: session } = useSession()
 
   const difficultyLabel: Record<Difficulty, string> = {
     basic: t("basic"),
@@ -461,6 +467,69 @@ export function Sidebar() {
             })}
           </div>
         </SidebarContent>
+
+        <SidebarFooter className="p-3 pb-2">
+          <button
+            type="button"
+            onClick={() => push("/directory")}
+            className="text-sidebar-foreground/40 hover:text-sidebar-foreground/70 mb-2 flex w-full items-center gap-2 rounded-md px-2 py-1.5 font-mono text-[11px] tracking-[0.08em] uppercase transition-colors hover:bg-[var(--color-bg-hover)]"
+          >
+            <Users className="h-[11px] w-[11px] shrink-0" strokeWidth={1.8} />
+            <span className="truncate">{t("directory")}</span>
+            <span className="ml-auto shrink-0 rounded-sm bg-amber-500/20 px-1 py-px font-mono text-[8px] font-bold tracking-widest text-amber-400 uppercase">
+              beta
+            </span>
+          </button>
+          {session ? (
+            <div className="flex items-center gap-3">
+              <div className="shrink-0">
+                {session.user.image ? (
+                  <Image
+                    src={session.user.image}
+                    alt={session.user.name}
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                  />
+                ) : (
+                  <div className="bg-sidebar-accent text-sidebar-foreground/70 flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-bold">
+                    {session.user.name[0]}
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sidebar-foreground truncate text-[12px] font-medium">
+                  {session.user.name}
+                </p>
+                <p className="text-sidebar-foreground/40 truncate text-[10px]">
+                  {session.user.email}
+                </p>
+              </div>
+              <Tooltip>
+                <TooltipTrigger
+                  className="text-sidebar-foreground/30 hover:text-sidebar-foreground/70 cursor-pointer transition-colors"
+                  onClick={async () => {
+                    await authClient.signOut()
+                  }}
+                >
+                  <LogOut className="h-[14px] w-[14px]" strokeWidth={1.8} />
+                </TooltipTrigger>
+                <TooltipContent side="right">Sign out</TooltipContent>
+              </Tooltip>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={async () => {
+                await authClient.signIn.social({ provider: "github" })
+              }}
+              className="border-sidebar-border text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground flex w-full items-center justify-center gap-2 rounded-md border px-3 py-1.5 text-[12px] font-medium transition-colors"
+            >
+              <GitHubIcon className="h-[13px] w-[13px]" />
+              {t("signIn")}
+            </button>
+          )}
+        </SidebarFooter>
       </TooltipProvider>
     </ShadcnSidebar>
   )

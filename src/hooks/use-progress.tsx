@@ -7,10 +7,12 @@ import {
   useEffect,
   useCallback,
   useMemo,
+  useRef,
   type ReactNode,
 } from "react"
 
 import { PROGRESS_STORAGE_KEY } from "@/lib/constants"
+import { useSession } from "@/lib/auth-client"
 
 interface ProgressData {
   visitedConcepts: string[]
@@ -50,51 +52,85 @@ interface ProgressCtx {
 
 const Ctx = createContext<ProgressCtx | null>(null)
 
+function syncToServer(patch: Partial<ProgressData>) {
+  fetch("/api/progress/sync", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  }).catch(() => {})
+}
+
 export function ProgressProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<ProgressData>(empty)
+  const { data: session } = useSession()
+  const syncedRef = useRef(false)
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setData(load())
   }, [])
 
-  const markConceptVisited = useCallback((id: string) => {
-    setData((prev) => {
-      if (prev.visitedConcepts.includes(id)) {
-        return prev
-      }
-
-      const nextData = { ...prev, visitedConcepts: [...prev.visitedConcepts, id] }
-      persist(nextData)
-      return nextData
+  // On login: merge localStorage → server and replace local state with merged result
+  useEffect(() => {
+    if (!session || syncedRef.current) return
+    syncedRef.current = true
+    const local = load()
+    fetch("/api/progress/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(local),
     })
-  }, [])
+      .then((r) => r.json())
+      .then((merged: ProgressData) => {
+        persist(merged)
+        setData(merged)
+      })
+      .catch(() => {})
+  }, [session])
 
-  const toggleExerciseCompleted = useCallback((id: string) => {
-    setData((prev) => {
-      const already = prev.completedExercises.includes(id)
-      const next = {
-        ...prev,
-        completedExercises: already
-          ? prev.completedExercises.filter((x) => x !== id)
-          : [...prev.completedExercises, id],
-      }
-      persist(next)
-      return next
-    })
-  }, [])
+  const markConceptVisited = useCallback(
+    (id: string) => {
+      setData((prev) => {
+        if (prev.visitedConcepts.includes(id)) return prev
+        const nextData = { ...prev, visitedConcepts: [...prev.visitedConcepts, id] }
+        persist(nextData)
+        if (session) syncToServer({ visitedConcepts: nextData.visitedConcepts })
+        return nextData
+      })
+    },
+    [session]
+  )
 
-  const saveQuizScore = useCallback((id: string, pct: number) => {
-    setData((prev) => {
-      if ((prev.quizScores[id] ?? -1) >= pct) {
-        return prev
-      }
+  const toggleExerciseCompleted = useCallback(
+    (id: string) => {
+      setData((prev) => {
+        const already = prev.completedExercises.includes(id)
+        const next = {
+          ...prev,
+          completedExercises: already
+            ? prev.completedExercises.filter((x) => x !== id)
+            : [...prev.completedExercises, id],
+        }
+        persist(next)
+        if (session) syncToServer({ completedExercises: next.completedExercises })
+        return next
+      })
+    },
+    [session]
+  )
 
-      const nextData = { ...prev, quizScores: { ...prev.quizScores, [id]: pct } }
-      persist(nextData)
-      return nextData
-    })
-  }, [])
+  const saveQuizScore = useCallback(
+    (id: string, pct: number) => {
+      setData((prev) => {
+        if ((prev.quizScores[id] ?? -1) >= pct) return prev
+        const nextData = { ...prev, quizScores: { ...prev.quizScores, [id]: pct } }
+        persist(nextData)
+        if (session) syncToServer({ quizScores: nextData.quizScores })
+        return nextData
+      })
+    },
+    [session]
+  )
 
   const resetProgress = useCallback(() => {
     persist(empty)

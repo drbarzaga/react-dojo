@@ -44,8 +44,10 @@ export async function generateMetadata({
 
 export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {
   const { locale } = await params
-  const messages = await getMessages()
-  const content = await getContentForLocale(locale as Locale)
+  const [messages, content] = await Promise.all([
+    getMessages(),
+    getContentForLocale(locale as Locale),
+  ])
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>

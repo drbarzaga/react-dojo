@@ -53,7 +53,9 @@
     "quizzesCompleted": "{attempted} / {total} quizzes completados",
     "basic": "Básico",
     "intermediate": "Intermedio",
-    "advanced": "Avanzado"
+    "advanced": "Avanzado",
+    "directory": "Directorio de Devs",
+    "signIn": "Iniciar sesión con GitHub"
   },
   "Footer": {
     "madeWith": "Hecho con",
@@ -149,5 +151,18 @@
     "titleDefault": "React Dojo - Aprende React de forma sencilla",
     "titleTemplate": "%s — React Dojo",
     "description": "Plataforma interactiva para dominar React: conceptos claros, ejercicios reales y quizzes en el navegador."
+  },
+  "Directory": {
+    "title": "Directorio de Developers",
+    "subtitle": "{count} {count, plural, one {developer} other {developers}} aprendiendo React",
+    "memberSince": "Miembro desde",
+    "overallProgress": "Progreso general",
+    "empty": "Aún no hay developers. ¡Sé el primero en registrarte!",
+    "membersOnly": "Solo miembros",
+    "membersOnlyDesc": "Inicia sesión con GitHub para ver el directorio de developers y comparar tu progreso con otros.",
+    "featureProgress": "Rastrea tu progreso",
+    "featureCompare": "Compara con otros",
+    "featureRanks": "Gana rangos KYU",
+    "signIn": "Iniciar sesión con GitHub"
   }
 }
