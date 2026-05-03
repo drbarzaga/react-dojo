@@ -510,6 +510,9 @@ export function Sidebar() {
                   className="text-sidebar-foreground/30 hover:text-sidebar-foreground/70 cursor-pointer transition-colors"
                   onClick={async () => {
                     await authClient.signOut()
+                    if (current.startsWith("directory")) {
+                      push("/")
+                    }
                   }}
                 >
                   <LogOut className="h-[14px] w-[14px]" strokeWidth={1.8} />
