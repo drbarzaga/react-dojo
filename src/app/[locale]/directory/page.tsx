@@ -11,6 +11,7 @@ import {
   TOTAL_QUIZZES,
 } from "@/lib/ranking"
 import { GitHubSignInButton } from "@/components/github-sign-in-button"
+import { KyuInfoButton } from "@/components/kyu-info-button"
 
 interface Developer {
   id: string
@@ -68,11 +69,14 @@ export default async function DirectoryPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-12">
-      <div className="mb-8">
-        <h1 className="font-mono text-2xl font-bold text-[var(--color-fg)]">{t("title")}</h1>
-        <p className="mt-1 text-sm text-[var(--color-fg-muted)]">
-          {t("subtitle", { count: developers.length })}
-        </p>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-mono text-2xl font-bold text-[var(--color-fg)]">{t("title")}</h1>
+          <p className="mt-1 text-sm text-[var(--color-fg-muted)]">
+            {t("subtitle", { count: developers.length })}
+          </p>
+        </div>
+        <KyuInfoButton />
       </div>
 
       {developers.length === 0 ? (

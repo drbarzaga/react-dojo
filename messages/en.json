@@ -163,6 +163,12 @@
     "featureProgress": "Track your progress",
     "featureCompare": "Compare with others",
     "featureRanks": "Earn KYU ranks",
-    "signIn": "Sign in with GitHub"
+    "signIn": "Sign in with GitHub",
+    "kyuInfoTitle": "How KYU ranks work",
+    "kyuInfoDesc": "Inspired by martial arts and coding communities like Codewars. Your score (0–100) is a weighted average of your progress.",
+    "kyuInfoFormula": "Score formula",
+    "kyuInfoConcepts": "Concepts visited",
+    "kyuInfoExercises": "Exercises completed",
+    "kyuInfoQuizzes": "Quizzes attempted"
   }
 }
