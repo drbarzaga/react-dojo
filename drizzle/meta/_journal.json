@@ -15,6 +15,13 @@
       "when": 1777828174657,
       "tag": "0001_right_captain_universe",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777921593016,
+      "tag": "0002_strange_patch",
+      "breakpoints": true
     }
   ]
 }

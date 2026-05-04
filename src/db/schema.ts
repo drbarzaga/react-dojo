@@ -115,6 +115,18 @@ export const activityLog = pgTable(
   (t) => [unique("user_date_unique").on(t.userId, t.date)]
 )
 
+export const contentFeedback = pgTable(
+  "content_feedback",
+  {
+    id: text("id").primaryKey(),
+    contentType: text("content_type").notNull(),
+    contentId: text("content_id").notNull(),
+    reaction: integer("reaction").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => [index("feedback_content_idx").on(t.contentType, t.contentId)]
+)
+
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),

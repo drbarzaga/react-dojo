@@ -10,6 +10,7 @@ import { useKeyboardNav } from "@/hooks/use-keyboard-nav"
 import { useContent } from "@/providers/content-provider"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { FeedbackWidget } from "@/components/feedback-widget"
 
 interface ConceptPageProps {
   concept: Concept
@@ -100,9 +101,11 @@ export function ConceptPage({ concept, prev, next }: ConceptPageProps) {
         </section>
       )}
 
+      <FeedbackWidget contentType="concept" contentId={concept.id} />
+
       <nav
         ref={bottomRef}
-        className="mt-24 flex items-start justify-between gap-8 border-t border-[var(--color-line)] pt-8 text-[14px]"
+        className="mt-12 flex items-start justify-between gap-8 border-t border-[var(--color-line)] pt-8 text-[14px]"
       >
         {prev ? (
           <a

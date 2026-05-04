@@ -10,6 +10,7 @@ import { useProgress } from "@/hooks/use-progress"
 import { useLocaleRouter } from "@/hooks/use-locale-router"
 import { useKeyboardNav } from "@/hooks/use-keyboard-nav"
 import { useContent } from "@/providers/content-provider"
+import { FeedbackWidget } from "@/components/feedback-widget"
 
 interface ExercisePageProps {
   exercise: Exercise
@@ -174,7 +175,9 @@ export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
         </section>
       ) : null}
 
-      <nav className="mt-14 flex items-start justify-between gap-8 border-t border-[var(--color-line)] pt-8 text-[14px]">
+      <FeedbackWidget contentType="exercise" contentId={exercise.id} />
+
+      <nav className="mt-12 flex items-start justify-between gap-8 border-t border-[var(--color-line)] pt-8 text-[14px]">
         {prev ? (
           <a
             href={href(`/learn/${prev.id}`)}

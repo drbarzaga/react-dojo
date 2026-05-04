@@ -82,6 +82,15 @@
     "open": "open",
     "close": "close"
   },
+  "FeedbackWidget": {
+    "label": "Was this helpful?",
+    "thanks": "Thanks!",
+    "totalVotes": "{count} {count, plural, one {vote} other {votes}}",
+    "reaction1": "Terrible",
+    "reaction2": "Not helpful",
+    "reaction3": "Helpful",
+    "reaction4": "Love it!"
+  },
   "ConceptPage": {
     "prev": "← previous",
     "next": "next →",

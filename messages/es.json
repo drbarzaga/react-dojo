@@ -82,6 +82,15 @@
     "open": "abrir",
     "close": "cerrar"
   },
+  "FeedbackWidget": {
+    "label": "¿Fue útil?",
+    "thanks": "¡Gracias!",
+    "totalVotes": "{count} {count, plural, one {voto} other {votos}}",
+    "reaction1": "Terrible",
+    "reaction2": "No me ayudó",
+    "reaction3": "Útil",
+    "reaction4": "¡Me encantó!"
+  },
   "ConceptPage": {
     "prev": "← anterior",
     "next": "siguiente →",

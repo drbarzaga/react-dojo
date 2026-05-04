@@ -5,6 +5,7 @@ import { ArrowLeft, Check, Copy } from "lucide-react"
 import { SandpackProvider, SandpackLayout, SandpackCodeEditor } from "@codesandbox/sandpack-react"
 import { useTranslations } from "next-intl"
 import { Playground, getSandpackTheme } from "@/components/playground"
+import { FeedbackWidget } from "@/components/feedback-widget"
 import { useLocaleRouter } from "@/hooks/use-locale-router"
 import { useTheme } from "@/hooks/use-theme"
 import { useEditorTheme } from "@/hooks/use-editor-theme"
@@ -137,8 +138,10 @@ export function HookDetailPage({ hook, prev, next }: HookDetailPageProps) {
         )}
       </div>
 
+      <FeedbackWidget contentType="hook" contentId={hook.id} />
+
       {/* Prev / Next navigation */}
-      <nav className="mt-14 flex items-start justify-between gap-8 border-t border-[var(--color-line)] pt-8 text-[14px]">
+      <nav className="mt-12 flex items-start justify-between gap-8 border-t border-[var(--color-line)] pt-8 text-[14px]">
         {prev ? (
           <a
             href={href(`/hooks/${prev.id}`)}

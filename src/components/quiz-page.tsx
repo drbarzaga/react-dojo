@@ -11,6 +11,7 @@ import type { Quiz } from "@/content/quiz"
 import { useProgress } from "@/hooks/use-progress"
 import { useLocaleRouter } from "@/hooks/use-locale-router"
 import { TIMER_TICK_MS } from "@/lib/constants"
+import { FeedbackWidget } from "@/components/feedback-widget"
 
 interface QuizPageProps {
   quiz: Quiz
@@ -373,6 +374,8 @@ export function QuizPage({ quiz, allQuizzes }: QuizPageProps) {
             </>
           )}
         </div>
+
+        <FeedbackWidget contentType="quiz" contentId={quiz.id} />
       </article>
     )
   }
