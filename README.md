@@ -55,11 +55,26 @@ Contributions are welcome. If you find a bug or want to add a concept, exercise,
 1. Fork the repository
 2. Create a branch: `git checkout -b feat/my-feature`
 3. Make your changes and run checks before committing:
+
+   First, check for any code standard violations:
+
    ```bash
-   bun run build
    bun run lint
-   bun run format
    ```
+
+   If the linter reports auto-fixable errors, run:
+
+   ```bash
+   bun run lint:fix
+   ```
+
+   Finally, ensure code formatting and verify the build:
+
+   ```bash
+   bun run format
+   bun run build
+   ```
+
 4. Commit and open a pull request
 
 For bugs or ideas, [open an issue](https://github.com/drbarzaga/react-dojo/issues/new).
