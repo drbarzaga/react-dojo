@@ -199,7 +199,7 @@ const editorThemes: Record<EditorThemeId, { dark: SandpackThemeProp; light?: San
     },
   }
 
-function getSandpackTheme(editorTheme: EditorThemeId, appTheme: Theme): SandpackThemeProp {
+export function getSandpackTheme(editorTheme: EditorThemeId, appTheme: Theme): SandpackThemeProp {
   const t = editorThemes[editorTheme]
   if (editorTheme === "auto") return appTheme === "light" ? t.light! : t.dark
   return t.dark

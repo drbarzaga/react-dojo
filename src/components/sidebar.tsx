@@ -11,6 +11,7 @@ import {
   MessageCircleQuestion,
   RefreshCw,
   Users,
+  Anchor,
 } from "lucide-react"
 import type { ComponentType } from "react"
 import { useState, useEffect } from "react"
@@ -469,6 +470,17 @@ export function Sidebar() {
         </SidebarContent>
 
         <SidebarFooter className="p-3 pb-2">
+          <button
+            type="button"
+            onClick={() => push("/hooks")}
+            className="text-sidebar-foreground/40 hover:text-sidebar-foreground/70 mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 font-mono text-[11px] tracking-[0.08em] uppercase transition-colors hover:bg-[var(--color-bg-hover)]"
+          >
+            <Anchor className="h-[11px] w-[11px] shrink-0" strokeWidth={1.8} />
+            <span className="truncate">{t("customHooks")}</span>
+            <span className="ml-auto shrink-0 rounded-sm bg-amber-500/20 px-1 py-px font-mono text-[8px] font-bold tracking-widest text-amber-400 uppercase">
+              beta
+            </span>
+          </button>
           <button
             type="button"
             onClick={() => push("/directory")}
