@@ -6,6 +6,8 @@ import tseslint from "typescript-eslint"
 import { defineConfig, globalIgnores } from "eslint/config"
 import eslintConfigPrettier from "eslint-config-prettier"
 
+import preferExportFunction from "./src/rules/prefer-export-function.js"
+
 export default defineConfig([
   globalIgnores(["dist", ".next"]),
   {
@@ -21,6 +23,13 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    plugins: {
+      "local-rules": {
+        rules: {
+          "prefer-export-function": preferExportFunction,
+        },
+      },
+    },
     rules: {
       // setState in useEffect on mount is a valid pattern for reading from external sources (localStorage, etc.)
       "react-hooks/set-state-in-effect": "warn",
@@ -34,6 +43,7 @@ export default defineConfig([
           boolean: true,
         },
       ],
+      "local-rules/prefer-export-function": "error",
     },
   },
 ])
