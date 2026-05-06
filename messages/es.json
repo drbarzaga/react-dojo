@@ -212,5 +212,19 @@
     "kyuInfoConcepts": "Conceptos visitados",
     "kyuInfoExercises": "Ejercicios completados",
     "kyuInfoQuizzes": "Quizzes intentados"
+  },
+  "DonateDialog": {
+    "tooltip": "Donar a React Dojo",
+    "title": "Apoya React Dojo",
+    "description": "React Dojo es una plataforma de aprendizaje gratuita y open-source, sin anuncios ni paywalls. Mantenerla tiene costos reales — cualquier contribución ayuda a que siga viva y mejorando.",
+    "costsTitle": "En qué se usan los fondos",
+    "costDatabaseLabel": "Base de datos",
+    "costDatabaseDesc": "Neon PostgreSQL — almacena progreso, feedback y actividad",
+    "costServerLabel": "Hosting y cómputo",
+    "costServerDesc": "Vercel — sirve la app y la API globalmente",
+    "costDomainLabel": "Dominio y servicios",
+    "costDomainDesc": "Renovación del dominio e integraciones de terceros",
+    "cta": "Donar con PayPal",
+    "note": "Toda contribución, sin importar el monto, es muy apreciada."
   }
 }
