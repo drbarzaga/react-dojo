@@ -74,12 +74,15 @@ export function FeedbackWidget({ contentType, contentId }: FeedbackWidgetProps) 
     [contentType, contentId, voted, loading]
   )
 
+  const total = Object.values(counts).reduce((s, n) => s + n, 0)
+  const hasData = total > 0
+
   return (
     <div className="mt-12 flex flex-col items-center gap-3">
       <div
         className={[
           "flex items-center gap-1 rounded-full border px-5 py-2.5 transition-all duration-300",
-          voted !== null
+          hasData
             ? "gap-3 border-[var(--color-line-strong)] bg-[var(--color-bg-raise)]"
             : "border-[var(--color-line)] bg-[var(--color-bg)]",
         ].join(" ")}
@@ -116,7 +119,7 @@ export function FeedbackWidget({ contentType, contentId }: FeedbackWidgetProps) 
                       ].join(" ")}
                     >
                       <span className="text-[20px] leading-none select-none">{emoji}</span>
-                      {voted !== null && (
+                      {hasData && (
                         <span
                           className={[
                             "font-mono text-[11px] tabular-nums transition-all",
