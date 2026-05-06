@@ -122,6 +122,7 @@ export const contentFeedback = pgTable(
     contentType: text("content_type").notNull(),
     contentId: text("content_id").notNull(),
     reaction: integer("reaction").notNull(),
+    comment: text("comment"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (t) => [index("feedback_content_idx").on(t.contentType, t.contentId)]

@@ -23,18 +23,22 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const { type, id, reaction } = await req.json()
+  const { type, id, reaction, comment, prevId } = await req.json()
   if (!type || !id || !reaction) return Response.json({ error: "Missing fields" }, { status: 400 })
   if (![1, 2, 3, 4].includes(reaction))
     return Response.json({ error: "Invalid reaction" }, { status: 400 })
+
+  if (prevId) {
+    await db.delete(contentFeedback).where(eq(contentFeedback.id, prevId))
+  }
 
   await db.insert(contentFeedback).values({
     id: crypto.randomUUID(),
     contentType: type,
     contentId: id,
     reaction,
+    comment: comment?.trim() || null,
   })
 
-  const counts = await getCounts(type, id)
-  return Response.json({ counts })
+  return Response.json({ ok: true })
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "content_feedback" ADD COLUMN "comment" text;

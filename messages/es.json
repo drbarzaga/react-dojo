@@ -89,7 +89,11 @@
     "reaction1": "Terrible",
     "reaction2": "No me ayudó",
     "reaction3": "Útil",
-    "reaction4": "¡Me encantó!"
+    "reaction4": "¡Me encantó!",
+    "placeholder": "Tu feedback...",
+    "send": "Enviar",
+    "confirmed": "¡Gracias por tu feedback!",
+    "confirmedSub": "Tu opinión nos ayuda a mejorar el contenido."
   },
   "ConceptPage": {
     "prev": "← anterior",
