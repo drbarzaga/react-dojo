@@ -1,8 +1,8 @@
 import { db } from "@/db"
-import { contentFeedback } from "@/db/schema"
+import { contentFeedback, REACTION_SLUGS } from "@/db/schema"
 import { and, count, eq } from "drizzle-orm"
 
-async function getCounts(type: string, id: string): Promise<Record<number, number>> {
+async function getCounts(type: string, id: string): Promise<Record<string, number>> {
   const rows = await db
     .select({ reaction: contentFeedback.reaction, count: count() })
     .from(contentFeedback)
@@ -25,7 +25,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const { type, id, reaction, comment, prevId } = await req.json()
   if (!type || !id || !reaction) return Response.json({ error: "Missing fields" }, { status: 400 })
-  if (![1, 2, 3, 4].includes(reaction))
+  if (!(REACTION_SLUGS as readonly string[]).includes(reaction))
     return Response.json({ error: "Invalid reaction" }, { status: 400 })
 
   if (prevId) {

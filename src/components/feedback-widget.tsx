@@ -6,6 +6,8 @@ import { Loader2 } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Textarea } from "@/components/ui/textarea"
 
+import { REACTION_SLUGS } from "@/db/schema"
+
 const REACTION_EMOJIS = ["😭", "😕", "🙂", "🤩"] as const
 
 interface FeedbackWidgetProps {
@@ -15,7 +17,7 @@ interface FeedbackWidgetProps {
 
 export function FeedbackWidget({ contentType, contentId }: FeedbackWidgetProps) {
   const t = useTranslations("FeedbackWidget")
-  const [reaction, setReaction] = useState<number | null>(null)
+  const [reaction, setReaction] = useState<(typeof REACTION_SLUGS)[number] | null>(null)
   const [comment, setComment] = useState("")
   const [confirming, setConfirming] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -70,18 +72,18 @@ export function FeedbackWidget({ contentType, contentId }: FeedbackWidgetProps) 
           </span>
           <TooltipProvider delay={300}>
             {REACTION_EMOJIS.map((emoji, i) => {
-              const value = i + 1
-              const isSelected = reaction === value
+              const slug = REACTION_SLUGS[i]
+              const isSelected = reaction === slug
               const label = t(
-                `reaction${value}` as "reaction1" | "reaction2" | "reaction3" | "reaction4"
+                `reaction${i + 1}` as "reaction1" | "reaction2" | "reaction3" | "reaction4"
               )
               return (
-                <Tooltip key={value}>
+                <Tooltip key={slug}>
                   <TooltipTrigger
                     render={
                       <button
                         type="button"
-                        onClick={() => !confirming && setReaction(value)}
+                        onClick={() => !confirming && setReaction(slug)}
                         className={[
                           "flex h-9 w-9 items-center justify-center rounded-full transition-all duration-150",
                           confirming ? "cursor-default" : "cursor-pointer",

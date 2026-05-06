@@ -11,6 +11,9 @@ import {
   unique,
 } from "drizzle-orm/pg-core"
 
+export const REACTION_SLUGS = ["terrible", "not_helpful", "helpful", "love_it"] as const
+export type ReactionSlug = (typeof REACTION_SLUGS)[number]
+
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -121,7 +124,7 @@ export const contentFeedback = pgTable(
     id: text("id").primaryKey(),
     contentType: text("content_type").notNull(),
     contentId: text("content_id").notNull(),
-    reaction: integer("reaction").notNull(),
+    reaction: text("reaction").notNull(),
     comment: text("comment"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
