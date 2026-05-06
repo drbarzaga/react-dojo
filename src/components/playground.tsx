@@ -395,13 +395,13 @@ export function Playground({
   }, [maximized])
 
   // appTheme intentionally excluded — ThemeSync handles CSS updates imperatively
+  // getSavedCode intentionally excluded — initial snapshot only, updates via CodeSync
   const initialFiles = useMemo(() => {
     const baseFiles: SandpackFiles = {
       [THEME_FILE_NAME]: { code: buildStyles(appTheme), hidden: true },
       ...files,
     }
 
-    // Restore saved code if persistence enabled
     if (enablePersistence && exerciseId) {
       const savedCode = getSavedCode(exerciseId)
       if (savedCode) {
@@ -414,7 +414,7 @@ export function Playground({
     }
 
     return baseFiles
-  }, [files, exerciseId, enablePersistence, getSavedCode]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [files, exerciseId, enablePersistence]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div
