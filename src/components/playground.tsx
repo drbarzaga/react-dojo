@@ -309,35 +309,49 @@ function ThemeSync({ appTheme }: { appTheme: Theme }) {
 function CodeSync({ exerciseId }: { exerciseId: string }) {
   const { sandpack } = useSandpack()
   const { saveCode } = useCodePersistence()
-  const filesRef = useRef(sandpack.files)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const codeRef = useRef<ExerciseFiles | null>(null)
 
   useEffect(() => {
-    const currentFiles = sandpack.files
-    // Check if files changed
-    const changed = Object.keys(currentFiles).some(
-      (path) => currentFiles[path].code !== filesRef.current[path]?.code
-    )
+    const next = Object.entries(sandpack.files).reduce<ExerciseFiles>((acc, [path, file]) => {
+      if (path.includes(THEME_FILE_NAME)) return acc
+      return { ...acc, [path]: file.code }
+    }, {})
+
+    const prev = codeRef.current
+
+    // First run — record baseline without saving
+    if (prev === null) {
+      codeRef.current = next
+      return
+    }
+
+    // Compare by content, not reference, to ignore Sandpack re-renders with same code
+    const changed =
+      Object.keys(next).some((p) => next[p] !== prev[p]) ||
+      Object.keys(prev).some((p) => !(p in next))
 
     if (!changed) return
-    filesRef.current = currentFiles
 
-    // Debounced save
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    timeoutRef.current = setTimeout(() => {
-      const codeToSave = Object.entries(currentFiles).reduce((acc, [path, file]) => {
-        // Skip injected theme file
-        if (path.includes(THEME_FILE_NAME)) return acc
-        return { ...acc, [path]: file.code }
-      }, {} as ExerciseFiles)
-
-      saveCode(exerciseId, codeToSave)
+    // Content changed: update ref and reset debounce
+    codeRef.current = next
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => {
+      saveCode(exerciseId, codeRef.current!)
+      timerRef.current = null
     }, 750)
-
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    }
+    // No cleanup return — timer must survive reference-only re-renders of sandpack.files
   }, [sandpack.files, exerciseId, saveCode])
+
+  // Flush any pending save on unmount so navigating away doesn't lose code
+  useEffect(() => {
+    return () => {
+      if (timerRef.current !== null) {
+        clearTimeout(timerRef.current)
+        if (codeRef.current) saveCode(exerciseId, codeRef.current)
+      }
+    }
+  }, [exerciseId, saveCode])
 
   return null
 }
