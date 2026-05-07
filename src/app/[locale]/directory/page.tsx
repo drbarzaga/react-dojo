@@ -1,13 +1,9 @@
 import { GitHubSignInButton } from "@/components/github-sign-in-button"
 import { KyuInfoButton } from "@/components/kyu-info-button"
+import { getContentForLocale } from "@/content/loader"
+import type { Locale } from "@/i18n/routing"
 import { auth } from "@/lib/auth"
-import {
-  calculateScore,
-  getRank,
-  TOTAL_CONCEPTS,
-  TOTAL_EXERCISES,
-  TOTAL_QUIZZES,
-} from "@/lib/ranking"
+import { calculateScore, getRank } from "@/lib/ranking"
 import { Crown } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import { headers } from "next/headers"
@@ -34,11 +30,23 @@ function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", { month: "short", year: "numeric" })
 }
 
-export default async function DirectoryPage() {
-  const [session, t] = await Promise.all([
+interface Props {
+  params: Promise<{ locale: string }>
+}
+
+export default async function DirectoryPage({ params }: Props) {
+  const { locale } = await params
+  const [session, t, { allConcepts, allExercises, allQuizzes }] = await Promise.all([
     auth.api.getSession({ headers: await headers() }),
     getTranslations("Directory"),
+    getContentForLocale(locale as Locale),
   ])
+
+  const totals = {
+    concepts: allConcepts.length,
+    exercises: allExercises.length,
+    quizzes: allQuizzes.length,
+  }
 
   if (!session) {
     return (
@@ -84,8 +92,8 @@ export default async function DirectoryPage() {
       ) : (
         <div className="space-y-3">
           {developers.map((dev, index) => {
-            const rank = getRank(dev.concepts, dev.exercises, dev.quizzes)
-            const score = calculateScore(dev.concepts, dev.exercises, dev.quizzes)
+            const rank = getRank(dev.concepts, dev.exercises, dev.quizzes, totals)
+            const score = calculateScore(dev.concepts, dev.exercises, dev.quizzes, totals)
 
             return (
               <div
@@ -151,19 +159,19 @@ export default async function DirectoryPage() {
                   <StatBar
                     label="Concepts"
                     value={dev.concepts}
-                    total={TOTAL_CONCEPTS}
+                    total={totals.concepts}
                     colorClass="bg-blue-400/60"
                   />
                   <StatBar
                     label="Exercises"
                     value={dev.exercises}
-                    total={TOTAL_EXERCISES}
+                    total={totals.exercises}
                     colorClass="bg-emerald-400/60"
                   />
                   <StatBar
                     label="Quizzes"
                     value={dev.quizzes}
-                    total={TOTAL_QUIZZES}
+                    total={totals.quizzes}
                     colorClass="bg-amber-400/60"
                   />
                 </div>

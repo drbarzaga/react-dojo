@@ -26,7 +26,7 @@ const appStyle = {
 };
 
 export default function App() {
-  const [isOn, setIsOn] = useState(false);
+  // declara estado isOn aquí
 
   return (
     <div style={appStyle}>
@@ -34,7 +34,7 @@ export default function App() {
       <button
         onClick={() => {}}
         style={{
-          backgroundColor: isOn ? "#22c55e" : "#6b7280",
+          backgroundColor: "#6b7280",
           color: "white",
           padding: "12px 24px",
           borderRadius: 8,
@@ -43,7 +43,7 @@ export default function App() {
           fontSize: 18
         }}
       >
-        {/* TODO: muestra ON/OFF según isOn */}
+        {/* muestra ON u OFF según isOn */}
         OFF
       </button>
     </div>

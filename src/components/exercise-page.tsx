@@ -5,6 +5,7 @@ import { Playground } from "@/components/playground"
 import type { Difficulty, Exercise } from "@/content/exercises"
 import { useKeyboardNav } from "@/hooks/use-keyboard-nav"
 import { useLocaleRouter } from "@/hooks/use-locale-router"
+import { useCodePersistence } from "@/hooks/use-code-persistence"
 import { useProgress } from "@/hooks/use-progress"
 import { cn } from "@/lib/utils"
 import { useContent } from "@/providers/content-provider"
@@ -37,7 +38,9 @@ export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
   const t = useTranslations("ExercisePage")
   const { push, href } = useLocaleRouter()
   const [showSolution, setShowSolution] = useState(false)
+  const [resetCount, setResetCount] = useState(0)
   const { completedExercises, toggleExerciseCompleted } = useProgress()
+  const { clearCode } = useCodePersistence()
   const { allConcepts } = useContent()
   useKeyboardNav({
     prev: prev && `/learn/${prev.id}`,
@@ -99,7 +102,18 @@ export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
       <section className="mt-12">
         <div className="text-fg-dim mb-2 flex items-center justify-between text-[11px]">
           <span>{showSolution ? t("solution") : t("yourCode")}</span>
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-4">
+            {!showSolution && (
+              <button
+                onClick={() => {
+                  clearCode(exercise.id)
+                  setResetCount((c) => c + 1)
+                }}
+                className="text-fg-dim hover:text-fg text-[11px] transition-colors"
+              >
+                {t("reset")}
+              </button>
+            )}
             <button
               onClick={() => setShowSolution((v) => !v)}
               className={cn(
@@ -120,7 +134,7 @@ export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
             />
           ) : (
             <Playground
-              key={`${exercise.id}-start`}
+              key={`${exercise.id}-start-${resetCount}`}
               files={exercise.starter}
               dependencies={exercise.dependencies}
               exerciseId={exercise.id}
