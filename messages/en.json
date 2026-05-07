@@ -225,6 +225,7 @@
     "costDomainLabel": "Domain & services",
     "costDomainDesc": "Domain renewal and third-party integrations",
     "cta": "Donate via PayPal",
+    "ctaKofi": "Support React Dojo on Ko-fi",
     "note": "Every contribution, no matter the size, is greatly appreciated."
   }
 }

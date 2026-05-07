@@ -224,7 +224,8 @@
     "costServerDesc": "Vercel — sirve la app y la API globalmente",
     "costDomainLabel": "Dominio y servicios",
     "costDomainDesc": "Renovación del dominio e integraciones de terceros",
-    "cta": "Donar con PayPal",
+    "cta": "Donar vía PayPal",
+    "ctaKofi": "Donar vía Ko-fi",
     "note": "Toda contribución, sin importar el monto, es muy apreciada."
   }
 }

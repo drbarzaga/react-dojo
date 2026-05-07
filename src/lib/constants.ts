@@ -29,3 +29,7 @@ export const THEME_FILE_NAME = "styles.css"
 export const MOBILE_BREAKPOINT = 768
 
 export const PROGRESS_STORAGE_KEY = "react-dojo-progress"
+
+// Donation URLs
+export const PAYPAL_URL = "https://paypal.me/reactdojolearn"
+export const KOFI_URL = "https://ko-fi.com/reactdojo"
