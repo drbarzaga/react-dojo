@@ -1,14 +1,6 @@
 "use client"
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  type ReactNode,
-} from "react"
+import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react"
 
 import type { ExerciseFiles } from "@/types/code-persistence"
 import { CODE_STORAGE_KEY } from "@/lib/constants"
@@ -52,12 +44,9 @@ interface CodePersistenceCtx {
 const Ctx = createContext<CodePersistenceCtx | null>(null)
 
 export function CodePersistenceProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<CodePersistenceData>(empty)
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setData(load())
-  }, [])
+  const [data, setData] = useState<CodePersistenceData>(() =>
+    typeof window === "undefined" ? empty : load()
+  )
 
   const getSavedCode = useCallback(
     (exerciseId: string) => {
