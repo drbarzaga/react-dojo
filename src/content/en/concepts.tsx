@@ -10,7 +10,7 @@ import type { Concept, Category } from "@/content/types"
 export type { Concept, Category, Section } from "@/content/types"
 
 type ConceptOverride = Partial<
-  Pick<Concept, "kicker" | "title" | "lede" | "pitfalls" | "sections" | "playground">
+  Pick<Concept, "label" | "kicker" | "title" | "lede" | "pitfalls" | "sections" | "playground">
 >
 
 const overrides: Record<string, ConceptOverride> = {
@@ -1824,6 +1824,7 @@ export default function App() {
     ),
   },
   "controlado-vs-no-controlado": {
+    label: "Controlled vs Uncontrolled",
     kicker: "Interview · Forms",
     title: "Who holds the input's truth?",
     lede: "A controlled component delegates the input value to React — state is the source of truth. An uncontrolled component lets the DOM hold the value and reads it with a ref when needed.",
@@ -2201,6 +2202,7 @@ export default function App() {
     ),
   },
   "componentes-puros": {
+    label: "Pure Components",
     kicker: "Interview · Performance",
     title: "Same input, always the same output",
     lede: "A pure component is one that given the same props produces exactly the same JSX — with no side effects in the render. React can skip its re-render if the props haven't changed, making the UI predictable and optimizable.",
