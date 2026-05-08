@@ -5,20 +5,18 @@ import { eq } from "drizzle-orm"
 
 export async function GET(req: Request) {
   const session = await auth.api.getSession({ headers: req.headers })
-  if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 })
 
   const data = await db.query.userProgress.findFirst({
-    where: eq(userProgress.userId, session.user.id),
+    where: eq(userProgress.userId, session!.user.id),
   })
   return Response.json(data ?? { visitedConcepts: [], completedExercises: [], quizScores: {} })
 }
 
 export async function POST(req: Request) {
   const session = await auth.api.getSession({ headers: req.headers })
-  if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 })
 
   const { visitedConcepts, completedExercises, quizScores } = await req.json()
-  const userId = session.user.id
+  const userId = session!.user.id
 
   const existing = await db.query.userProgress.findFirst({
     where: eq(userProgress.userId, userId),
@@ -48,10 +46,9 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   const session = await auth.api.getSession({ headers: req.headers })
-  if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 })
 
   const patch = await req.json()
-  const userId = session.user.id
+  const userId = session!.user.id
 
   const existing = await db.query.userProgress.findFirst({
     where: eq(userProgress.userId, userId),
