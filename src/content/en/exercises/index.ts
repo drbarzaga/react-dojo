@@ -195,22 +195,22 @@ export default function App() {
   },
   "like-button": {
     title: "Like button",
-    lede: "A 'like' button that shows the counter and can be toggled. If liked, clicking decrements; if not, it increments.",
+    lede: "A Twitter-style 'like' button: the counter starts at 142 (other users' likes) and you add or subtract 1 on each click.",
     objectives: [
-      "Declare likes state initial at 0",
+      "Declare likes state initial at 142",
       "Declare isLiked state initial at false",
       "On click: if isLiked, likes-- and isLiked=false; if not, likes++ and isLiked=true",
       "Change button color when liked",
       "Show counter next to button",
     ],
-    hint: "Use one state for the numeric value and another for the boolean liked state",
+    hint: "Use a numeric state for the total likes (starts at 142, not 0) and a boolean to track whether the current user has liked it",
     starter: {
       "/App.js": `import { useState } from "react";
 
 const appStyle = {
   padding: 24,
   fontFamily: "system-ui",
-  background: "#09090b",
+  background: "var(--bg)",
   minHeight: "100vh",
 };
 
@@ -221,7 +221,7 @@ const rowStyle = {
 };
 
 export default function App() {
-  // declare likes state here
+  // declare likes state here (starts at 142)
   // declare isLiked state here
 
   const handleClick = () => {
@@ -261,7 +261,7 @@ export default function App() {
 const appStyle = {
   padding: 24,
   fontFamily: "system-ui",
-  background: "#09090b",
+  background: "var(--bg)",
   minHeight: "100vh",
 };
 
@@ -272,7 +272,7 @@ const rowStyle = {
 };
 
 export default function App() {
-  const [likes, setLikes] = useState(0);
+  const [likes, setLikes] = useState(142);
   const [isLiked, setIsLiked] = useState(false);
 
   const handleClick = () => {

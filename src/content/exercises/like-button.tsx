@@ -4,16 +4,16 @@ export const likeButton: Exercise = {
   id: "like-button",
   label: "like button",
   title: "Botón me gusta",
-  lede: "Un botón de 'like' que muestra el contador y se puede togglear. Si está likeado, al hacer clic lo decrementa; si no, lo incrementa.",
+  lede: "Un botón de 'like' estilo Twitter: el contador empieza en 142 (likes de otros usuarios) y tú sumas o restas 1 al hacer clic.",
   difficulty: "basic",
   objectives: [
-    "Declara estado likes inicial en 0",
+    "Declara estado likes inicial en 142",
     "Declara estado isLiked inicial en false",
     "Al hacer clic: si isLiked, likes-- y isLiked=false; si no, likes++ y isLiked=true",
     "Cambia el color del botón cuando está likeado",
     "Muestra el contador al lado del botón",
   ],
-  hint: "Usa un estado para el valor numérico y otro para el boolean de si está likeado",
+  hint: "Usa un estado numérico para el total de likes (empieza en 142, no en 0) y un boolean para saber si el usuario actual lo likeó",
   relatedConcepts: ["useState"],
   starter: {
     "/App.js": `import { useState } from "react";
@@ -32,7 +32,7 @@ const rowStyle = {
 };
 
 export default function App() {
-  // declara estado likes aquí
+  // declara estado likes aquí (empieza en 142)
   // declara estado isLiked aquí
 
   const handleClick = () => {
@@ -83,7 +83,7 @@ const rowStyle = {
 };
 
 export default function App() {
-  const [likes, setLikes] = useState(0);
+  const [likes, setLikes] = useState(142);
   const [isLiked, setIsLiked] = useState(false);
 
   const handleClick = () => {
