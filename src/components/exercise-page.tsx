@@ -36,7 +36,7 @@ const difficultyKey: Record<
 
 export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
   const t = useTranslations("ExercisePage")
-  const { push, href } = useLocaleRouter()
+  const { push, href, locale } = useLocaleRouter()
   const [showSolution, setShowSolution] = useState(false)
   const [resetCount, setResetCount] = useState(0)
   const { completedExercises, toggleExerciseCompleted } = useProgress()
@@ -134,7 +134,7 @@ export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
             />
           ) : (
             <Playground
-              key={`${exercise.id}-start-${resetCount}`}
+              key={`${locale}-${exercise.id}-start-${resetCount}`}
               files={exercise.starter}
               dependencies={exercise.dependencies}
               exerciseId={exercise.id}

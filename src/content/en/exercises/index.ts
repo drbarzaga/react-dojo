@@ -339,7 +339,7 @@ const appStyle = {
 };
 
 export default function App() {
-  // declare activeTab state here with initial value "home"
+  // TODO: declare activeTab state with initial value "home"
 
   return (
     <div style={appStyle}>
@@ -348,11 +348,13 @@ export default function App() {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => {}} // update the active tab on click
+            onClick={() => {
+              // TODO: update the active tab
+            }}
             style={{
               padding: "8px 16px",
-              backgroundColor: "transparent", // change if tab.id === activeTab
-              color: "#a1a1aa", // change if tab.id === activeTab
+              backgroundColor: "transparent",
+              color: "#a1a1aa",
               border: "none",
               cursor: "pointer",
             }}
@@ -362,7 +364,7 @@ export default function App() {
         ))}
       </div>
       <div style={{ padding: 16, fontSize: 18 }}>
-        {/* show the active tab content */}
+        {/* TODO: show the active tab content */}
       </div>
     </div>
   );
