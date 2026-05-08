@@ -140,19 +140,19 @@ const labelStyle = {
 };
 
 export default function App() {
-  const [text, setText] = useState("");
+  // declare text state here
 
   return (
     <div style={appStyle}>
       <p style={labelStyle}>Controlled Input</p>
       <input
-        value={text}
+        value=""
         onChange={() => {}}
         placeholder="type something..."
         style={{ padding: 8, fontSize: 16, width: "100%", borderRadius: 8 }}
       />
       <p style={{ marginTop: 16, fontSize: 18 }}>
-        {/* TODO: display text here */}
+        {/* display text here */}
       </p>
     </div>
   );
