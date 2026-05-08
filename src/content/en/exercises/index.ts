@@ -334,7 +334,7 @@ const tabs = [
 const appStyle = {
   padding: 24,
   fontFamily: "system-ui",
-  background: "#09090b",
+  background: "var(--bg)",
   minHeight: "100vh",
 };
 
@@ -383,7 +383,7 @@ const tabs = [
 const appStyle = {
   padding: 24,
   fontFamily: "system-ui",
-  background: "#09090b",
+  background: "var(--bg)",
   minHeight: "100vh",
 };
 
