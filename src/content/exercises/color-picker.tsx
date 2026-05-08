@@ -47,7 +47,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ padding: 24, fontFamily: "system-ui", background: "#09090b", minHeight: "100vh" }}>
+    <div style={{ padding: 24, fontFamily: "system-ui", background: "var(--bg)", minHeight: "100vh" }}>
       <p style={{ marginBottom: 24, color: "#71717a" }}>Color Picker</p>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 24 }}>
         {colors.map((color) => (
@@ -106,7 +106,7 @@ export default function App() {
   const handleColorClick = (color) => setSelectedColor(color);
 
   return (
-    <div style={{ padding: 24, fontFamily: "system-ui", background: "#09090b", minHeight: "100vh" }}>
+    <div style={{ padding: 24, fontFamily: "system-ui", background: "var(--bg)", minHeight: "100vh" }}>
       <p style={{ marginBottom: 24, color: "#71717a" }}>Color Picker</p>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 24 }}>
         {colors.map((color) => (

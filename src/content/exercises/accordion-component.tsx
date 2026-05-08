@@ -65,7 +65,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ padding: 24, fontFamily: "system-ui", background: "#09090b", minHeight: "100vh" }}>
+    <div style={{ padding: 24, fontFamily: "system-ui", background: "var(--bg)", minHeight: "100vh" }}>
       <p style={{ marginBottom: 24, color: "#71717a" }}>Accordion</p>
       {items.map((item) => (
         <AccordionItem
@@ -136,7 +136,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ padding: 24, fontFamily: "system-ui", background: "#09090b", minHeight: "100vh" }}>
+    <div style={{ padding: 24, fontFamily: "system-ui", background: "var(--bg)", minHeight: "100vh" }}>
       <p style={{ marginBottom: 24, color: "#71717a" }}>Accordion</p>
       {items.map((item) => (
         <AccordionItem key={item.id} item={item} isOpen={openItems.has(item.id)} onToggle={() => toggleItem(item.id)} />

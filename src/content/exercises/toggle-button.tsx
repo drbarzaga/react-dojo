@@ -21,7 +21,7 @@ const appStyle = {
   padding: 24,
   textAlign: "center",
   fontFamily: "system-ui",
-  background: "#09090b",
+  background: "var(--bg)",
   minHeight: "100vh",
 };
 
@@ -58,7 +58,7 @@ const appStyle = {
   padding: 24,
   textAlign: "center",
   fontFamily: "system-ui",
-  background: "#09090b",
+  background: "var(--bg)",
   minHeight: "100vh",
 };
 
