@@ -423,28 +423,29 @@ export default function App() {
     title: "Form with validation",
     lede: "A simple form with name and email fields. Validate that name is not empty and email contains '@'. Show error messages below each field.",
     objectives: [
-      "Declare state for form values: name and email",
-      "Declare state for errors: nameError and emailError",
-      "On submit, validate both fields",
-      "Show error messages when fields are invalid",
-      "Prevent submission if there are errors",
+      "Two fields: name and email",
+      "Errors state: { name: '', email: '' }",
+      "On submit: validate name (not empty) and email (contains @)",
+      "If there are errors, show them below each field in red",
+      "If no errors, show 'Success!' in green",
     ],
-    hint: "Validate on submit, not on every keystroke, to avoid annoying the user",
+    hint: "Use the form's onSubmit event, preventDefault(), and validate before doing anything",
     starter: {
       "/App.js": `import { useState } from "react";
 
 export default function App() {
-  const [form, setForm] = useState({ name: "", email: "" });
-  const [errors, setErrors] = useState({ name: "", email: "" });
-  const [success, setSuccess] = useState(false);
+  // TODO: declare form state with { name: "", email: "" }
+  // TODO: declare errors state with { name: "", email: "" }
+  // TODO: declare success state as false
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    // TODO: update the corresponding field in form
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // TODO: validate name (not empty) and email (contains @)
+    // TODO: if errors, update errors; if not, mark success
   };
 
   return (
@@ -452,7 +453,6 @@ export default function App() {
       <div style={{ marginBottom: 16 }}>
         <input
           name="name"
-          value={form.name}
           onChange={handleChange}
           placeholder="name"
           style={{ padding: 8, fontSize: 16, width: "100%" }}
@@ -462,7 +462,6 @@ export default function App() {
       <div style={{ marginBottom: 16 }}>
         <input
           name="email"
-          value={form.email}
           onChange={handleChange}
           placeholder="email"
           style={{ padding: 8, fontSize: 16, width: "100%" }}

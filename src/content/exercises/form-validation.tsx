@@ -19,17 +19,18 @@ export const formValidation: Exercise = {
     "/App.js": `import { useState } from "react";
 
 export default function App() {
-  const [form, setForm] = useState({ name: "", email: "" });
-  const [errors, setErrors] = useState({ name: "", email: "" });
-  const [success, setSuccess] = useState(false);
+  // TODO: declara estado form con { name: "", email: "" }
+  // TODO: declara estado errors con { name: "", email: "" }
+  // TODO: declara estado success en false
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    // TODO: actualiza el campo correspondiente en form
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // TODO: valida nombre (no vacío) y email (contiene @)
+    // TODO: si hay errores, actualiza errors; si no, marca success
   };
 
   return (
@@ -37,27 +38,25 @@ export default function App() {
       <div style={{ marginBottom: 16 }}>
         <input
           name="name"
-          value={form.name}
           onChange={handleChange}
           placeholder="nombre"
           style={{ padding: 8, fontSize: 16, width: "100%" }}
         />
-        {/* TODO: muestra error de name */}
+        {/* TODO: muestra el error de nombre */}
       </div>
       <div style={{ marginBottom: 16 }}>
         <input
           name="email"
-          value={form.email}
           onChange={handleChange}
           placeholder="email"
           style={{ padding: 8, fontSize: 16, width: "100%" }}
         />
-        {/* TODO: muestra error de email */}
+        {/* TODO: muestra el error de email */}
       </div>
       <button type="submit" style={{ padding: "8px 16px", fontSize: 16 }}>
         Enviar
       </button>
-      {/* TODO: muestra success message */}
+      {/* TODO: muestra mensaje de éxito */}
     </form>
   );
 }

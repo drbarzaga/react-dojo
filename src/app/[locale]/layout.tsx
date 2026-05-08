@@ -43,10 +43,13 @@ export async function generateMetadata({
 }
 
 export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {
-  const { locale } = await params
+  const { locale: rawLocale } = await params
+  const locale: Locale = (routing.locales as readonly string[]).includes(rawLocale)
+    ? (rawLocale as Locale)
+    : routing.defaultLocale
   const [messages, content] = await Promise.all([
-    getMessages(),
-    getContentForLocale(locale as Locale),
+    getMessages({ locale }),
+    getContentForLocale(locale),
   ])
 
   return (
