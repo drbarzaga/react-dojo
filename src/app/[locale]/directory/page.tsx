@@ -21,7 +21,7 @@ interface Developer {
 
 async function getUsers(): Promise<Developer[]> {
   const baseUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000"
-  const res = await fetch(`${baseUrl}/api/users`, { cache: "no-store" })
+  const res = await fetch(`${baseUrl}/api/users`, { cache: "no-store", headers: await headers() })
   if (!res.ok) return []
   return res.json()
 }
