@@ -551,15 +551,15 @@ export default function App() {
   },
   "color-picker": {
     title: "Color picker",
-    lede: "A color picker with preset colors. Clicking a color sets it as the selected color and displays a preview box with that color.",
+    lede: "A color picker with a preset palette and a custom color input. Shows the selected color in a preview swatch and its hex value.",
     objectives: [
-      "Declare selectedColor state with initial value '#ffffff'",
-      "Create 4 buttons with different background colors",
-      "On click, set selectedColor to the clicked color",
-      "Show a preview box with the selected color",
-      "Display the hex code below the preview",
+      "Declare selectedColor state with initial value '#3b82f6'",
+      "On click: update selectedColor with the clicked color",
+      "Highlight the selected color in the palette",
+      "Wire up the input type='color' to pick a custom color",
+      "Show the selected color in the preview swatch and its hex value",
     ],
-    hint: "Store the color value in state, use it both for the active button style and the preview box",
+    hint: "Use input type='color' for the custom color picker.",
     starter: {
       "/App.js": `import { useState } from "react";
 
@@ -586,33 +586,39 @@ const swatchStyle = {
 };
 
 export default function App() {
-  const [selectedColor, setSelectedColor] = useState("#3b82f6");
+  // TODO: declare selectedColor state with initial value "#3b82f6"
 
   const handleColorClick = (color) => {
+    // TODO: update selectedColor with the received color
   };
 
   return (
     <div style={{ padding: 24, fontFamily: "system-ui", background: "#09090b", minHeight: "100vh" }}>
       <p style={{ marginBottom: 24, color: "#71717a" }}>Color Picker</p>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 24 }}>
+        {/* TODO: pass (selectedColor === color) to colorBtnStyle to highlight the selected one */}
         {colors.map((color) => (
           <button
             key={color}
             onClick={() => handleColorClick(color)}
-            style={{ ...colorBtnStyle(selectedColor === color), background: color }}
+            style={{ ...colorBtnStyle(false), background: color }}
             title={color}
           />
         ))}
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-        <div style={{ ...swatchStyle, background: selectedColor }} />
+        {/* TODO: use selectedColor as the swatch background */}
+        <div style={{ ...swatchStyle, background: "#3b82f6" }} />
         <input
           type="color"
-          value={selectedColor}
-          onChange={() => {}}
+          defaultValue="#3b82f6"
+          onChange={(e) => {
+            // TODO: update selectedColor with e.target.value
+          }}
           style={{ ...swatchStyle, padding: 0, cursor: "pointer" }}
         />
         <span style={{ color: "#fff", fontFamily: "monospace", fontSize: 14 }}>
+          {/* TODO: display selectedColor in uppercase with .toUpperCase() */}
         </span>
       </div>
     </div>
