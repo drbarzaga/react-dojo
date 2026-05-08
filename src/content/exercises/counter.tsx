@@ -7,10 +7,10 @@ export const counter: Exercise = {
   lede: "Un contador con controles para incrementar, decrementar y resetear. El botón '+3' debe sumar tres unidades incluso si se presiona varias veces seguido — usa actualización funcional.",
   difficulty: "basic",
   objectives: [
-    "Declara un estado count que empiece en 0",
+    "Declara un estado 'count' que empiece en '0'",
     "Botón '+' suma 1, botón '−' resta 1",
-    "Botón 'reset' vuelve a 0",
-    "Botón '+3' suma 3 usando setCount(c => c + 1) tres veces",
+    "Botón 'reset' vuelve a '0'",
+    "Botón '+3' suma 3 usando 'setCount(c => c + 1)' tres veces",
     "El display debe mostrar el valor actual centrado",
   ],
   hint: "Pasar una función a setCount te da el valor más reciente; pasarle un número usa el valor capturado en el render.",

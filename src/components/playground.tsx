@@ -17,6 +17,8 @@ import {
   type SandpackPredefinedTemplate,
   type SandpackThemeProp,
 } from "@codesandbox/sandpack-react"
+import { renderObjective } from "@/lib/render-objective"
+import { ListChecks, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useEffect, useMemo, useRef, useState } from "react"
 
@@ -366,6 +368,7 @@ interface PlaygroundProps {
   dependencies?: Record<string, string>
   exerciseId?: string
   enablePersistence?: boolean
+  objectives?: string[]
 }
 
 export function Playground({
@@ -376,6 +379,7 @@ export function Playground({
   dependencies,
   exerciseId,
   enablePersistence = false,
+  objectives,
 }: PlaygroundProps) {
   const t = useTranslations("Playground")
   const { theme: appTheme } = useTheme()
@@ -384,6 +388,7 @@ export function Playground({
 
   const [maximized, setMaximized] = useState(false)
   const [consoleOpen, setConsoleOpen] = useState(showConsole)
+  const [objectivesOpen, setObjectivesOpen] = useState(false)
   const [windowHeight, setWindowHeight] = useState(0)
   const editorHeight = maximized && windowHeight > 0 ? windowHeight - 48 - 40 - 64 : height
 
@@ -405,6 +410,7 @@ export function Playground({
       window.removeEventListener("resize", updateHeight)
       window.removeEventListener("keydown", onKey)
       document.body.style.overflow = prevOverflow
+      setObjectivesOpen(false)
     }
   }, [maximized])
 
@@ -451,6 +457,41 @@ export function Playground({
         </button>
       </div>
 
+      {objectives && objectives.length > 0 && objectivesOpen && (
+        <div className="absolute right-4 bottom-16 z-10 w-[22rem]">
+          <div className="bg-bg-raise overflow-hidden rounded-xl shadow-2xl">
+            <div className="flex items-center justify-between px-4 py-3">
+              <div className="flex items-center gap-2">
+                <ListChecks size={12} className="text-fg-dim" strokeWidth={2} />
+                <span className="text-fg-dim text-[10px] font-semibold tracking-[0.16em] uppercase">
+                  {t("objectives")}
+                </span>
+              </div>
+              <button
+                onClick={() => setObjectivesOpen(false)}
+                type="button"
+                className="text-fg-faint hover:text-fg-muted -mr-1 rounded p-1 transition-colors"
+              >
+                <X size={12} strokeWidth={2} />
+              </button>
+            </div>
+            <div className="bg-line h-px" />
+            <ol className="space-y-3 px-4 py-3">
+              {objectives.map((o, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <span className="bg-bg-hover text-fg-dim mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full font-mono text-[10px]">
+                    {i + 1}
+                  </span>
+                  <span className="text-fg-muted text-[13px] leading-[1.55]">
+                    {renderObjective(o)}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      )}
+
       <div className={maximized ? "min-h-0 flex-1" : ""}>
         <SandpackProvider
           template={template}
@@ -471,28 +512,56 @@ export function Playground({
               showOpenInCodeSandbox={false}
               style={{ height: editorHeight, flex: "35 35 0%" }}
               actionsChildren={
-                <button
-                  onClick={() => setConsoleOpen((v) => !v)}
-                  title={consoleOpen ? t("closeTerminal") : t("openTerminal")}
-                  type="button"
-                  style={{
-                    appearance: "none",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: 28,
-                    height: 28,
-                    padding: 0,
-                    cursor: "pointer",
-                    border: "1px solid var(--sp-colors-surface3)",
-                    borderRadius: 9999,
-                    backgroundColor: "var(--sp-colors-surface2)",
-                    color: consoleOpen ? "var(--sp-colors-accent)" : "var(--sp-colors-clickable)",
-                    transition: "color 0.15s",
-                  }}
-                >
-                  <TerminalIcon />
-                </button>
+                <>
+                  {objectives && objectives.length > 0 && (
+                    <button
+                      onClick={() => setObjectivesOpen((v) => !v)}
+                      title={t("objectives")}
+                      type="button"
+                      style={{
+                        appearance: "none",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: 28,
+                        height: 28,
+                        padding: 0,
+                        cursor: "pointer",
+                        border: "1px solid var(--sp-colors-surface3)",
+                        borderRadius: 9999,
+                        backgroundColor: "var(--sp-colors-surface2)",
+                        color: objectivesOpen
+                          ? "var(--sp-colors-accent)"
+                          : "var(--sp-colors-clickable)",
+                        transition: "color 0.15s",
+                      }}
+                    >
+                      <ListChecks size={13} strokeWidth={1.8} />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setConsoleOpen((v) => !v)}
+                    title={consoleOpen ? t("closeTerminal") : t("openTerminal")}
+                    type="button"
+                    style={{
+                      appearance: "none",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: 28,
+                      height: 28,
+                      padding: 0,
+                      cursor: "pointer",
+                      border: "1px solid var(--sp-colors-surface3)",
+                      borderRadius: 9999,
+                      backgroundColor: "var(--sp-colors-surface2)",
+                      color: consoleOpen ? "var(--sp-colors-accent)" : "var(--sp-colors-clickable)",
+                      transition: "color 0.15s",
+                    }}
+                  >
+                    <TerminalIcon />
+                  </button>
+                </>
               }
             />
           </SandpackLayout>

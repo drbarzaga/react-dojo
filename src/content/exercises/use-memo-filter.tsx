@@ -7,8 +7,8 @@ export const useMemoFilter: Exercise = {
   lede: "Una lista de tareas se filtra y ordena con cada render — incluso cuando solo cambia un contador no relacionado. Usa useMemo para que el cálculo pesado solo se repita cuando cambien query u order.",
   difficulty: "basic",
   objectives: [
-    "Envuelve el filtrado + ordenamiento en useMemo",
-    "Declara [query, order] como dependencias",
+    "Envuelve el filtrado + ordenamiento en 'useMemo'",
+    "Declara '[query, order]' como dependencias",
     "Verifica que el contador ya no recalcula la lista (observa el log en consola)",
   ],
   hint: "useMemo(fn, [deps]) memoriza el valor retornado por fn. Solo recalcula cuando alguna dependencia cambia. Si el cálculo es costoso o produce un array nuevo en cada render, useMemo evita re-renders en cadena.",

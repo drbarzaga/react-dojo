@@ -7,8 +7,8 @@ export const tabsComponent: Exercise = {
   lede: "Un componente con múltiples tabs que muestra contenido diferente según el tab activo. Usa un estado para trackear cuál tab está seleccionado.",
   difficulty: "basic",
   objectives: [
-    "Declara estado activeTab con valor inicial 'home'",
-    "3 tabs: Home, About, Contact",
+    "Declara estado 'activeTab' con valor inicial 'home'",
+    "3 tabs: 'Home', 'About', 'Contact'",
     "Cada tab muestra contenido diferente",
     "El tab activo tiene estilo visual distinto (fondo oscuro)",
     "Solo muestra el contenido del tab activo",

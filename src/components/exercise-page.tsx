@@ -9,6 +9,7 @@ import { useCodePersistence } from "@/hooks/use-code-persistence"
 import { useProgress } from "@/hooks/use-progress"
 import { cn } from "@/lib/utils"
 import { useContent } from "@/providers/content-provider"
+import { renderObjective } from "@/lib/render-objective"
 import { BookOpen, CheckCircle2, Circle, Lightbulb } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
@@ -93,7 +94,7 @@ export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
               <span className="text-fg-faint mt-px w-4 shrink-0 text-right font-mono text-[12px]">
                 {i + 1}.
               </span>
-              <span>{o}</span>
+              <span>{renderObjective(o)}</span>
             </li>
           ))}
         </ol>
@@ -139,6 +140,7 @@ export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
               dependencies={exercise.dependencies}
               exerciseId={exercise.id}
               enablePersistence
+              objectives={exercise.objectives}
             />
           )}
         </div>

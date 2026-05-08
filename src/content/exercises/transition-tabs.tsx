@@ -7,8 +7,8 @@ export const transitionTabs: Exercise = {
   lede: "Tres tabs, una renderiza 4000 items y bloquea el hilo. Al hacer click la UI se congela y la tab activa no responde hasta que termina. Usa useTransition para mantener los clicks responsivos y mostrar un indicador de carga.",
   difficulty: "intermediate",
   objectives: [
-    "Envuelve setActiveTab en startTransition",
-    "Usa isPending para atenuar visualmente la tab que está cargando",
+    "Envuelve 'setActiveTab' en 'startTransition'",
+    "Usa 'isPending' para atenuar visualmente la tab que está cargando",
     "Comprueba que las tabs responden al instante aunque la lista tarde en renderizar",
   ],
   hint: "startTransition marca el setState como no urgente — React puede interrumpirlo si llega una interacción más urgente. isPending es true mientras la transición está en curso.",

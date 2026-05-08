@@ -7,9 +7,9 @@ export const autoFocus: Exercise = {
   lede: "El input debe enfocarse al montar y al pulsar 'Enfocar'. Además, cuenta cuántas veces se re-renderizó el componente sin provocar re-renders adicionales.",
   difficulty: "basic",
   objectives: [
-    "Crea una ref para el input y enfócalo al montar",
-    "Botón 'Enfocar' que aplica focus programático",
-    "Mantén un contador de renders en otra ref — NO debe causar re-renders",
+    "Crea una 'ref' para el input y enfócalo al montar",
+    "Botón 'Enfocar' que aplica 'focus' programático",
+    "Mantén un contador de renders en otra 'ref' — NO debe causar re-renders",
     "El texto del input es estado controlado",
     "Botón 'Limpiar' resetea el texto y el input",
   ],

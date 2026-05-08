@@ -8,9 +8,9 @@ export const colorPicker: Exercise = {
   difficulty: "basic",
   objectives: [
     "Palette de colores predefinidos en un array",
-    "Estado selectedColor",
+    "Estado 'selectedColor'",
     "Click en color para seleccionarlo",
-    "Input type='color' para color personalizado",
+    "Input 'type=color' para color personalizado",
     "Mostrar color seleccionado con preview y valor hex",
   ],
   hint: "Usa input type='color' para el picker personalizado.",

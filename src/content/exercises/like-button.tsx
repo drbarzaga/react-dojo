@@ -7,9 +7,9 @@ export const likeButton: Exercise = {
   lede: "Un botón de 'like' estilo Twitter: el contador empieza en 142 (likes de otros usuarios) y tú sumas o restas 1 al hacer clic.",
   difficulty: "basic",
   objectives: [
-    "Declara estado likes inicial en 142",
-    "Declara estado isLiked inicial en false",
-    "Al hacer clic: si isLiked, likes-- y isLiked=false; si no, likes++ y isLiked=true",
+    "Declara estado 'likes' inicial en '142'",
+    "Declara estado 'isLiked' inicial en 'false'",
+    "Al hacer clic: si 'isLiked', 'likes--' y 'isLiked=false'; si no, 'likes++' y 'isLiked=true'",
     "Cambia el color del botón cuando está likeado",
     "Muestra el contador al lado del botón",
   ],

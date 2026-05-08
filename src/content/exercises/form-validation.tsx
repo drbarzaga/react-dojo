@@ -7,9 +7,9 @@ export const formValidation: Exercise = {
   lede: "Un formulario con validación en tiempo real. Muestra errores cuando el campo está vacío al hacer submit, o cuando el email no es válido.",
   difficulty: "basic",
   objectives: [
-    "Dos campos: name y email",
-    "Estado errors: { name: '', email: '' }",
-    "Al hacer submit: validar name (no vacío) y email (contiene @)",
+    "Dos campos: 'name' y 'email'",
+    "Estado 'errors' con shape '{ name, email }'",
+    "Al hacer submit: validar 'name' (no vacío) y 'email' (contiene '@')",
     "Si hay errores, mostrarlos debajo de cada campo en rojo",
     "Si no hay errores, mostrar 'Éxito!' en verde",
   ],

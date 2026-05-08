@@ -9,9 +9,9 @@ export const optimisticLike: Exercise = {
   lede: "Un post con contador de likes. Al hacer click, el like tarda 800ms en guardarse y la UI no responde hasta que termina. Implementa useOptimistic para que el contador suba al instante y revierta si falla.",
   difficulty: "basic",
   objectives: [
-    "Crea el estado optimista con useOptimistic a partir de likes",
-    "Al hacer click, llama addOptimistic(1) antes de la petición async",
-    "Actualiza el estado real con setLikes cuando la petición tiene éxito",
+    "Crea el estado optimista con 'useOptimistic' a partir de 'likes'",
+    "Al hacer click, llama 'addOptimistic(1)' antes de la petición async",
+    "Actualiza el estado real con 'setLikes' cuando la petición tiene éxito",
     "Muestra un indicador visual cuando el like está pendiente",
   ],
   hint: "useOptimistic(state, updateFn) — el updateFn recibe el estado actual y el valor que pasaste a addOptimistic. Retorna el nuevo estado provisional.",

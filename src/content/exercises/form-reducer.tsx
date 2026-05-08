@@ -8,7 +8,7 @@ export const formReducer: Exercise = {
   difficulty: "intermediate",
   objectives: [
     "Reducer con acciones 'change', 'blur', 'submit'",
-    "Estado: { values, touched, submitted } — errors se derivan en render, no se guardan",
+    "Estado: '{ values, touched, submitted }' — errors se derivan en render, no se guardan",
     "Valida email (formato), password (≥ 6 chars), confirm (igual a password)",
     "Solo muestra errores de un campo cuando está 'touched' o tras submit",
     "Submit deshabilitado si hay errores — pero calculado en render, no guardado",

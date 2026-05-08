@@ -157,7 +157,8 @@
     "minimizeLabel": "Minimize editor",
     "maximizeLabel": "Maximize editor",
     "closeTerminal": "Close terminal",
-    "openTerminal": "Open terminal"
+    "openTerminal": "Open terminal",
+    "objectives": "Objectives"
   },
   "LocaleSwitcher": {
     "label": "Language"

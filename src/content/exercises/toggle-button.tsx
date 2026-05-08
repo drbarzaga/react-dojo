@@ -7,10 +7,10 @@ export const toggleButton: Exercise = {
   lede: "Un botón que alterna entre dos estados: 'off' y 'on'. Cambia el color y el texto según el estado. Usa el operador ternario para condicional.",
   difficulty: "basic",
   objectives: [
-    "Declara estado isOn con valor inicial false",
+    "Declara estado 'isOn' con valor inicial 'false'",
     "Muestra 'ON' u 'OFF' según el estado",
     "Cambia el color de fondo: verde cuando on, gris cuando off",
-    "Al hacer clic, alterna el estado con setIsOn(!isOn)",
+    "Al hacer clic, alterna el estado con 'setIsOn(!isOn)'",
   ],
   hint: "El operador ternario: condicion ? valorSiTrue : valorSiFalse",
   relatedConcepts: ["useState"],
