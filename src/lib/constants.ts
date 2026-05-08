@@ -33,3 +33,5 @@ export const PROGRESS_STORAGE_KEY = "react-dojo-progress"
 // Donation URLs
 export const PAYPAL_URL = "https://paypal.me/reactdojolearn"
 export const KOFI_URL = "https://ko-fi.com/reactdojo"
+
+export const PROTECTED_API_ROUTES = ["/api/users", "/api/progress/sync"]
