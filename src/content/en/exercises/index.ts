@@ -221,10 +221,11 @@ const rowStyle = {
 };
 
 export default function App() {
-  const [likes, setLikes] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
+  // declare likes state here
+  // declare isLiked state here
 
   const handleClick = () => {
+    // implement logic here
   };
 
   return (
@@ -234,8 +235,8 @@ export default function App() {
         <button
           onClick={handleClick}
           style={{
-            backgroundColor: isLiked ? "#ef4444" : "#e5e7eb",
-            color: isLiked ? "white" : "black",
+            backgroundColor: "#e5e7eb",
+            color: "black",
             padding: "8px 16px",
             borderRadius: 8,
             border: "none",
@@ -246,7 +247,7 @@ export default function App() {
           ♥ Like
         </button>
         <span style={{ fontSize: 18 }}>
-          {/* TODO: display likes */}
+          {/* display likes */}
         </span>
       </div>
     </div>
