@@ -9,8 +9,14 @@ import { SearchModal } from "@/components/search-modal"
 import { ShortcutsModal } from "@/components/shortcuts-modal"
 import { BreadcrumbBar } from "@/components/breadcrumb-bar"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import type { SidebarOpenState } from "@/lib/sidebar-state"
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+interface AppShellProps {
+  children: React.ReactNode
+  initialSidebarState: SidebarOpenState
+}
+
+export function AppShell({ children, initialSidebarState }: AppShellProps) {
   const [searchOpen, setSearchOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const pathname = usePathname()
@@ -50,7 +56,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
       <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
       <div className="flex min-h-0 flex-1">
-        <Sidebar />
+        <Sidebar initialState={initialSidebarState} />
         <SidebarInset className="flex min-w-0 flex-col overflow-hidden">
           <BreadcrumbBar />
           <main

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import type { Metadata } from "next"
+import { cookies } from "next/headers"
 import { NextIntlClientProvider } from "next-intl"
 import { getMessages, getTranslations } from "next-intl/server"
 import { routing, type Locale } from "@/i18n/routing"
@@ -7,6 +8,8 @@ import { AppProviders } from "@/providers/app-provider"
 import { AppShell } from "@/components/app-shell"
 import { ContentProvider } from "@/providers/content-provider"
 import { getContentForLocale } from "@/content/loader"
+import { SIDEBAR_OPEN_STATE_KEY } from "@/lib/constants"
+import { parseSidebarOpenState } from "@/lib/sidebar-state"
 
 interface LocaleLayoutProps {
   children: ReactNode
@@ -47,16 +50,18 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   const locale: Locale = (routing.locales as readonly string[]).includes(rawLocale)
     ? (rawLocale as Locale)
     : routing.defaultLocale
-  const [messages, content] = await Promise.all([
+  const [messages, content, cookieStore] = await Promise.all([
     getMessages({ locale }),
     getContentForLocale(locale),
+    cookies(),
   ])
+  const initialSidebarState = parseSidebarOpenState(cookieStore.get(SIDEBAR_OPEN_STATE_KEY)?.value)
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
       <ContentProvider {...content}>
         <AppProviders>
-          <AppShell>{children}</AppShell>
+          <AppShell initialSidebarState={initialSidebarState}>{children}</AppShell>
         </AppProviders>
       </ContentProvider>
     </NextIntlClientProvider>

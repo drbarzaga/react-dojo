@@ -8,6 +8,8 @@ import { type QuizDifficulty } from "@/content/quiz"
 import { useLocaleRouter } from "@/hooks/use-locale-router"
 import { useProgress } from "@/hooks/use-progress"
 import { authClient, useSession } from "@/lib/auth-client"
+import { cn } from "@/lib/utils"
+import { type SidebarOpenState, writeSidebarOpenStateCookie } from "@/lib/sidebar-state"
 import { useContent } from "@/providers/content-provider"
 import {
   Anchor,
@@ -81,8 +83,8 @@ const difficultyDot: Record<Difficulty, string> = {
 
 function SectionLabel({ children, ring }: { children: React.ReactNode; ring?: React.ReactNode }) {
   return (
-    <div className="flex items-center px-4 pt-4 pb-1 first:pt-2">
-      <span className="text-sidebar-foreground/30 flex-1 text-[10px] font-semibold tracking-[0.18em] uppercase">
+    <div className="flex items-center px-4 pt-5 pb-2 first:pt-3">
+      <span className="text-sidebar-foreground/40 flex-1 text-[10px] font-semibold tracking-[0.2em] uppercase">
         {children}
       </span>
       {ring}
@@ -106,13 +108,22 @@ function NavItem({
   return (
     <button
       onClick={onClick}
-      className={[
-        "flex w-full min-w-0 items-center gap-2 rounded-md px-3 py-[5px] text-left font-mono text-[13px] transition-colors",
+      className={cn(
+        "group/nav relative flex w-full min-w-0 items-center gap-2 rounded-md py-[6px] pr-2.5 pl-3.5 text-left font-mono text-[13px] transition-all duration-150",
         active
-          ? "bg-sidebar-accent text-sidebar-accent-foreground"
-          : "text-sidebar-foreground/60 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
-      ].join(" ")}
+          ? "bg-sidebar-accent/70 text-sidebar-foreground"
+          : "text-sidebar-foreground/55 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground/90"
+      )}
     >
+      <span
+        aria-hidden
+        className={cn(
+          "absolute top-1/2 left-1 h-3.5 w-[2px] -translate-y-1/2 rounded-full transition-all duration-200",
+          active
+            ? "scale-y-100 bg-emerald-400/80"
+            : "bg-sidebar-foreground/20 scale-y-0 group-hover/nav:scale-y-50"
+        )}
+      />
       <span className="flex-1 truncate">{label}</span>
       {indicator}
       {badge && (
@@ -124,7 +135,11 @@ function NavItem({
   )
 }
 
-export function Sidebar() {
+interface SidebarProps {
+  initialState: SidebarOpenState
+}
+
+export function Sidebar({ initialState }: SidebarProps) {
   const t = useTranslations("Sidebar")
   const pathname = usePathname()
   const { locale, push } = useLocaleRouter()
@@ -149,6 +164,8 @@ export function Sidebar() {
 
   const isExerciseRoute = current.startsWith("learn/")
   const isQuizRoute = current.startsWith("quiz/")
+  const isHooksRoute = current === "hooks" || current.startsWith("hooks/")
+  const isDirectoryRoute = current === "directory" || current.startsWith("directory/")
   const activeExId = isExerciseRoute ? current.slice(6) : null
 
   const totalConcepts = allConcepts.length
@@ -166,15 +183,29 @@ export function Sidebar() {
     ? (allQuizzes.find((q) => `quiz/${q.id}` === current)?.difficulty ?? null)
     : null
 
-  const [openCats, setOpenCats] = useState<Set<string>>(
-    () => new Set(activeCatId ? [activeCatId] : [])
-  )
-  const [openLevels, setOpenLevels] = useState<Set<string>>(
-    () => new Set(activeDifficulty ? [activeDifficulty] : [])
-  )
-  const [openQuizLevels, setOpenQuizLevels] = useState<Set<string>>(
-    () => new Set(activeQuizDifficulty ? [activeQuizDifficulty] : [])
-  )
+  const [openCats, setOpenCats] = useState<Set<string>>(() => {
+    const cats = new Set<string>(initialState.cats)
+    if (activeCatId) cats.add(activeCatId)
+    return cats
+  })
+  const [openLevels, setOpenLevels] = useState<Set<string>>(() => {
+    const levels = new Set<string>(initialState.levels)
+    if (activeDifficulty) levels.add(activeDifficulty)
+    return levels
+  })
+  const [openQuizLevels, setOpenQuizLevels] = useState<Set<string>>(() => {
+    const quizLevels = new Set<string>(initialState.quizLevels)
+    if (activeQuizDifficulty) quizLevels.add(activeQuizDifficulty)
+    return quizLevels
+  })
+
+  useEffect(() => {
+    writeSidebarOpenStateCookie({
+      cats: [...openCats],
+      levels: [...openLevels],
+      quizLevels: [...openQuizLevels],
+    })
+  }, [openCats, openLevels, openQuizLevels])
 
   useEffect(() => {
     if (activeCatId) {
@@ -255,35 +286,44 @@ export function Sidebar() {
               const visited = cat.conceptIds.filter((id) => visitedConcepts.has(id)).length
               const total = cat.conceptIds.length
 
+              const allDone = total > 0 && visited === total
               return (
                 <div key={cat.id}>
                   <button
                     onClick={() => toggle(cat.id)}
-                    className="group/cat hover:bg-sidebar-accent/60 flex w-full items-center gap-2 rounded-md px-3 py-[6px] transition-colors"
+                    className="group/cat hover:bg-sidebar-accent/50 flex w-full items-center gap-2 rounded-md px-3 py-[7px] transition-colors"
                   >
                     {Icon && (
                       <Icon
-                        className="text-sidebar-foreground/35 group-hover/cat:text-sidebar-foreground/55 h-[11px] w-[11px] shrink-0"
+                        className={cn(
+                          "h-[12px] w-[12px] shrink-0 transition-colors",
+                          allDone
+                            ? "text-emerald-400/70"
+                            : "text-sidebar-foreground/40 group-hover/cat:text-sidebar-foreground/65"
+                        )}
                         strokeWidth={2}
                       />
                     )}
-                    <span className="text-sidebar-foreground/45 group-hover/cat:text-sidebar-foreground/65 flex-1 truncate text-left font-mono text-[11px] font-semibold tracking-widest uppercase">
+                    <span className="text-sidebar-foreground/55 group-hover/cat:text-sidebar-foreground/80 flex-1 truncate text-left font-mono text-[11px] font-semibold tracking-widest uppercase">
                       {cat.title}
                     </span>
                     {visited > 0 && visited < total && (
-                      <span className="text-sidebar-foreground/25 font-mono text-[9px]">
+                      <span className="text-sidebar-foreground/35 group-hover/cat:text-sidebar-foreground/55 font-mono text-[9px] tabular-nums transition-colors">
                         {visited}/{total}
                       </span>
                     )}
-                    {visited === total && (
+                    {allDone && (
                       <Check
-                        className="h-[9px] w-[9px] shrink-0 text-emerald-400/60"
+                        className="h-[10px] w-[10px] shrink-0 text-emerald-400/70"
                         strokeWidth={3}
                       />
                     )}
                     <ChevronDown
-                      className="text-sidebar-foreground/20 h-[10px] w-[10px] shrink-0 transition-transform duration-200"
-                      style={{ transform: isOpen ? "rotate(0deg)" : "rotate(-90deg)" }}
+                      className="text-sidebar-foreground/30 group-hover/cat:text-sidebar-foreground/60 h-[11px] w-[11px] shrink-0"
+                      style={{
+                        transform: isOpen ? "rotate(0deg)" : "rotate(-90deg)",
+                        transition: "transform 200ms ease, color 150ms ease",
+                      }}
                     />
                   </button>
 
@@ -295,7 +335,7 @@ export function Sidebar() {
                     }}
                   >
                     <div style={{ overflow: "hidden", minHeight: 0 }}>
-                      <div className="pr-0 pb-1 pl-2">
+                      <div className="border-sidebar-border/40 ml-[18px] border-l pb-1 pl-1.5">
                         {cat.conceptIds.map((id) => {
                           const concept = conceptIndex[id]
                           if (!concept) return null
@@ -327,7 +367,7 @@ export function Sidebar() {
           </div>
 
           {/* ── PRACTICE ──────────────────────── */}
-          <div className="bg-sidebar-border mx-3 mt-3 h-px" />
+          <div className="via-sidebar-border/80 mx-4 mt-3 h-px bg-linear-to-r from-transparent to-transparent" />
           <SectionLabel
             ring={
               <Tooltip>
@@ -347,22 +387,35 @@ export function Sidebar() {
             {(["basic", "intermediate", "advanced"] as const).map((level) => {
               const exs = allExercises.filter((e) => e.difficulty === level)
               if (!exs.length) return null
+              const isActiveLevel = activeDifficulty === level
               return (
                 <div key={level}>
                   <button
                     onClick={() => toggleLevel(level)}
-                    className="group/level hover:bg-sidebar-accent/60 flex w-full items-center gap-2 rounded-md px-3 py-[6px] transition-colors"
+                    className="group/level hover:bg-sidebar-accent/50 flex w-full items-center gap-2 rounded-md px-3 py-[7px] transition-colors"
                   >
                     <span
-                      className={`h-[6px] w-[6px] shrink-0 rounded-full ${difficultyDot[level]}`}
+                      className={cn(
+                        "h-[7px] w-[7px] shrink-0 rounded-full transition-shadow",
+                        difficultyDot[level],
+                        isActiveLevel && "ring-2 ring-current/20"
+                      )}
                     />
-                    <span className="text-sidebar-foreground/50 group-hover/level:text-sidebar-foreground/70 flex-1 text-left font-mono text-[11px] font-semibold tracking-widest uppercase">
+                    <span
+                      className={cn(
+                        "flex-1 text-left font-mono text-[11px] font-semibold tracking-widest uppercase transition-colors",
+                        isActiveLevel
+                          ? "text-sidebar-foreground/80"
+                          : "text-sidebar-foreground/55 group-hover/level:text-sidebar-foreground/80"
+                      )}
+                    >
                       {difficultyLabel[level]}
                     </span>
                     <ChevronDown
-                      className="text-sidebar-foreground/20 h-[10px] w-[10px] shrink-0 transition-transform duration-200"
+                      className="text-sidebar-foreground/30 group-hover/level:text-sidebar-foreground/60 h-[11px] w-[11px] shrink-0"
                       style={{
                         transform: openLevels.has(level) ? "rotate(0deg)" : "rotate(-90deg)",
+                        transition: "transform 200ms ease, color 150ms ease",
                       }}
                     />
                   </button>
@@ -374,26 +427,28 @@ export function Sidebar() {
                     }}
                   >
                     <div style={{ overflow: "hidden", minHeight: 0 }}>
-                      {exs.map((ex) => {
-                        const active = isExerciseRoute && activeExId === ex.id
-                        const completed = completedExercises.has(ex.id)
-                        return (
-                          <NavItem
-                            key={ex.id}
-                            label={ex.label}
-                            active={active}
-                            onClick={() => push(`/learn/${ex.id}`)}
-                            indicator={
-                              completed ? (
-                                <Check
-                                  className="h-[9px] w-[9px] shrink-0 text-emerald-400/70"
-                                  strokeWidth={3}
-                                />
-                              ) : null
-                            }
-                          />
-                        )
-                      })}
+                      <div className="border-sidebar-border/40 ml-[15px] border-l pb-1 pl-1.5">
+                        {exs.map((ex) => {
+                          const active = isExerciseRoute && activeExId === ex.id
+                          const completed = completedExercises.has(ex.id)
+                          return (
+                            <NavItem
+                              key={ex.id}
+                              label={ex.label}
+                              active={active}
+                              onClick={() => push(`/learn/${ex.id}`)}
+                              indicator={
+                                completed ? (
+                                  <Check
+                                    className="h-[9px] w-[9px] shrink-0 text-emerald-400/70"
+                                    strokeWidth={3}
+                                  />
+                                ) : null
+                              }
+                            />
+                          )
+                        })}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -402,7 +457,7 @@ export function Sidebar() {
           </div>
 
           {/* ── QUIZ ──────────────────────────── */}
-          <div className="bg-sidebar-border mx-3 mt-3 h-px" />
+          <div className="via-sidebar-border/80 mx-4 mt-3 h-px bg-linear-to-r from-transparent to-transparent" />
           <SectionLabel
             ring={
               <Tooltip>
@@ -422,22 +477,35 @@ export function Sidebar() {
             {(["basic", "intermediate", "advanced"] as const).map((level) => {
               const quizzes = allQuizzes.filter((q) => q.difficulty === level)
               if (!quizzes.length) return null
+              const isActiveQuizLevel = activeQuizDifficulty === level
               return (
                 <div key={level}>
                   <button
                     onClick={() => toggleQuizLevel(level)}
-                    className="group/qlevel hover:bg-sidebar-accent/60 flex w-full items-center gap-2 rounded-md px-3 py-[6px] transition-colors"
+                    className="group/qlevel hover:bg-sidebar-accent/50 flex w-full items-center gap-2 rounded-md px-3 py-[7px] transition-colors"
                   >
                     <span
-                      className={`h-[6px] w-[6px] shrink-0 rounded-full ${difficultyDot[level as QuizDifficulty]}`}
+                      className={cn(
+                        "h-[7px] w-[7px] shrink-0 rounded-full transition-shadow",
+                        difficultyDot[level as QuizDifficulty],
+                        isActiveQuizLevel && "ring-2 ring-current/20"
+                      )}
                     />
-                    <span className="text-sidebar-foreground/50 group-hover/qlevel:text-sidebar-foreground/70 flex-1 text-left font-mono text-[11px] font-semibold tracking-widest uppercase">
+                    <span
+                      className={cn(
+                        "flex-1 text-left font-mono text-[11px] font-semibold tracking-widest uppercase transition-colors",
+                        isActiveQuizLevel
+                          ? "text-sidebar-foreground/80"
+                          : "text-sidebar-foreground/55 group-hover/qlevel:text-sidebar-foreground/80"
+                      )}
+                    >
                       {difficultyLabel[level as QuizDifficulty]}
                     </span>
                     <ChevronDown
-                      className="text-sidebar-foreground/20 h-[10px] w-[10px] shrink-0 transition-transform duration-200"
+                      className="text-sidebar-foreground/30 group-hover/qlevel:text-sidebar-foreground/60 h-[11px] w-[11px] shrink-0"
                       style={{
                         transform: openQuizLevels.has(level) ? "rotate(0deg)" : "rotate(-90deg)",
+                        transition: "transform 200ms ease, color 150ms ease",
                       }}
                     />
                   </button>
@@ -449,18 +517,20 @@ export function Sidebar() {
                     }}
                   >
                     <div style={{ overflow: "hidden", minHeight: 0 }}>
-                      {quizzes.map((quiz) => {
-                        const active = current === `quiz/${quiz.id}`
-                        return (
-                          <NavItem
-                            key={quiz.id}
-                            label={quiz.label}
-                            active={active}
-                            onClick={() => push(`/quiz/${quiz.id}`)}
-                            badge={quiz.questions.length}
-                          />
-                        )
-                      })}
+                      <div className="border-sidebar-border/40 ml-[15px] border-l pb-1 pl-1.5">
+                        {quizzes.map((quiz) => {
+                          const active = current === `quiz/${quiz.id}`
+                          return (
+                            <NavItem
+                              key={quiz.id}
+                              label={quiz.label}
+                              active={active}
+                              onClick={() => push(`/quiz/${quiz.id}`)}
+                              badge={quiz.questions.length}
+                            />
+                          )
+                        })}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -469,58 +539,100 @@ export function Sidebar() {
           </div>
         </SidebarContent>
 
-        <SidebarFooter className="p-3 pb-2">
-          <button
-            type="button"
-            onClick={() => push("/hooks")}
-            className="text-sidebar-foreground/40 hover:text-sidebar-foreground/70 hover:bg-bg-hover mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 font-mono text-[11px] tracking-[0.08em] uppercase transition-colors"
-          >
-            <Anchor className="h-[11px] w-[11px] shrink-0" strokeWidth={1.8} />
-            <span className="truncate">{t("customHooks")}</span>
-            <span className="ml-auto shrink-0 rounded-sm bg-amber-500/20 px-1 py-px font-mono text-[8px] font-bold tracking-widest text-amber-400 uppercase">
-              beta
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={() => push("/directory")}
-            className="text-sidebar-foreground/40 hover:text-sidebar-foreground/70 hover:bg-bg-hover mb-2 flex w-full items-center gap-2 rounded-md px-2 py-1.5 font-mono text-[11px] tracking-[0.08em] uppercase transition-colors"
-          >
-            <Users className="h-[11px] w-[11px] shrink-0" strokeWidth={1.8} />
-            <span className="truncate">{t("directory")}</span>
-            <span className="ml-auto shrink-0 rounded-sm bg-amber-500/20 px-1 py-px font-mono text-[8px] font-bold tracking-widest text-amber-400 uppercase">
-              beta
-            </span>
-          </button>
+        <SidebarFooter className="gap-2 p-3 pb-3">
+          <div className="flex flex-col gap-0.5">
+            <button
+              type="button"
+              onClick={() => push("/hooks")}
+              className={cn(
+                "group/beta relative flex w-full items-center gap-2 rounded-md px-2 py-1.5 font-mono text-[11px] tracking-[0.08em] uppercase transition-colors",
+                isHooksRoute
+                  ? "bg-sidebar-accent/70 text-sidebar-foreground/90"
+                  : "text-sidebar-foreground/45 hover:bg-sidebar-accent/45 hover:text-sidebar-foreground/85"
+              )}
+            >
+              <span
+                aria-hidden
+                className={cn(
+                  "absolute top-1/2 left-0 h-3.5 w-[2px] -translate-y-1/2 rounded-full transition-all duration-200",
+                  isHooksRoute ? "scale-y-100 bg-emerald-400/80" : "scale-y-0"
+                )}
+              />
+              <Anchor
+                className={cn(
+                  "h-[12px] w-[12px] shrink-0 transition-colors",
+                  isHooksRoute
+                    ? "text-sidebar-foreground/80"
+                    : "text-sidebar-foreground/40 group-hover/beta:text-sidebar-foreground/70"
+                )}
+                strokeWidth={1.8}
+              />
+              <span className="truncate">{t("customHooks")}</span>
+              <span className="ml-auto shrink-0 rounded-sm border border-amber-500/30 bg-amber-500/15 px-1.5 py-px font-mono text-[8px] font-bold tracking-widest text-amber-400 uppercase">
+                beta
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => push("/directory")}
+              className={cn(
+                "group/dir relative flex w-full items-center gap-2 rounded-md px-2 py-1.5 font-mono text-[11px] tracking-[0.08em] uppercase transition-colors",
+                isDirectoryRoute
+                  ? "bg-sidebar-accent/70 text-sidebar-foreground/90"
+                  : "text-sidebar-foreground/45 hover:bg-sidebar-accent/45 hover:text-sidebar-foreground/85"
+              )}
+            >
+              <span
+                aria-hidden
+                className={cn(
+                  "absolute top-1/2 left-0 h-3.5 w-[2px] -translate-y-1/2 rounded-full transition-all duration-200",
+                  isDirectoryRoute ? "scale-y-100 bg-emerald-400/80" : "scale-y-0"
+                )}
+              />
+              <Users
+                className={cn(
+                  "h-[12px] w-[12px] shrink-0 transition-colors",
+                  isDirectoryRoute
+                    ? "text-sidebar-foreground/80"
+                    : "text-sidebar-foreground/40 group-hover/dir:text-sidebar-foreground/70"
+                )}
+                strokeWidth={1.8}
+              />
+              <span className="truncate">{t("directory")}</span>
+              <span className="ml-auto shrink-0 rounded-sm border border-amber-500/30 bg-amber-500/15 px-1.5 py-px font-mono text-[8px] font-bold tracking-widest text-amber-400 uppercase">
+                beta
+              </span>
+            </button>
+          </div>
           {session ? (
-            <div className="flex items-center gap-3">
-              <div className="shrink-0">
+            <div className="border-sidebar-border/50 bg-sidebar-accent/25 hover:border-sidebar-border hover:bg-sidebar-accent/40 mt-1 flex items-center gap-2.5 rounded-lg border p-2 transition-colors">
+              <div className="ring-sidebar-border/40 shrink-0 rounded-full ring-1">
                 {session.user.image ? (
                   <Image
                     src={session.user.image}
                     alt={session.user.name}
-                    width={32}
-                    height={32}
+                    width={36}
+                    height={36}
                     className="rounded-full"
                   />
                 ) : (
-                  <div className="bg-sidebar-accent text-sidebar-foreground/70 flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-bold">
+                  <div className="bg-sidebar-accent text-sidebar-foreground/80 flex h-9 w-9 items-center justify-center rounded-full text-[14px] font-bold">
                     {session.user.name[0]}
                   </div>
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sidebar-foreground truncate text-[12px] font-medium">
+                <p className="text-sidebar-foreground truncate text-[12px] leading-tight font-medium">
                   {session.user.name}
                 </p>
-                <p className="text-sidebar-foreground/40 truncate text-[10px]">
+                <p className="text-sidebar-foreground/45 truncate text-[10px] leading-tight">
                   {session.user.email}
                 </p>
               </div>
               <Tooltip>
                 <TooltipTrigger
                   aria-label="Sign out"
-                  className="text-sidebar-foreground/30 hover:text-sidebar-foreground/70 cursor-pointer transition-colors"
+                  className="text-sidebar-foreground/35 hover:bg-sidebar-accent hover:text-sidebar-foreground/85 grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-md transition-colors"
                   onClick={async () => {
                     await authClient.signOut()
                     if (current.startsWith("directory")) {
@@ -539,9 +651,9 @@ export function Sidebar() {
               onClick={async () => {
                 await authClient.signIn.social({ provider: "github" })
               }}
-              className="border-sidebar-border text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground flex w-full items-center justify-center gap-2 rounded-md border px-3 py-1.5 text-[12px] font-medium transition-colors"
+              className="border-sidebar-border/70 text-sidebar-foreground/60 hover:border-sidebar-border hover:bg-sidebar-accent/60 hover:text-sidebar-foreground mt-1 flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2 text-[12px] font-medium transition-colors"
             >
-              <GitHubIcon className="h-[13px] w-[13px]" />
+              <GitHubIcon className="h-[14px] w-[14px]" />
               {t("signIn")}
             </button>
           )}
