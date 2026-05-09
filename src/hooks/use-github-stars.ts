@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useLayoutEffect, useState } from "react"
 
 const TTL_MS = 60 * 60 * 1000
 
@@ -17,14 +17,29 @@ function readCache(key: string): number | null {
 }
 
 export function useGitHubStars(repo: string) {
+  const key = `gh-stars:${repo}`
+  const [previousRepo, setPreviousRepo] = useState(repo)
   const [stars, setStars] = useState<number | null>(null)
+  const [animate, setAnimate] = useState(false)
+
+  if (repo !== previousRepo) {
+    setPreviousRepo(repo)
+    setStars(readCache(`gh-stars:${repo}`))
+    setAnimate(false)
+  }
+
+  useLayoutEffect(() => {
+    queueMicrotask(() => {
+      const cached = readCache(key)
+      if (cached !== null) {
+        setStars(cached)
+        setAnimate(false)
+      }
+    })
+  }, [repo, key])
 
   useEffect(() => {
-    const key = `gh-stars:${repo}`
-    const cached = readCache(key)
-    if (cached !== null) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setStars(cached)
+    if (readCache(key) !== null) {
       return
     }
 
@@ -33,11 +48,12 @@ export function useGitHubStars(repo: string) {
       .then((d) => {
         if (typeof d.stargazers_count === "number") {
           setStars(d.stargazers_count)
+          setAnimate(true)
           sessionStorage.setItem(key, JSON.stringify({ value: d.stargazers_count, ts: Date.now() }))
         }
       })
       .catch(() => {})
-  }, [repo])
+  }, [repo, key])
 
-  return stars
+  return { stars, animate }
 }
