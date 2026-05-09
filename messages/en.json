@@ -54,7 +54,7 @@
     "basic": "Basic",
     "intermediate": "Intermediate",
     "advanced": "Advanced",
-    "customHooks": "Custom Hooks",
+    "customHooks": "Hooks Library",
     "directory": "Developer Directory",
     "signIn": "Sign in with GitHub"
   },
@@ -169,21 +169,21 @@
     "description": "Interactive platform to master React: clear concepts, real exercises, and quizzes in the browser."
   },
   "CustomHooks": {
-    "sectionLabel": "Custom Hooks",
-    "title": "Custom Hooks",
+    "sectionLabel": "Hooks Library",
+    "title": "Hooks Library",
     "description": "Community-contributed reusable hooks. Copy the code, try it in the playground, and use it in your projects.",
     "hookCount": "{count} hooks",
     "addHook": "Add your hook",
     "viewHook": "View hook",
     "noHooks": "No hooks in this category.",
-    "backToHooks": "Custom Hooks",
+    "backToHooks": "Hooks Library",
     "tabCode": "Code",
     "tabPlayground": "Usage",
     "copy": "Copy",
     "copied": "Copied",
     "prev": "← previous",
     "next": "next →",
-    "dialogTitle": "Add your custom hook",
+    "dialogTitle": "Add your hook",
     "dialogSubtitle": "Share your hook with the community in three simple steps.",
     "dialogNote": "Your hook should be added to",
     "step1Title": "Star the repo",
@@ -193,7 +193,7 @@
     "step2Desc": "Fork the repository to your own GitHub account.",
     "step2Link": "Fork now",
     "step3Title": "Open a Pull Request",
-    "step3Desc": "Add your hook to the custom hooks file and open a PR with a short description.",
+    "step3Desc": "Add your hook to the library file and open a PR with a short description.",
     "step3Link": "Open PR"
   },
   "Directory": {

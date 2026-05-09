@@ -4,6 +4,7 @@ import { FeedbackWidget } from "@/components/feedback-widget"
 import { Playground, getSandpackTheme } from "@/components/playground"
 import type { CustomHook, HookCategory } from "@/content/custom-hooks"
 import { useEditorTheme } from "@/hooks/use-editor-theme"
+import { useKeyboardNav } from "@/hooks/use-keyboard-nav"
 import { useLocaleRouter } from "@/hooks/use-locale-router"
 import { useTheme } from "@/hooks/use-theme"
 import { SandpackCodeEditor, SandpackLayout, SandpackProvider } from "@codesandbox/sandpack-react"
@@ -63,6 +64,11 @@ export function HookDetailPage({ hook, prev, next }: HookDetailPageProps) {
   const { push, href } = useLocaleRouter()
   const [tab, setTab] = useState<Tab>("code")
   const [copied, setCopied] = useState(false)
+
+  useKeyboardNav({
+    prev: prev && `/hooks/${prev.id}`,
+    next: next && `/hooks/${next.id}`,
+  })
 
   const handleCopy = useCallback(async () => {
     await navigator.clipboard.writeText(hook.code)
