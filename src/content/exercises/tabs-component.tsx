@@ -1,8 +1,8 @@
 import type { Exercise } from "./types"
 
 export const tabsComponent: Exercise = {
-  id: "tabs-component",
-  label: "tabs component",
+  id: "tabs",
+  label: "tabs",
   title: "Componente de tabs",
   lede: "Un componente con múltiples tabs que muestra contenido diferente según el tab activo. Usa un estado para trackear cuál tab está seleccionado.",
   difficulty: "basic",

@@ -686,16 +686,16 @@ export default function App() {
     },
   },
   "accordion-component": {
-    title: "Accordion component",
-    lede: "An accordion with 3 sections. Clicking a section header expands or collapses it. Only one section can be open at a time.",
+    title: "Accordion",
+    lede: "An accordion component where each item can be expanded or collapsed independently. The state is a Set of open IDs.",
     objectives: [
-      "Declare openIndex state with initial value null (all closed)",
-      "Create 3 section objects with title and content",
-      "On click header, set openIndex: if same index, set to null; otherwise set to that index",
-      "Only render content when the section is open",
-      "Show different icons for open vs closed state",
+      "Declare 'openItems' state as an empty 'new Set()'",
+      "In 'toggleItem': if 'id' is in the Set, remove it; otherwise add it — always using a functional update with a copy",
+      "Pass 'openItems.has(item.id)' as the 'isOpen' prop to each 'AccordionItem'",
+      "The '▼' icon rotates 180° when 'isOpen' is true",
+      "The content only renders when 'isOpen' is true",
     ],
-    hint: "Use openIndex === index to check if a section is open, not a boolean for each section",
+    hint: "Use a Set to store open IDs. To toggle: if set.has(id) delete it, otherwise add it. Always copy the Set before mutating.",
     starter: {
       "/App.js": `import { useState } from "react";
 
@@ -732,27 +732,30 @@ function AccordionItem({ item, isOpen, onToggle }) {
     <div style={itemStyle}>
       <div onClick={onToggle} style={headerStyle}>
         <span style={{ color: "#fff" }}>{item.title}</span>
-        <span style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 200ms" }}>▼</span>
+        {/* TODO: rotate the icon 180deg when isOpen is true */}
+        <span>▼</span>
       </div>
-      {isOpen && <div style={contentStyle}>{item.content}</div>}
+      {/* TODO: render the content only when isOpen is true */}
     </div>
   );
 }
 
 export default function App() {
-  const [openItems, setOpenItems] = useState(new Set());
+  // TODO: declare openItems state with an empty new Set()
 
   const toggleItem = (id) => {
+    // TODO: if id is in openItems, remove it; otherwise add it
+    // Remember: use the functional form of setOpenItems and copy the Set before modifying it
   };
 
   return (
-    <div style={{ padding: 24, fontFamily: "system-ui", background: "#09090b", minHeight: "100vh" }}>
+    <div style={{ padding: 24, fontFamily: "system-ui", background: "var(--bg)", minHeight: "100vh" }}>
       <p style={{ marginBottom: 24, color: "#71717a" }}>Accordion</p>
       {items.map((item) => (
         <AccordionItem
           key={item.id}
           item={item}
-          isOpen={false}
+          isOpen={false} // TODO: change false to openItems.has(item.id)
           onToggle={() => toggleItem(item.id)}
         />
       ))}
@@ -817,7 +820,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ padding: 24, fontFamily: "system-ui", background: "#09090b", minHeight: "100vh" }}>
+    <div style={{ padding: 24, fontFamily: "system-ui", background: "var(--bg)", minHeight: "100vh" }}>
       <p style={{ marginBottom: 24, color: "#71717a" }}>Accordion</p>
       {items.map((item) => (
         <AccordionItem key={item.id} item={item} isOpen={openItems.has(item.id)} onToggle={() => toggleItem(item.id)} />

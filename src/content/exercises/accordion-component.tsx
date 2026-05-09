@@ -2,16 +2,16 @@ import type { Exercise } from "./types"
 
 export const accordionComponent: Exercise = {
   id: "accordion-component",
-  label: "accordion component",
+  label: "accordion",
   title: "Acordeón",
-  lede: "Un componente acordeón donde cada item puede expandirse o contraerse. Solo un item abierto a la vez (accordion estricto) o múltiples (accordion normal).",
+  lede: "Un componente acordeón donde cada item puede expandirse o contraerse independientemente. El estado es un Set de IDs abiertos.",
   difficulty: "basic",
   objectives: [
-    "Array de items con '{ id, title, content }'",
-    "Estado 'openItems': 'Set<string>' para trackear items abiertos",
-    "Click togglea el item: si está abierto, lo remueve; si no, lo añade",
-    "Icono rotate en el header cuando está abierto",
-    "Animación de height con 'overflow: hidden'",
+    "Declara estado 'openItems' como 'new Set()' vacío",
+    "En 'toggleItem': si 'id' está en el Set, remuévelo; si no, agrégalo — siempre con copia funcional",
+    "Pasa 'openItems.has(item.id)' como prop 'isOpen' a cada 'AccordionItem'",
+    "El ícono '▼' rota 180° cuando 'isOpen' es true",
+    "El contenido solo se renderiza cuando 'isOpen' es true",
   ],
   hint: "Usa Set para almacenar IDs abiertos. toggle: si set.has(id) remueve, si no añade.",
   relatedConcepts: ["useState"],
@@ -51,17 +51,20 @@ function AccordionItem({ item, isOpen, onToggle }) {
     <div style={itemStyle}>
       <div onClick={onToggle} style={headerStyle}>
         <span style={{ color: "#fff" }}>{item.title}</span>
-        <span style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 200ms" }}>▼</span>
+        {/* TODO: rota el ícono 180deg cuando isOpen es true */}
+        <span>▼</span>
       </div>
-      {isOpen && <div style={contentStyle}>{item.content}</div>}
+      {/* TODO: renderiza el contenido solo cuando isOpen es true */}
     </div>
   );
 }
 
 export default function App() {
-  const [openItems, setOpenItems] = useState(new Set());
+  // TODO: declara estado openItems con new Set() vacío
 
   const toggleItem = (id) => {
+    // TODO: si id está en openItems, remuévelo; si no, agrégalo
+    // Recuerda: usa la forma funcional de setOpenItems y copia el Set antes de modificarlo
   };
 
   return (
@@ -71,7 +74,7 @@ export default function App() {
         <AccordionItem
           key={item.id}
           item={item}
-          isOpen={false}
+          isOpen={false} // TODO: cambia false por openItems.has(item.id)
           onToggle={() => toggleItem(item.id)}
         />
       ))}
