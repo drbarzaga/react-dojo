@@ -6,7 +6,7 @@
 
 - [ ] New feature
 - [ ] Bug fix
-- [ ] New content (concept / exercise / quiz)
+- [ ] New content (concept / exercise / quiz / custom hook)
 - [ ] UI/UX improvement
 - [ ] Refactor / cleanup
 - [ ] Other
