@@ -26,15 +26,17 @@ const appStyle = {
 };
 
 export default function App() {
-  // declara estado isOn aquí
+  // TODO: declara estado isOn con valor inicial false
 
   return (
     <div style={appStyle}>
       <p style={{ marginBottom: 24, color: "#71717a" }}>Toggle Button</p>
       <button
-        onClick={() => {}}
+        onClick={() => {
+          // TODO: alterna isOn con setIsOn(!isOn)
+        }}
         style={{
-          backgroundColor: "#6b7280",
+          backgroundColor: "#6b7280", // TODO: verde (#22c55e) cuando isOn, gris (#6b7280) cuando off
           color: "white",
           padding: "12px 24px",
           borderRadius: 8,
@@ -43,8 +45,7 @@ export default function App() {
           fontSize: 18
         }}
       >
-        {/* muestra ON u OFF según isOn */}
-        OFF
+        {/* TODO: muestra "ON" si isOn es true, "OFF" si false */}
       </button>
     </div>
   );

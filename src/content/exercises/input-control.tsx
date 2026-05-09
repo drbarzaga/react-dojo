@@ -30,19 +30,21 @@ const labelStyle = {
 };
 
 export default function App() {
-  // declara estado text aquí
+  // TODO: declara estado text con string vacío ("")
 
   return (
     <div style={appStyle}>
       <p style={labelStyle}>Input controlado</p>
       <input
-        value=""
-        onChange={() => {}}
+        value="" // TODO: cambia "" por text
+        onChange={() => {
+          // TODO: actualiza con setText(e.target.value)
+        }}
         placeholder="escribe algo..."
         style={{ padding: 8, fontSize: 16, width: "100%", borderRadius: 8 }}
       />
       <p style={{ marginTop: 16, fontSize: 18 }}>
-        {/* muestra text aquí */}
+        {/* TODO: muestra text aquí */}
       </p>
     </div>
   );

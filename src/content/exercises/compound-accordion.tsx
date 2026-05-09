@@ -17,7 +17,10 @@ export const compoundAccordion: Exercise = {
   hint: "Necesitas dos niveles de contexto: uno global (qué item está abierto) y uno por item (cuál es el id de este item). Así Trigger y Panel saben a qué item pertenecen sin recibirlo como prop.",
   relatedConcepts: ["compound-components", "useContext"],
   starter: {
-    "/App.js": `import { useState } from "react";
+    "/App.js": `import { createContext, useContext, useState } from "react";
+
+// TODO: crea AccordionCtx = createContext(null) — compartirá { active, toggle }
+// TODO: crea ItemCtx = createContext(null) — compartirá el id de cada item
 
 // Accordion con props — refactoriza al patrón Compound Components
 function Accordion({ items }) {
@@ -27,6 +30,8 @@ function Accordion({ items }) {
     setActive((prev) => (prev === id ? null : id));
   }
 
+  // TODO: cambia { items } por { children }
+  // TODO: envuelve el div con <AccordionCtx.Provider value={{ active, toggle }}>
   return (
     <div style={{ fontFamily: "system-ui", maxWidth: 480 }}>
       {items.map((item) => (
@@ -54,6 +59,11 @@ function Accordion({ items }) {
   );
 }
 
+// TODO: crea AccordionItem({ id, children }) — envuelve children con <ItemCtx.Provider value={id}>
+// TODO: crea AccordionTrigger({ children }) — lee id de ItemCtx, llama toggle(id) al hacer click
+// TODO: crea AccordionPanel({ children }) — solo renderiza si active === id (lee ambos contextos)
+// TODO: asigna Accordion.Item, Accordion.Trigger y Accordion.Panel
+
 const items = [
   { id: "1", title: "¿Qué es React?", content: "Una librería de JavaScript para construir interfaces de usuario basadas en componentes." },
   { id: "2", title: "¿Qué es un hook?", content: "Una función que empieza por 'use' y permite usar características de React desde componentes funcionales." },
@@ -61,6 +71,8 @@ const items = [
 ];
 
 export default function App() {
+  // TODO: reemplaza <Accordion items={items} /> por la API compuesta:
+  // <Accordion> → <Accordion.Item> → <Accordion.Trigger> y <Accordion.Panel>
   return <Accordion items={items} />;
 }
 `,

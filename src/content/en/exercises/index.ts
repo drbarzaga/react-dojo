@@ -52,15 +52,17 @@ const appStyle = {
 };
 
 export default function App() {
-  // declare isOn state here
+  // TODO: declare isOn state with initial value false
 
   return (
     <div style={appStyle}>
       <p style={{ marginBottom: 24, color: "#71717a" }}>Toggle Button</p>
       <button
-        onClick={() => {}}
+        onClick={() => {
+          // TODO: toggle isOn with setIsOn(!isOn)
+        }}
         style={{
-          backgroundColor: "#6b7280",
+          backgroundColor: "#6b7280", // TODO: green (#22c55e) when isOn, gray (#6b7280) when off
           color: "white",
           padding: "12px 24px",
           borderRadius: 8,
@@ -69,8 +71,7 @@ export default function App() {
           fontSize: 18
         }}
       >
-        {/* show ON or OFF based on isOn */}
-        OFF
+        {/* TODO: show "ON" if isOn is true, "OFF" if false */}
       </button>
     </div>
   );
@@ -140,19 +141,21 @@ const labelStyle = {
 };
 
 export default function App() {
-  // declare text state here
+  // TODO: declare text state with empty string ("")
 
   return (
     <div style={appStyle}>
       <p style={labelStyle}>Controlled Input</p>
       <input
-        value=""
-        onChange={() => {}}
+        value="" // TODO: change "" to text
+        onChange={() => {
+          // TODO: update with setText(e.target.value)
+        }}
         placeholder="type something..."
         style={{ padding: 8, fontSize: 16, width: "100%", borderRadius: 8 }}
       />
       <p style={{ marginTop: 16, fontSize: 18 }}>
-        {/* display text here */}
+        {/* TODO: display text here */}
       </p>
     </div>
   );
@@ -221,11 +224,12 @@ const rowStyle = {
 };
 
 export default function App() {
-  // declare likes state here (starts at 142)
-  // declare isLiked state here
+  // TODO: declare likes state with initial value 142
+  // TODO: declare isLiked state with initial value false
 
   const handleClick = () => {
-    // implement logic here
+    // TODO: if isLiked, subtract 1 from likes and set isLiked to false
+    // TODO: otherwise, add 1 to likes and set isLiked to true
   };
 
   return (
@@ -235,8 +239,8 @@ export default function App() {
         <button
           onClick={handleClick}
           style={{
-            backgroundColor: "#e5e7eb",
-            color: "black",
+            backgroundColor: "#e5e7eb", // TODO: red (#ef4444) if isLiked, gray (#e5e7eb) if not
+            color: "black", // TODO: "white" if isLiked, "black" if not
             padding: "8px 16px",
             borderRadius: 8,
             border: "none",
@@ -247,7 +251,7 @@ export default function App() {
           ♥ Like
         </button>
         <span style={{ fontSize: 18 }}>
-          {/* display likes */}
+          {/* TODO: display likes */}
         </span>
       </div>
     </div>
@@ -311,7 +315,7 @@ export default function App() {
 `,
     },
   },
-  "tabs-component": {
+  tabs: {
     title: "Tab component",
     lede: "A tabs component with 3 tabs. Clicking a tab shows its content and hides the others. Use state to track which tab is active.",
     objectives: [
@@ -2444,7 +2448,10 @@ export default function App() {
     ],
     hint: "You need two levels of context: one global (which item is open) and one per item (what the id of this item is). That way Trigger and Panel know which item they belong to without receiving it as a prop.",
     starter: {
-      "/App.js": `import { useState } from "react";
+      "/App.js": `import { createContext, useContext, useState } from "react";
+
+// TODO: create AccordionCtx = createContext(null) — will share { active, toggle }
+// TODO: create ItemCtx = createContext(null) — will share the id of each item
 
 // Accordion with props — refactor to the Compound Components pattern
 function Accordion({ items }) {
@@ -2454,6 +2461,8 @@ function Accordion({ items }) {
     setActive((prev) => (prev === id ? null : id));
   }
 
+  // TODO: change { items } to { children }
+  // TODO: wrap the div with <AccordionCtx.Provider value={{ active, toggle }}>
   return (
     <div style={{ fontFamily: "system-ui", maxWidth: 480 }}>
       {items.map((item) => (
@@ -2481,6 +2490,11 @@ function Accordion({ items }) {
   );
 }
 
+// TODO: create AccordionItem({ id, children }) — wrap children with <ItemCtx.Provider value={id}>
+// TODO: create AccordionTrigger({ children }) — read id from ItemCtx, call toggle(id) on click
+// TODO: create AccordionPanel({ children }) — only render if active === id (read both contexts)
+// TODO: assign Accordion.Item, Accordion.Trigger and Accordion.Panel
+
 const items = [
   { id: "1", title: "What is React?", content: "A JavaScript library for building user interfaces based on components." },
   { id: "2", title: "What is a hook?", content: "A function that starts with 'use' and allows using React features from functional components." },
@@ -2488,6 +2502,8 @@ const items = [
 ];
 
 export default function App() {
+  // TODO: replace <Accordion items={items} /> with the compound API:
+  // <Accordion> → <Accordion.Item> → <Accordion.Trigger> and <Accordion.Panel>
   return <Accordion items={items} />;
 }
 `,

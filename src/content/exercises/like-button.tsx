@@ -32,11 +32,12 @@ const rowStyle = {
 };
 
 export default function App() {
-  // declara estado likes aquí (empieza en 142)
-  // declara estado isLiked aquí
+  // TODO: declara estado likes con valor inicial 142
+  // TODO: declara estado isLiked con valor inicial false
 
   const handleClick = () => {
-    // implementa la lógica aquí
+    // TODO: si isLiked, resta 1 a likes y pon isLiked en false
+    // TODO: si no, suma 1 a likes y pon isLiked en true
   };
 
   return (
@@ -46,8 +47,8 @@ export default function App() {
         <button
           onClick={handleClick}
           style={{
-            backgroundColor: "#e5e7eb",
-            color: "black",
+            backgroundColor: "#e5e7eb", // TODO: rojo (#ef4444) si isLiked, gris (#e5e7eb) si no
+            color: "black", // TODO: "white" si isLiked, "black" si no
             padding: "8px 16px",
             borderRadius: 8,
             border: "none",
@@ -58,7 +59,7 @@ export default function App() {
           ♥ Like
         </button>
         <span style={{ fontSize: 18 }}>
-          {/* muestra likes */}
+          {/* TODO: muestra likes */}
         </span>
       </div>
     </div>
