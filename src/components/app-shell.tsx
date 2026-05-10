@@ -10,6 +10,7 @@ import { ShortcutsModal } from "@/components/shortcuts-modal"
 import { BreadcrumbBar } from "@/components/breadcrumb-bar"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import type { SidebarOpenState } from "@/lib/sidebar-state"
+import { PLAYGROUND_MAXIMIZED_PORTAL_ELEMENT_ID } from "@/lib/constants"
 
 interface AppShellProps {
   children: React.ReactNode
@@ -71,6 +72,7 @@ export function AppShell({ children, initialSidebarState }: AppShellProps) {
           <Footer />
         </SidebarInset>
       </div>
+      <div id={PLAYGROUND_MAXIMIZED_PORTAL_ELEMENT_ID} />
     </SidebarProvider>
   )
 }

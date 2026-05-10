@@ -42,7 +42,9 @@
     "switchToLight": "Cambiar a tema claro",
     "switchToDark": "Cambiar a tema oscuro",
     "modeLight": "Modo claro",
-    "modeDark": "Modo oscuro"
+    "modeDark": "Modo oscuro",
+    "themeGroupDark": "Oscuros",
+    "themeGroupLight": "Claros"
   },
   "Sidebar": {
     "concepts": "Conceptos",
@@ -158,7 +160,23 @@
     "maximizeLabel": "Maximizar editor",
     "closeTerminal": "Cerrar terminal",
     "openTerminal": "Abrir terminal",
-    "objectives": "Objetivos"
+    "objectives": "Objetivos",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "copyTooltip": "Copiar archivo activo",
+    "format": "Formato",
+    "formatted": "Listo",
+    "formatTooltip": "Formatear con Prettier (⌘⇧F)",
+    "reset": "Reset",
+    "resetConfirm": "¿Confirmar?",
+    "resetTooltip": "Volver al código inicial",
+    "fontDecrease": "Disminuir tamaño",
+    "fontIncrease": "Aumentar tamaño",
+    "layoutToggle": "Alternar layout",
+    "layoutHorizontal": "Layout horizontal",
+    "layoutVertical": "Layout vertical",
+    "saving": "Guardando…",
+    "saved": "Guardado"
   },
   "LocaleSwitcher": {
     "label": "Idioma"

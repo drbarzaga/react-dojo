@@ -1,10 +1,25 @@
 "use client"
 
+import { PlaygroundToolbar } from "@/components/playground-toolbar"
 import { useCodePersistence } from "@/hooks/use-code-persistence"
 import { useEditorTheme } from "@/hooks/use-editor-theme"
 import { useTheme, type Theme } from "@/hooks/use-theme"
-import { THEME_FILE_NAME } from "@/lib/constants"
-import { type EditorThemeId } from "@/types"
+import {
+  PLAYGROUND_FLUSH_SAVE_EVENT,
+  PLAYGROUND_FONT_SIZE_DEFAULT_PX,
+  PLAYGROUND_FONT_SIZE_MAX_PX,
+  PLAYGROUND_FONT_SIZE_MIN_PX,
+  PLAYGROUND_FONT_SIZE_STORAGE_KEY,
+  PLAYGROUND_LAYOUT_STORAGE_KEY,
+  PLAYGROUND_MAXIMIZED_PORTAL_ELEMENT_ID,
+  PLAYGROUND_MAXIMIZED_Z_INDEX,
+  PLAYGROUND_PREVIEW_ACTION_BUTTON_PX,
+  PLAYGROUND_PREVIEW_ACTION_ICON_PX,
+  PLAYGROUND_SAVED_INDICATOR_DURATION_MS,
+  THEME_FILE_NAME,
+} from "@/lib/constants"
+import { renderObjective } from "@/lib/render-objective"
+import { type EditorThemeId, type PlaygroundLayout, type PlaygroundSaveState } from "@/types"
 import type { ExerciseFiles } from "@/types/code-persistence"
 import {
   SandpackCodeEditor,
@@ -12,15 +27,16 @@ import {
   SandpackLayout,
   SandpackPreview,
   SandpackProvider,
+  SandpackStack,
   useSandpack,
   type SandpackFiles,
   type SandpackPredefinedTemplate,
   type SandpackThemeProp,
 } from "@codesandbox/sandpack-react"
-import { renderObjective } from "@/lib/render-objective"
 import { ListChecks, X } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { createPortal } from "react-dom"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 // ─── Editor theme definitions ────────────────────────────────────────────────
 
@@ -83,6 +99,118 @@ const editorThemes: Record<EditorThemeId, { dark: SandpackThemeProp; light?: San
           property: "#4a6880",
           static: "#6b4a82",
           string: "#3d6b60",
+        },
+        font,
+      },
+    },
+    oneDark: {
+      dark: {
+        colors: {
+          surface1: "#282c34",
+          surface2: "#21252b",
+          surface3: "#3e4451",
+          clickable: "#5c6370",
+          base: "#abb2bf",
+          disabled: "#4b5263",
+          hover: "#ffffff",
+          accent: "#61afef",
+          error: "#e06c75",
+          errorSurface: "rgba(224,108,117,0.1)",
+        },
+        syntax: {
+          plain: "#abb2bf",
+          comment: { color: "#5c6370", fontStyle: "italic" },
+          keyword: "#c678dd",
+          tag: "#e06c75",
+          punctuation: "#abb2bf",
+          definition: "#61afef",
+          property: "#e06c75",
+          static: "#d19a66",
+          string: "#98c379",
+        },
+        font,
+      },
+    },
+    tokyoNight: {
+      dark: {
+        colors: {
+          surface1: "#1a1b26",
+          surface2: "#16161e",
+          surface3: "#2a2b3d",
+          clickable: "#565f89",
+          base: "#a9b1d6",
+          disabled: "#414868",
+          hover: "#c0caf5",
+          accent: "#7aa2f7",
+          error: "#f7768e",
+          errorSurface: "rgba(247,118,142,0.1)",
+        },
+        syntax: {
+          plain: "#a9b1d6",
+          comment: { color: "#565f89", fontStyle: "italic" },
+          keyword: "#bb9af7",
+          tag: "#f7768e",
+          punctuation: "#a9b1d6",
+          definition: "#7aa2f7",
+          property: "#73daca",
+          static: "#ff9e64",
+          string: "#9ece6a",
+        },
+        font,
+      },
+    },
+    catppuccin: {
+      dark: {
+        colors: {
+          surface1: "#1e1e2e",
+          surface2: "#181825",
+          surface3: "#313244",
+          clickable: "#6c7086",
+          base: "#cdd6f4",
+          disabled: "#45475a",
+          hover: "#f5f5f5",
+          accent: "#89b4fa",
+          error: "#f38ba8",
+          errorSurface: "rgba(243,139,168,0.1)",
+        },
+        syntax: {
+          plain: "#cdd6f4",
+          comment: { color: "#6c7086", fontStyle: "italic" },
+          keyword: "#cba6f7",
+          tag: "#f38ba8",
+          punctuation: "#cdd6f4",
+          definition: "#89b4fa",
+          property: "#94e2d5",
+          static: "#fab387",
+          string: "#a6e3a1",
+        },
+        font,
+      },
+    },
+    rosePine: {
+      dark: {
+        colors: {
+          surface1: "#191724",
+          surface2: "#1f1d2e",
+          surface3: "#26233a",
+          clickable: "#6e6a86",
+          base: "#e0def4",
+          disabled: "#403d52",
+          hover: "#ffffff",
+          accent: "#9ccfd8",
+          error: "#eb6f92",
+          errorSurface: "rgba(235,111,146,0.1)",
+        },
+        syntax: {
+          plain: "#e0def4",
+          comment: { color: "#6e6a86", fontStyle: "italic" },
+          keyword: "#c4a7e7",
+          tag: "#eb6f92",
+          punctuation: "#e0def4",
+          definition: "#9ccfd8",
+          property: "#ebbcba",
+          static: "#f6c177",
+          string: "#f6c177",
         },
         font,
       },
@@ -272,15 +400,15 @@ hr { border:0; border-top:1px solid ${t.line}; margin:14px 0; }
 `
 }
 
-function TerminalIcon() {
+function TerminalIcon({ size = 13, strokeWidth = 2 }: { size?: number; strokeWidth?: number }) {
   return (
     <svg
-      width="13"
-      height="13"
+      width={size}
+      height={size}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden
@@ -307,12 +435,29 @@ function ThemeSync({ appTheme }: { appTheme: Theme }) {
   return null
 }
 
-// Auto-saves user code to localStorage when files change
-function CodeSync({ exerciseId }: { exerciseId: string }) {
+// Auto-saves user code to localStorage when files change and reports save state.
+function CodeSync({
+  exerciseId,
+  onStateChange,
+}: {
+  exerciseId: string
+  onStateChange: (state: PlaygroundSaveState) => void
+}) {
   const { sandpack } = useSandpack()
   const { saveCode } = useCodePersistence()
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const codeRef = useRef<ExerciseFiles | null>(null)
+
+  const flushAsSaved = useCallback(() => {
+    if (codeRef.current) saveCode(exerciseId, codeRef.current)
+    onStateChange("saved")
+    if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
+    savedTimerRef.current = setTimeout(
+      () => onStateChange("idle"),
+      PLAYGROUND_SAVED_INDICATOR_DURATION_MS
+    )
+  }, [exerciseId, saveCode, onStateChange])
 
   useEffect(() => {
     const next = Object.entries(sandpack.files).reduce<ExerciseFiles>((acc, [path, file]) => {
@@ -335,15 +480,16 @@ function CodeSync({ exerciseId }: { exerciseId: string }) {
 
     if (!changed) return
 
-    // Content changed: update ref and reset debounce
+    // Content changed: mark as saving, update ref and reset debounce
     codeRef.current = next
+    onStateChange("saving")
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
-      saveCode(exerciseId, codeRef.current!)
+      flushAsSaved()
       timerRef.current = null
     }, 750)
     // No cleanup return — timer must survive reference-only re-renders of sandpack.files
-  }, [sandpack.files, exerciseId, saveCode])
+  }, [sandpack.files, exerciseId, saveCode, onStateChange, flushAsSaved])
 
   // Flush any pending save on unmount so navigating away doesn't lose code
   useEffect(() => {
@@ -352,11 +498,66 @@ function CodeSync({ exerciseId }: { exerciseId: string }) {
         clearTimeout(timerRef.current)
         if (codeRef.current) saveCode(exerciseId, codeRef.current)
       }
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
     }
   }, [exerciseId, saveCode])
 
+  // Manual save triggered by Cmd+S — bypass debounce, flush immediately, flash indicator
+  useEffect(() => {
+    const handler = () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+        timerRef.current = null
+      }
+      flushAsSaved()
+    }
+    window.addEventListener(PLAYGROUND_FLUSH_SAVE_EVENT, handler)
+    return () => window.removeEventListener(PLAYGROUND_FLUSH_SAVE_EVENT, handler)
+  }, [flushAsSaved])
+
   return null
 }
+
+function readPersistedFontSize(): number {
+  if (typeof window === "undefined") return PLAYGROUND_FONT_SIZE_DEFAULT_PX
+  try {
+    const raw = window.localStorage.getItem(PLAYGROUND_FONT_SIZE_STORAGE_KEY)
+    if (!raw) return PLAYGROUND_FONT_SIZE_DEFAULT_PX
+    const parsed = Number(raw)
+    if (Number.isNaN(parsed)) return PLAYGROUND_FONT_SIZE_DEFAULT_PX
+    return Math.max(PLAYGROUND_FONT_SIZE_MIN_PX, Math.min(PLAYGROUND_FONT_SIZE_MAX_PX, parsed))
+  } catch {
+    return PLAYGROUND_FONT_SIZE_DEFAULT_PX
+  }
+}
+
+function readPersistedLayout(): PlaygroundLayout {
+  if (typeof window === "undefined") return "horizontal"
+  try {
+    const raw = window.localStorage.getItem(PLAYGROUND_LAYOUT_STORAGE_KEY)
+    return raw === "vertical" ? "vertical" : "horizontal"
+  } catch {
+    return "horizontal"
+  }
+}
+
+const CONSOLE_PANEL_PX = 200
+
+const FLEX_PANE_STRETCH_STYLE = {
+  flex: "1 1 0%",
+  minHeight: 0,
+  minWidth: 0,
+  width: "100%",
+  height: "100%",
+  alignSelf: "stretch",
+} as const
+
+const PREVIEW_NESTED_STYLE = {
+  flex: "1 1 0%",
+  minHeight: 0,
+  minWidth: 0,
+  width: "100%",
+} as const
 
 // ─── Playground ───────────────────────────────────────────────────────────────
 
@@ -389,25 +590,58 @@ export function Playground({
   const [maximized, setMaximized] = useState(false)
   const [consoleOpen, setConsoleOpen] = useState(showConsole)
   const [objectivesOpen, setObjectivesOpen] = useState(false)
-  const [windowHeight, setWindowHeight] = useState(0)
-  const editorHeight = maximized && windowHeight > 0 ? windowHeight - 48 - 40 - 64 : height
+  const [layout, setLayout] = useState<PlaygroundLayout>("horizontal")
+  const [fontSize, setFontSize] = useState<number>(PLAYGROUND_FONT_SIZE_DEFAULT_PX)
+  const [saveState, setSaveState] = useState<PlaygroundSaveState>("idle")
+  const [isPlaygroundClient, setIsPlaygroundClient] = useState(false)
+
+  // Hydrate persisted preferences after mount (avoids SSR mismatch)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFontSize(readPersistedFontSize())
+    setLayout(readPersistedLayout())
+  }, [])
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      setIsPlaygroundClient(true)
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [])
+
+  const handleLayoutChange = useCallback((next: PlaygroundLayout) => {
+    setLayout(next)
+    try {
+      window.localStorage.setItem(PLAYGROUND_LAYOUT_STORAGE_KEY, next)
+    } catch {
+      /* ignore */
+    }
+  }, [])
+
+  const handleFontSizeChange = useCallback((next: number) => {
+    setFontSize(next)
+    try {
+      window.localStorage.setItem(PLAYGROUND_FONT_SIZE_STORAGE_KEY, String(next))
+    } catch {
+      /* ignore */
+    }
+  }, [])
+
+  // Editor only uses an explicit pixel height when not maximized; when maximized, CSS flex chain handles it.
+  const paneHeight = layout === "vertical" ? Math.max(180, height / 2) : height
 
   useEffect(() => {
     if (!maximized) return
 
-    const updateHeight = () => setWindowHeight(window.innerHeight)
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setMaximized(false)
     }
 
-    updateHeight()
-    window.addEventListener("resize", updateHeight)
     window.addEventListener("keydown", onKey)
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = "hidden"
 
     return () => {
-      window.removeEventListener("resize", updateHeight)
       window.removeEventListener("keydown", onKey)
       document.body.style.overflow = prevOverflow
       setObjectivesOpen(false)
@@ -436,138 +670,256 @@ export function Playground({
     return baseFiles
   }, [files, exerciseId, enablePersistence]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  return (
+  const themeWithFont = useMemo(() => {
+    const base = getSandpackTheme(editorTheme, appTheme)
+    if (typeof base === "string") return base
+    return {
+      ...base,
+      font: { ...base.font, size: `${fontSize}px` },
+    }
+  }, [editorTheme, appTheme, fontSize])
+
+  const editorPaneStyle = useMemo(() => {
+    if (maximized) {
+      return layout === "vertical"
+        ? FLEX_PANE_STRETCH_STYLE
+        : {
+            flex: "65 65 0%",
+            minHeight: 0,
+            minWidth: 0,
+            height: "100%",
+            alignSelf: "stretch",
+          }
+    }
+    return layout === "vertical"
+      ? { height: paneHeight, width: "100%", flex: "none" as const }
+      : { height: paneHeight, flex: "65 65 0%" }
+  }, [maximized, layout, paneHeight])
+
+  const previewPaneStyle = useMemo(() => {
+    if (maximized) {
+      return layout === "vertical"
+        ? FLEX_PANE_STRETCH_STYLE
+        : {
+            flex: "35 35 0%",
+            minHeight: 0,
+            minWidth: 0,
+            height: "100%",
+            alignSelf: "stretch",
+          }
+    }
+    return layout === "vertical"
+      ? { height: paneHeight, width: "100%", flex: "none" as const }
+      : { height: paneHeight, flex: "35 35 0%" }
+  }, [maximized, layout, paneHeight])
+
+  const sandpackLayoutStyle = useMemo(
+    () => ({
+      flexDirection: layout === "vertical" ? ("column" as const) : ("row" as const),
+      borderTopLeftRadius: 0,
+      borderTopRightRadius: 0,
+      ...(maximized
+        ? {
+            flex: "1 1 0%",
+            minHeight: 0,
+            minWidth: 0,
+            height: "100%",
+            width: "100%",
+            overflow: "hidden" as const,
+          }
+        : {}),
+    }),
+    [layout, maximized]
+  )
+
+  if (!isPlaygroundClient) {
+    return (
+      <div className="relative my-2" style={{ minHeight: height }}>
+        <div
+          aria-busy="true"
+          className="border-line bg-bg-raise animate-pulse rounded-lg border"
+          style={{ height }}
+        />
+      </div>
+    )
+  }
+
+  // data-playground-root: scopes keyboard shortcuts (Cmd+S, Cmd+Shift+F, Cmd+Enter)
+  // to fire only when focus is inside this playground.
+  const playgroundTree = (
     <div
+      data-playground-root=""
+      {...(maximized ? { "data-maximized": "", "data-playground-layout": layout } : {})}
       className={
         maximized
-          ? "bg-bg fixed top-12 right-0 bottom-10 left-0 z-50 flex flex-col p-4 md:left-[240px]"
-          : "relative my-2"
+          ? "bg-bg fixed top-12 right-0 bottom-0 left-0 flex min-h-0 max-w-none flex-col overflow-hidden p-0"
+          : "border-line-strong relative my-2 overflow-hidden rounded-lg border shadow-[0_2px_16px_rgba(0,0,0,0.18)]"
       }
+      style={maximized ? { zIndex: PLAYGROUND_MAXIMIZED_Z_INDEX } : undefined}
     >
-      <div className="mb-1.5 flex items-center justify-end">
-        <button
-          onClick={() => setMaximized((v) => !v)}
-          className="text-fg-dim hover:text-fg flex cursor-pointer items-center gap-1.5 text-[11px] transition-colors"
-          aria-label={maximized ? t("minimizeLabel") : t("maximizeLabel")}
-        >
-          <span className="capitalize">{maximized ? t("minimize") : t("maximize")}</span>
-          <span aria-hidden className="text-[13px] leading-none">
-            {maximized ? "⤡" : "⤢"}
-          </span>
-        </button>
-      </div>
-
-      {objectives && objectives.length > 0 && objectivesOpen && (
-        <div className="absolute right-4 bottom-16 z-10 w-[22rem]">
-          <div className="bg-bg-raise overflow-hidden rounded-xl shadow-2xl">
-            <div className="flex items-center justify-between px-4 py-3">
-              <div className="flex items-center gap-2">
-                <ListChecks size={12} className="text-fg-dim" strokeWidth={2} />
-                <span className="text-fg-dim text-[10px] font-semibold tracking-[0.16em] uppercase">
-                  {t("objectives")}
-                </span>
-              </div>
-              <button
-                onClick={() => setObjectivesOpen(false)}
-                type="button"
-                className="text-fg-faint hover:text-fg-muted -mr-1 rounded p-1 transition-colors"
-              >
-                <X size={12} strokeWidth={2} />
-              </button>
-            </div>
-            <div className="bg-line h-px" />
-            <ol className="space-y-3 px-4 py-3">
-              {objectives.map((o, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <span className="bg-bg-hover text-fg-dim mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full font-mono text-[10px]">
-                    {i + 1}
-                  </span>
-                  <span className="text-fg-muted text-[13px] leading-[1.55]">
-                    {renderObjective(o)}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      )}
-
-      <div className={maximized ? "min-h-0 flex-1" : ""}>
+      <div
+        className={
+          maximized
+            ? "playground-shell flex min-h-0 min-w-0 flex-1 basis-0 flex-col overflow-hidden"
+            : ""
+        }
+      >
         <SandpackProvider
           template={template}
-          theme={getSandpackTheme(editorTheme, appTheme)}
+          theme={themeWithFont}
           files={initialFiles}
           customSetup={dependencies ? { dependencies } : undefined}
         >
           <ThemeSync appTheme={appTheme} />
-          {enablePersistence && exerciseId && <CodeSync exerciseId={exerciseId} />}
-          <SandpackLayout>
-            <SandpackCodeEditor
-              showLineNumbers
-              showInlineErrors
-              showTabs={Object.keys(files).length > 1}
-              style={{ height: editorHeight, flex: "65 65 0%" }}
-            />
-            <SandpackPreview
-              showOpenInCodeSandbox={false}
-              style={{ height: editorHeight, flex: "35 35 0%" }}
-              actionsChildren={
-                <>
-                  {objectives && objectives.length > 0 && (
-                    <button
-                      onClick={() => setObjectivesOpen((v) => !v)}
-                      title={t("objectives")}
-                      type="button"
-                      style={{
-                        appearance: "none",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: 28,
-                        height: 28,
-                        padding: 0,
-                        cursor: "pointer",
-                        border: "1px solid var(--sp-colors-surface3)",
-                        borderRadius: 9999,
-                        backgroundColor: "var(--sp-colors-surface2)",
-                        color: objectivesOpen
-                          ? "var(--sp-colors-accent)"
-                          : "var(--sp-colors-clickable)",
-                        transition: "color 0.15s",
-                      }}
-                    >
-                      <ListChecks size={13} strokeWidth={1.8} />
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setConsoleOpen((v) => !v)}
-                    title={consoleOpen ? t("closeTerminal") : t("openTerminal")}
-                    type="button"
+          {enablePersistence && exerciseId && (
+            <CodeSync exerciseId={exerciseId} onStateChange={setSaveState} />
+          )}
+          <PlaygroundToolbar
+            layout={layout}
+            onLayoutChange={handleLayoutChange}
+            fontSize={fontSize}
+            onFontSizeChange={handleFontSizeChange}
+            maximized={maximized}
+            onMaximizeToggle={() => {
+              setMaximized((previous) => {
+                const next = !previous
+                if (next) setConsoleOpen(false)
+                return next
+              })
+            }}
+            saveState={saveState}
+            starterFiles={files}
+            enableReset={enablePersistence === true && Boolean(exerciseId)}
+          />
+          <div className={maximized ? "flex min-h-0 min-w-0 flex-1 basis-0 flex-col" : ""}>
+            <SandpackLayout style={sandpackLayoutStyle}>
+              <SandpackCodeEditor
+                showLineNumbers
+                showInlineErrors
+                showTabs={Object.keys(files).length > 1}
+                style={editorPaneStyle}
+              />
+              <SandpackStack className="min-h-0 min-w-0" style={previewPaneStyle}>
+                {objectives && objectives.length > 0 && objectivesOpen && (
+                  <div
+                    className="absolute inset-x-2 z-30 max-h-[60%] overflow-y-auto overscroll-contain rounded-xl shadow-2xl"
                     style={{
-                      appearance: "none",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: 28,
-                      height: 28,
-                      padding: 0,
-                      cursor: "pointer",
-                      border: "1px solid var(--sp-colors-surface3)",
-                      borderRadius: 9999,
-                      backgroundColor: "var(--sp-colors-surface2)",
-                      color: consoleOpen ? "var(--sp-colors-accent)" : "var(--sp-colors-clickable)",
-                      transition: "color 0.15s",
+                      bottom:
+                        PLAYGROUND_PREVIEW_ACTION_BUTTON_PX +
+                        16 +
+                        (consoleOpen ? CONSOLE_PANEL_PX : 0),
                     }}
                   >
-                    <TerminalIcon />
-                  </button>
-                </>
-              }
-            />
-          </SandpackLayout>
-          {consoleOpen && <SandpackConsole style={{ height: 200 }} />}
+                    <div className="bg-bg-raise overflow-hidden rounded-xl">
+                      <div className="flex items-center justify-between px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <ListChecks size={12} className="text-fg-dim" strokeWidth={2} />
+                          <span className="text-fg-dim text-[10px] font-semibold tracking-[0.16em] uppercase">
+                            {t("objectives")}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => setObjectivesOpen(false)}
+                          type="button"
+                          className="text-fg-faint hover:text-fg-muted -mr-1 rounded p-1 transition-colors"
+                        >
+                          <X size={12} strokeWidth={2} />
+                        </button>
+                      </div>
+                      <div className="bg-line h-px" />
+                      <ol className="space-y-3 px-4 py-3">
+                        {objectives.map((o, i) => (
+                          <li key={i} className="flex items-start gap-3">
+                            <span className="bg-bg-hover text-fg-dim mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full font-mono text-[10px]">
+                              {i + 1}
+                            </span>
+                            <span className="text-fg-muted text-[13px] leading-[1.55]">
+                              {renderObjective(o)}
+                            </span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  </div>
+                )}
+                <SandpackPreview
+                  showNavigator={false}
+                  showRefreshButton
+                  showOpenInCodeSandbox={false}
+                  style={PREVIEW_NESTED_STYLE}
+                  actionsChildren={
+                    <>
+                      {objectives && objectives.length > 0 && (
+                        <button
+                          onClick={() => setObjectivesOpen((v) => !v)}
+                          title={t("objectives")}
+                          type="button"
+                          style={{
+                            appearance: "none",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: PLAYGROUND_PREVIEW_ACTION_BUTTON_PX,
+                            height: PLAYGROUND_PREVIEW_ACTION_BUTTON_PX,
+                            padding: 0,
+                            cursor: "pointer",
+                            border: "1px solid var(--sp-colors-surface3)",
+                            borderRadius: 9999,
+                            backgroundColor: "var(--sp-colors-surface2)",
+                            color: objectivesOpen
+                              ? "var(--sp-colors-accent)"
+                              : "var(--sp-colors-clickable)",
+                            transition: "color 0.15s",
+                          }}
+                        >
+                          <ListChecks size={PLAYGROUND_PREVIEW_ACTION_ICON_PX} strokeWidth={1.85} />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setConsoleOpen((v) => !v)}
+                        title={consoleOpen ? t("closeTerminal") : t("openTerminal")}
+                        type="button"
+                        style={{
+                          appearance: "none",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: PLAYGROUND_PREVIEW_ACTION_BUTTON_PX,
+                          height: PLAYGROUND_PREVIEW_ACTION_BUTTON_PX,
+                          padding: 0,
+                          cursor: "pointer",
+                          border: "1px solid var(--sp-colors-surface3)",
+                          borderRadius: 9999,
+                          backgroundColor: "var(--sp-colors-surface2)",
+                          color: consoleOpen
+                            ? "var(--sp-colors-accent)"
+                            : "var(--sp-colors-clickable)",
+                          transition: "color 0.15s",
+                        }}
+                      >
+                        <TerminalIcon size={PLAYGROUND_PREVIEW_ACTION_ICON_PX} strokeWidth={1.85} />
+                      </button>
+                    </>
+                  }
+                />
+                {consoleOpen ? (
+                  <SandpackConsole style={{ flexShrink: 0, height: CONSOLE_PANEL_PX }} />
+                ) : null}
+              </SandpackStack>
+            </SandpackLayout>
+          </div>
         </SandpackProvider>
       </div>
     </div>
   )
+
+  if (maximized) {
+    const portalHost =
+      typeof document !== "undefined"
+        ? document.getElementById(PLAYGROUND_MAXIMIZED_PORTAL_ELEMENT_ID)
+        : null
+    return createPortal(playgroundTree, portalHost ?? document.body)
+  }
+
+  return playgroundTree
 }

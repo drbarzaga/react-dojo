@@ -12,6 +12,8 @@
 /* Default = dark */
 :root {
   color-scheme: dark;
+  --sidebar-width: 16rem;
+  --sidebar-width-icon: 3rem;
   --color-bg: #0c0c0d;
   --color-bg-raise: #131315;
   --color-bg-hover: #1a1a1c;
@@ -58,6 +60,8 @@
 
 :root[data-theme="light"] {
   color-scheme: light;
+  --sidebar-width: 16rem;
+  --sidebar-width-icon: 3rem;
   --color-bg: #faf9f5;
   --color-bg-raise: #f1efe6;
   --color-bg-hover: #e8e5d9;
@@ -160,10 +164,123 @@ body {
 .sp-wrapper {
   --sp-font-mono: var(--font-mono) !important;
   --sp-font-body: var(--font-sans) !important;
-  border-radius: 8px !important;
   overflow: hidden;
-  border: 1px solid var(--color-line-strong) !important;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.18) !important;
+  transition:
+    background-color 220ms ease,
+    color 220ms ease;
+}
+
+/* Border/shadow/radius live on the outer div we own — strip them from Sandpack's wrapper. */
+[data-playground-root] .sp-wrapper {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* SandpackProvider renders a `.wrapper` div for theming that breaks our flex chain.
+   Promote its children to direct flex items so flex-1 propagates correctly. */
+[data-playground-root] > .playground-shell > .wrapper {
+  display: contents !important;
+}
+
+/* Sandpack stitches set .sp-layout > .sp-stack { height: theme layout height (~300px) }.
+   Default .sp-stack { width: 100% } + .sp-layout { flex-wrap: wrap } can wrap panes and cap height. */
+[data-playground-root][data-maximized] .sp-layout {
+  flex: 1 1 0% !important;
+  flex-wrap: nowrap !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  width: 100% !important;
+}
+
+[data-playground-root][data-maximized] .sp-layout > .sp-stack {
+  height: 100% !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+}
+
+[data-playground-root][data-maximized][data-playground-layout="horizontal"] .sp-layout > .sp-stack {
+  width: auto !important;
+}
+
+[data-playground-root][data-maximized][data-playground-layout="vertical"] .sp-layout > .sp-stack {
+  width: 100% !important;
+}
+
+[data-playground-root][data-maximized] .sp-wrapper {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+[data-playground-root][data-maximized] .sp-preview {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+
+[data-playground-root][data-maximized] .sp-preview-container {
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+}
+
+/* Fill the preview pane; !important beats Sandpack inline height from bundler resize. */
+[data-playground-root][data-maximized] .sp-preview-iframe,
+[data-playground-root][data-maximized] iframe[title="Sandpack Preview"] {
+  flex: 1 1 0% !important;
+  align-self: stretch !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: none !important;
+}
+
+/* Loading overlay is a sibling after .sp-preview-actions and would paint on top by default. */
+[data-playground-root][data-maximized] .sp-preview-container > .sp-overlay.sp-loading {
+  z-index: 1 !important;
+}
+
+[data-playground-root][data-maximized] .sp-preview-container > .sp-overlay:not(.sp-loading) {
+  z-index: 10 !important;
+}
+
+/* Apply to all modes so the objectives popup sits above the iframe.
+   overflow: visible ensures the popup can extend upward past the action bar. */
+[data-playground-root] .sp-preview-actions {
+  z-index: 5 !important;
+  overflow: visible !important;
+}
+
+/* Sandpack's built-in RoundedButton (refresh/restart) uses sp-icon-standalone
+   and defaults to ~28px. Match our custom 36px action buttons. */
+[data-playground-root] .sp-icon-standalone {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+}
+
+.sp-wrapper *,
+.sp-wrapper *::before,
+.sp-wrapper *::after {
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease;
+}
+
+[data-playground-root][data-maximized] .sp-wrapper,
+[data-playground-root][data-maximized] .sp-wrapper *,
+[data-playground-root][data-maximized] .sp-wrapper *::before,
+[data-playground-root][data-maximized] .sp-wrapper *::after {
+  transition: none !important;
 }
 
 .prose {
@@ -304,6 +421,10 @@ body {
   }
 }
 .page-enter {
+  animation: fade-in 200ms ease-out both;
+}
+
+.animate-fade-in {
   animation: fade-in 200ms ease-out both;
 }
 

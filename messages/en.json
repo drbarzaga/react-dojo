@@ -42,7 +42,9 @@
     "switchToLight": "Switch to light theme",
     "switchToDark": "Switch to dark theme",
     "modeLight": "Light mode",
-    "modeDark": "Dark mode"
+    "modeDark": "Dark mode",
+    "themeGroupDark": "Dark",
+    "themeGroupLight": "Light"
   },
   "Sidebar": {
     "concepts": "Concepts",
@@ -158,7 +160,23 @@
     "maximizeLabel": "Maximize editor",
     "closeTerminal": "Close terminal",
     "openTerminal": "Open terminal",
-    "objectives": "Objectives"
+    "objectives": "Objectives",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyTooltip": "Copy active file",
+    "format": "Format",
+    "formatted": "Done",
+    "formatTooltip": "Format with Prettier (⌘⇧F)",
+    "reset": "Reset",
+    "resetConfirm": "Confirm?",
+    "resetTooltip": "Restore starter code",
+    "fontDecrease": "Decrease font size",
+    "fontIncrease": "Increase font size",
+    "layoutToggle": "Toggle layout",
+    "layoutHorizontal": "Horizontal layout",
+    "layoutVertical": "Vertical layout",
+    "saving": "Saving…",
+    "saved": "Saved"
   },
   "LocaleSwitcher": {
     "label": "Language"
