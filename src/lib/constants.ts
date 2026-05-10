@@ -102,3 +102,5 @@ export const KOFI_URL = "https://ko-fi.com/reactdojo"
 export const PROTECTED_API_ROUTES = ["/api/users", "/api/progress/sync"]
 
 export const SIDEBAR_OPEN_STATE_COOKIE_MAX_AGE_S = 60 * 60 * 24 * 365
+
+export const SKELETON_ROW_COUNT_DIRECTORY = 6

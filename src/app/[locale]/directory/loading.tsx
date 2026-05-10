@@ -1,4 +1,4 @@
-const SKELETON_ROW_COUNT = 6
+import { SKELETON_ROW_COUNT_DIRECTORY } from "@/lib/constants"
 
 export default function DirectoryLoading() {
   return (
@@ -12,7 +12,7 @@ export default function DirectoryLoading() {
       </div>
 
       <div className="space-y-3">
-        {Array.from({ length: SKELETON_ROW_COUNT }).map((_, index) => (
+        {Array.from({ length: SKELETON_ROW_COUNT_DIRECTORY }).map((_, index) => (
           <div key={index} className="border-line bg-bg rounded-lg border p-4">
             <div className="flex items-center gap-3">
               <span className="text-fg-faint w-5 shrink-0 text-right font-mono text-[11px] tabular-nums">
