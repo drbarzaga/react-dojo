@@ -87,6 +87,7 @@ export function QuizPage({ quiz, allQuizzes }: QuizPageProps) {
   const [browsing, setBrowsing] = useState(true)
   const [session, setSession] = useState<QuizSession>(DEFAULT_SESSION)
   const wasFinishedOnMount = useRef(false)
+  const confettiFiredRef = useRef(false)
 
   const [timerEnabled, setTimerEnabled] = useState(false)
   const [timerSeconds, setTimerSeconds] = useState<number>(() => {
@@ -199,7 +200,8 @@ export function QuizPage({ quiz, allQuizzes }: QuizPageProps) {
     if (!finished || wasFinishedOnMount.current) return
     const pct = Math.round((score / total) * 100)
     saveQuizScore(quiz.id, pct)
-    if (pct >= 80) {
+    if (pct >= 80 && !confettiFiredRef.current) {
+      confettiFiredRef.current = true
       confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } })
     }
   }, [finished, quiz.id, score, total, saveQuizScore])
