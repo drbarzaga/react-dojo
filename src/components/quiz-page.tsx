@@ -25,6 +25,7 @@ interface QuizSession {
   selected: number | null
   score: number
   finished: boolean
+  answers: Record<number, number>
 }
 
 function sessionKey(id: string) {
@@ -34,9 +35,18 @@ function sessionKey(id: string) {
 function loadSession(id: string): QuizSession {
   try {
     const raw = localStorage.getItem(sessionKey(id))
-    if (raw) return JSON.parse(raw)
+    if (raw) {
+      const p = JSON.parse(raw)
+      return {
+        currentIndex: p.currentIndex ?? 0,
+        selected: p.selected ?? null,
+        score: p.score ?? 0,
+        finished: p.finished ?? false,
+        answers: p.answers ?? {},
+      }
+    }
   } catch {}
-  return { currentIndex: 0, selected: null, score: 0, finished: false }
+  return { currentIndex: 0, selected: null, score: 0, finished: false, answers: {} }
 }
 
 function saveSession(id: string, session: QuizSession) {
@@ -47,7 +57,13 @@ function clearSession(id: string) {
   localStorage.removeItem(sessionKey(id))
 }
 
-const DEFAULT_SESSION: QuizSession = { currentIndex: 0, selected: null, score: 0, finished: false }
+const DEFAULT_SESSION: QuizSession = {
+  currentIndex: 0,
+  selected: null,
+  score: 0,
+  finished: false,
+  answers: {},
+}
 
 function playTick(ctx: AudioContext, urgent: boolean) {
   try {
@@ -116,7 +132,7 @@ export function QuizPage({ quiz, allQuizzes }: QuizPageProps) {
       if (timeLeft === 1) {
         setSession((prev) => {
           if (prev.selected !== null) return prev
-          return { ...prev, selected: -1 }
+          return { ...prev, selected: -1, answers: { ...prev.answers, [prev.currentIndex]: -1 } }
         })
         setTimeLeft(0)
       } else {
@@ -157,6 +173,7 @@ export function QuizPage({ quiz, allQuizzes }: QuizPageProps) {
       ...prev,
       selected: index,
       score: index === question.correctIndex ? prev.score + 1 : prev.score,
+      answers: { ...prev.answers, [prev.currentIndex]: index },
     }))
   }
 
@@ -166,12 +183,6 @@ export function QuizPage({ quiz, allQuizzes }: QuizPageProps) {
     } else {
       setSession((prev) => ({ ...prev, finished: true }))
     }
-  }
-
-  function handleRestart() {
-    clearSession(quiz.id)
-    setSession(DEFAULT_SESSION)
-    setBrowsing(true)
   }
 
   function startQuiz() {
@@ -296,41 +307,68 @@ export function QuizPage({ quiz, allQuizzes }: QuizPageProps) {
 
         <p className="text-fg-muted mt-4 mb-10 text-[15px] leading-[1.6]">{quiz.description}</p>
 
+        {wasCompleted && Object.keys(session.answers).length === 0 && (
+          <p className="text-fg-dim mb-4 text-[13px]">{t("retakeForDetail")}</p>
+        )}
+
         <div className="space-y-2">
-          {quiz.questions.map((q, i) => (
-            <div
-              key={q.id}
-              className={cn(
-                "flex items-baseline gap-4 rounded-lg border px-5 py-4 text-[14px] leading-[1.55]",
-                wasCompleted
-                  ? "text-fg-muted border-green-500/15 bg-green-500/3"
-                  : "border-line bg-bg-raise text-fg-muted"
-              )}
-            >
-              <span className="text-fg-faint shrink-0 font-mono text-[11px]">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <span className="flex-1">{q.question}</span>
-              {wasCompleted && (
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 12 12"
-                  fill="none"
-                  className="ml-2 shrink-0 self-center text-green-500/50"
-                  aria-hidden
-                >
-                  <path
-                    d="M2 6L5 9L10 3"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              )}
-            </div>
-          ))}
+          {quiz.questions.map((q, i) => {
+            const hasAnswerData = Object.keys(session.answers).length > 0
+            const userAnswer = session.answers[i]
+            const wasAnswered = userAnswer !== undefined
+            const correct = wasAnswered && userAnswer === q.correctIndex
+            return (
+              <div
+                key={q.id}
+                className={cn(
+                  "flex items-baseline gap-4 rounded-lg border px-5 py-4 text-[14px] leading-[1.55]",
+                  "border-line bg-bg-raise text-fg-muted",
+                  hasAnswerData && correct && "border-green-500/15 bg-green-500/3",
+                  hasAnswerData && wasAnswered && !correct && "border-red-500/15 bg-red-500/3"
+                )}
+              >
+                <span className="text-fg-faint shrink-0 font-mono text-[11px]">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className="flex-1">{q.question}</span>
+                {hasAnswerData && wasAnswered && correct && (
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    className="ml-2 shrink-0 self-center text-green-500/50"
+                    aria-hidden
+                  >
+                    <path
+                      d="M2 6L5 9L10 3"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+                {hasAnswerData && wasAnswered && !correct && (
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    className="ml-2 shrink-0 self-center text-red-500/50"
+                    aria-hidden
+                  >
+                    <path
+                      d="M2 2L10 10M10 2L2 10"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                )}
+              </div>
+            )
+          })}
         </div>
 
         <div className="border-line mt-10 flex flex-wrap items-center gap-3 border-t pt-8">
@@ -447,30 +485,50 @@ export function QuizPage({ quiz, allQuizzes }: QuizPageProps) {
         </div>
 
         <div className="mt-8 flex flex-wrap justify-center gap-3">
+          {pct < 80 ? (
+            <button
+              onClick={restartAndStart}
+              className="bg-fg text-bg rounded-md px-5 py-2.5 text-[14px] font-medium transition-opacity hover:opacity-80"
+            >
+              {t("retry")}
+            </button>
+          ) : null}
           <button
             onClick={() => setBrowsing(true)}
             className="border-line text-fg-muted hover:border-fg-muted hover:text-fg rounded-md border px-4 py-2 text-[14px] transition-colors"
           >
             {t("viewQuestions")}
           </button>
-          <button
-            onClick={handleRestart}
-            className="border-line text-fg-muted hover:border-fg-muted hover:text-fg rounded-md border px-4 py-2 text-[14px] transition-colors"
-          >
-            {t("retry")}
-          </button>
-          {allQuizzes
-            .filter((q) => q.id !== quiz.id)
-            .map((q) => (
-              <button
-                key={q.id}
-                onClick={() => push(`/quiz/${q.id}`)}
-                className="border-line text-fg-muted hover:border-fg-muted hover:text-fg rounded-md border px-4 py-2 text-[14px] transition-colors"
-              >
-                {q.label}
-              </button>
-            ))}
+          {pct >= 80 ? (
+            <button
+              onClick={restartAndStart}
+              className="border-line text-fg-muted hover:border-fg-muted hover:text-fg rounded-md border px-4 py-2 text-[14px] transition-colors"
+            >
+              {t("retry")}
+            </button>
+          ) : null}
         </div>
+
+        {allQuizzes.filter((q) => q.id !== quiz.id).length > 0 && (
+          <div className="border-line mt-6 border-t pt-6">
+            <p className="text-fg-dim mb-3 text-center text-[11px] tracking-[0.14em] uppercase">
+              {t("otherQuizzes")}
+            </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              {allQuizzes
+                .filter((q) => q.id !== quiz.id)
+                .map((q) => (
+                  <button
+                    key={q.id}
+                    onClick={() => push(`/quiz/${q.id}`)}
+                    className="border-line text-fg-muted hover:border-fg-muted hover:text-fg rounded-md border px-4 py-2 text-[14px] transition-colors"
+                  >
+                    {q.label}
+                  </button>
+                ))}
+            </div>
+          </div>
+        )}
       </article>
     )
   }
