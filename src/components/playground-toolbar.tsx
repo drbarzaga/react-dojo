@@ -14,7 +14,18 @@ import {
 import { cn } from "@/lib/utils"
 import { type PlaygroundLayout, type PlaygroundSaveState } from "@/types"
 import { useSandpack, type SandpackFiles } from "@codesandbox/sandpack-react"
-import { Check, Columns2, Copy, Maximize2, Minimize2, Rows2, Sparkles, Undo2 } from "lucide-react"
+import {
+  Check,
+  Columns2,
+  Copy,
+  Eye,
+  EyeOff,
+  Maximize2,
+  Minimize2,
+  Rows2,
+  Sparkles,
+  Undo2,
+} from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useCallback, useEffect, useRef, useState } from "react"
 
@@ -28,6 +39,8 @@ interface PlaygroundToolbarProps {
   saveState: PlaygroundSaveState
   starterFiles: SandpackFiles
   enableReset: boolean
+  showSolution?: boolean
+  onSolutionToggle?: () => void
 }
 
 export function PlaygroundToolbar({
@@ -40,8 +53,11 @@ export function PlaygroundToolbar({
   saveState,
   starterFiles,
   enableReset,
+  showSolution,
+  onSolutionToggle,
 }: PlaygroundToolbarProps) {
   const t = useTranslations("Playground")
+  const tEx = useTranslations("ExercisePage")
   const { sandpack } = useSandpack()
   const [copied, setCopied] = useState(false)
   const [formatted, setFormatted] = useState(false)
@@ -144,7 +160,20 @@ export function PlaygroundToolbar({
           "border-line bg-bg-raise flex h-9 shrink-0 items-center justify-between gap-2 border-b px-2"
         )}
       >
-        <SaveIndicator state={saveState} t={t} />
+        <div className="flex items-center gap-1">
+          <SaveIndicator state={saveState} t={t} />
+          {onSolutionToggle && maximized && (
+            <>
+              <Separator />
+              <ToolbarButton
+                label={showSolution ? tEx("backToStarter") : tEx("viewSolution")}
+                tooltip={showSolution ? tEx("backToStarter") : tEx("viewSolution")}
+                icon={showSolution ? EyeOff : Eye}
+                onClick={onSolutionToggle}
+              />
+            </>
+          )}
+        </div>
 
         <div className="flex items-center gap-0.5">
           <ToolbarButton

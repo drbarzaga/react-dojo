@@ -12,7 +12,7 @@ import { useContent } from "@/providers/content-provider"
 import { renderObjective } from "@/lib/render-objective"
 import { BookOpen, CheckCircle2, Circle, Lightbulb } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useState } from "react"
+import { startTransition, useState } from "react"
 
 interface ExercisePageProps {
   exercise: Exercise
@@ -40,6 +40,7 @@ export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
   const { push, href, locale } = useLocaleRouter()
   const [showSolution, setShowSolution] = useState(false)
   const [resetCount, setResetCount] = useState(0)
+  const [maximized, setMaximized] = useState(false)
   const { completedExercises, toggleExerciseCompleted } = useProgress()
   const { clearCode } = useCodePersistence()
   const { allConcepts } = useContent()
@@ -132,6 +133,10 @@ export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
               key={`${exercise.id}-sol`}
               files={exercise.solution}
               dependencies={exercise.dependencies}
+              maximized={maximized}
+              onMaximizeChange={setMaximized}
+              showSolution={showSolution}
+              onSolutionToggle={() => startTransition(() => setShowSolution(false))}
             />
           ) : (
             <Playground
@@ -141,6 +146,10 @@ export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
               exerciseId={exercise.id}
               enablePersistence
               objectives={exercise.objectives}
+              maximized={maximized}
+              onMaximizeChange={setMaximized}
+              showSolution={showSolution}
+              onSolutionToggle={() => startTransition(() => setShowSolution(true))}
             />
           )}
         </div>

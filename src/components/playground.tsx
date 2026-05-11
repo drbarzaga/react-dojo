@@ -570,6 +570,10 @@ interface PlaygroundProps {
   exerciseId?: string
   enablePersistence?: boolean
   objectives?: string[]
+  maximized?: boolean
+  onMaximizeChange?: (v: boolean) => void
+  showSolution?: boolean
+  onSolutionToggle?: () => void
 }
 
 export function Playground({
@@ -581,13 +585,22 @@ export function Playground({
   exerciseId,
   enablePersistence = false,
   objectives,
+  maximized: controlledMaximized,
+  onMaximizeChange,
+  showSolution,
+  onSolutionToggle,
 }: PlaygroundProps) {
   const t = useTranslations("Playground")
   const { theme: appTheme } = useTheme()
   const { editorTheme } = useEditorTheme()
   const { getSavedCode } = useCodePersistence()
 
-  const [maximized, setMaximized] = useState(false)
+  const [internalMaximized, setInternalMaximized] = useState(false)
+  const maximized = controlledMaximized !== undefined ? controlledMaximized : internalMaximized
+  const onMaximizeChangeRef = useRef(onMaximizeChange)
+  useEffect(() => {
+    onMaximizeChangeRef.current = onMaximizeChange
+  }, [onMaximizeChange])
   const [consoleOpen, setConsoleOpen] = useState(showConsole)
   const [objectivesOpen, setObjectivesOpen] = useState(false)
   const [layout, setLayout] = useState<PlaygroundLayout>("horizontal")
@@ -630,11 +643,27 @@ export function Playground({
   // Editor only uses an explicit pixel height when not maximized; when maximized, CSS flex chain handles it.
   const paneHeight = layout === "vertical" ? Math.max(180, height / 2) : height
 
+  const handleMaximizeToggle = useCallback(() => {
+    const next = !maximized
+    if (next) setConsoleOpen(false)
+    if (onMaximizeChangeRef.current) {
+      onMaximizeChangeRef.current(next)
+    } else {
+      setInternalMaximized(next)
+    }
+  }, [maximized])
+
   useEffect(() => {
     if (!maximized) return
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMaximized(false)
+      if (e.key === "Escape") {
+        if (onMaximizeChangeRef.current) {
+          onMaximizeChangeRef.current(false)
+        } else {
+          setInternalMaximized(false)
+        }
+      }
     }
 
     window.addEventListener("keydown", onKey)
@@ -780,16 +809,12 @@ export function Playground({
             fontSize={fontSize}
             onFontSizeChange={handleFontSizeChange}
             maximized={maximized}
-            onMaximizeToggle={() => {
-              setMaximized((previous) => {
-                const next = !previous
-                if (next) setConsoleOpen(false)
-                return next
-              })
-            }}
+            onMaximizeToggle={handleMaximizeToggle}
             saveState={saveState}
             starterFiles={files}
             enableReset={enablePersistence === true && Boolean(exerciseId)}
+            showSolution={showSolution}
+            onSolutionToggle={onSolutionToggle}
           />
           <div className={maximized ? "flex min-h-0 min-w-0 flex-1 basis-0 flex-col" : ""}>
             <SandpackLayout style={sandpackLayoutStyle}>
