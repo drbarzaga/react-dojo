@@ -520,6 +520,14 @@ export function Sidebar({ initialState }: SidebarProps) {
                       <div className="border-sidebar-border/40 ml-[15px] border-l pb-1 pl-1.5">
                         {quizzes.map((quiz) => {
                           const active = current === `quiz/${quiz.id}`
+                          const score = quizScores[quiz.id]
+                          const attempted = score !== undefined
+                          const checkColor =
+                            score >= 80
+                              ? "text-emerald-400/70"
+                              : score >= 50
+                                ? "text-amber-400/70"
+                                : "text-rose-400/70"
                           return (
                             <NavItem
                               key={quiz.id}
@@ -527,6 +535,14 @@ export function Sidebar({ initialState }: SidebarProps) {
                               active={active}
                               onClick={() => push(`/quiz/${quiz.id}`)}
                               badge={quiz.questions.length}
+                              indicator={
+                                attempted ? (
+                                  <Check
+                                    className={cn("h-[9px] w-[9px] shrink-0", checkColor)}
+                                    strokeWidth={3}
+                                  />
+                                ) : null
+                              }
                             />
                           )
                         })}
