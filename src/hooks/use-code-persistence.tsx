@@ -1,25 +1,19 @@
 "use client"
 
-import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react"
+import { createContext, useContext, useCallback, useMemo, type ReactNode } from "react"
 
 import type { ExerciseFiles } from "@/types/code-persistence"
 import { CODE_STORAGE_KEY } from "@/lib/constants"
 
-interface CodePersistenceData {
-  [exerciseId: string]: {
-    [filePath: string]: string
-  }
-}
-
-const empty: CodePersistenceData = {}
+type CodePersistenceData = Record<string, Record<string, string>>
 
 function load(): CodePersistenceData {
   try {
     const raw = localStorage.getItem(CODE_STORAGE_KEY)
-    if (!raw) return empty
+    if (!raw) return {}
     return JSON.parse(raw)
   } catch {
-    return empty
+    return {}
   }
 }
 
@@ -44,40 +38,23 @@ interface CodePersistenceCtx {
 const Ctx = createContext<CodePersistenceCtx | null>(null)
 
 export function CodePersistenceProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<CodePersistenceData>(() =>
-    typeof window === "undefined" ? empty : load()
-  )
-
-  const getSavedCode = useCallback(
-    (exerciseId: string) => {
-      return data[exerciseId] ?? null
-    },
-    [data]
-  )
+  const getSavedCode = useCallback((exerciseId: string) => {
+    return load()[exerciseId] ?? null
+  }, [])
 
   const saveCode = useCallback((exerciseId: string, files: ExerciseFiles) => {
-    setData((prev) => {
-      const next = { ...prev, [exerciseId]: files }
-      persist(next)
-      return next
-    })
+    const next = { ...load(), [exerciseId]: files }
+    persist(next)
   }, [])
 
   const clearCode = useCallback((exerciseId: string) => {
-    setData((prev) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { [exerciseId]: _, ...rest } = prev
-      persist(rest)
-      return rest
-    })
+    const next: CodePersistenceData = { ...load() }
+    delete next[exerciseId]
+    persist(next)
   }, [])
 
   const value = useMemo<CodePersistenceCtx>(
-    () => ({
-      getSavedCode,
-      saveCode,
-      clearCode,
-    }),
+    () => ({ getSavedCode, saveCode, clearCode }),
     [getSavedCode, saveCode, clearCode]
   )
 
