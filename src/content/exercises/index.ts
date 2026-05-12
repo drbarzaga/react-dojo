@@ -20,6 +20,7 @@ import { tabsComponent } from "./tabs-component"
 import { formValidation } from "./form-validation"
 import { colorPicker } from "./color-picker"
 import { accordionComponent } from "./accordion-component"
+import { compoundAccordion } from "./compound-accordion"
 import { errorBoundary } from "./error-boundary"
 import type { Exercise } from "./types"
 
@@ -48,6 +49,7 @@ export const allExercises: Exercise[] = [
   formValidation,
   colorPicker,
   accordionComponent,
+  compoundAccordion,
   errorBoundary,
 ]
 
