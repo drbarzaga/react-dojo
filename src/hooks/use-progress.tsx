@@ -3,7 +3,6 @@
 import {
   createContext,
   useContext,
-  useState,
   useEffect,
   useCallback,
   useMemo,
@@ -12,6 +11,7 @@ import {
 } from "react"
 
 import { PROGRESS_STORAGE_KEY } from "@/lib/constants"
+import { useLocalStorage } from "@/hooks/use-local-storage"
 import { useSession } from "@/lib/auth-client"
 
 interface ProgressData {
@@ -24,20 +24,6 @@ const empty: ProgressData = {
   visitedConcepts: [],
   completedExercises: [],
   quizScores: {},
-}
-
-function load(): ProgressData {
-  try {
-    const raw = localStorage.getItem(PROGRESS_STORAGE_KEY)
-    if (!raw) return empty
-    return { ...empty, ...JSON.parse(raw) }
-  } catch {
-    return empty
-  }
-}
-
-function persist(data: ProgressData) {
-  localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(data))
 }
 
 interface ProgressCtx {
@@ -61,31 +47,25 @@ function syncToServer(patch: Partial<ProgressData>) {
 }
 
 export function ProgressProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<ProgressData>(empty)
+  const [data, setData] = useLocalStorage<ProgressData>(PROGRESS_STORAGE_KEY, empty)
   const { data: session } = useSession()
   const syncedRef = useRef(false)
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setData(load())
-  }, [])
 
   // On login: merge localStorage → server and replace local state with merged result
   useEffect(() => {
     if (!session || syncedRef.current) return
     syncedRef.current = true
-    const local = load()
     fetch("/api/progress/sync", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(local),
+      body: JSON.stringify(data),
     })
       .then((r) => r.json())
       .then((merged: ProgressData) => {
-        persist(merged)
         setData(merged)
       })
       .catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session])
 
   const markConceptVisited = useCallback(
@@ -93,12 +73,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       setData((prev) => {
         if (prev.visitedConcepts.includes(id)) return prev
         const nextData = { ...prev, visitedConcepts: [...prev.visitedConcepts, id] }
-        persist(nextData)
         if (session) syncToServer({ visitedConcepts: nextData.visitedConcepts })
         return nextData
       })
     },
-    [session]
+    [session, setData]
   )
 
   const toggleExerciseCompleted = useCallback(
@@ -111,12 +90,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             ? prev.completedExercises.filter((x) => x !== id)
             : [...prev.completedExercises, id],
         }
-        persist(next)
         if (session) syncToServer({ completedExercises: next.completedExercises })
         return next
       })
     },
-    [session]
+    [session, setData]
   )
 
   const saveQuizScore = useCallback(
@@ -124,18 +102,16 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       setData((prev) => {
         if ((prev.quizScores[id] ?? -1) >= pct) return prev
         const nextData = { ...prev, quizScores: { ...prev.quizScores, [id]: pct } }
-        persist(nextData)
         if (session) syncToServer({ quizScores: nextData.quizScores })
         return nextData
       })
     },
-    [session]
+    [session, setData]
   )
 
   const resetProgress = useCallback(() => {
-    persist(empty)
     setData(empty)
-  }, [])
+  }, [setData])
 
   const value = useMemo<ProgressCtx>(
     () => ({

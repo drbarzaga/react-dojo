@@ -4,6 +4,7 @@ import { FeedbackWidget } from "@/components/feedback-widget"
 import { Switch } from "@/components/ui/switch"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import type { Quiz } from "@/content/quiz"
+import { useLocalStorage } from "@/hooks/use-local-storage"
 import { useLocaleRouter } from "@/hooks/use-locale-router"
 import { useProgress } from "@/hooks/use-progress"
 import { TIMER_TICK_MS } from "@/lib/constants"
@@ -30,31 +31,6 @@ interface QuizSession {
 
 function sessionKey(id: string) {
   return `react-dojo-quiz-session-${id}`
-}
-
-function loadSession(id: string): QuizSession {
-  try {
-    const raw = localStorage.getItem(sessionKey(id))
-    if (raw) {
-      const p = JSON.parse(raw)
-      return {
-        currentIndex: p.currentIndex ?? 0,
-        selected: p.selected ?? null,
-        score: p.score ?? 0,
-        finished: p.finished ?? false,
-        answers: p.answers ?? {},
-      }
-    }
-  } catch {}
-  return { currentIndex: 0, selected: null, score: 0, finished: false, answers: {} }
-}
-
-function saveSession(id: string, session: QuizSession) {
-  localStorage.setItem(sessionKey(id), JSON.stringify(session))
-}
-
-function clearSession(id: string) {
-  localStorage.removeItem(sessionKey(id))
 }
 
 const DEFAULT_SESSION: QuizSession = {
@@ -85,36 +61,31 @@ export function QuizPage({ quiz, allQuizzes }: QuizPageProps) {
   const t = useTranslations("QuizPage")
   const { push } = useLocaleRouter()
   const [browsing, setBrowsing] = useState(true)
-  const [session, setSession] = useState<QuizSession>(DEFAULT_SESSION)
+  const [session, setSession, removeSession] = useLocalStorage<QuizSession>(
+    sessionKey(quiz.id),
+    DEFAULT_SESSION
+  )
   const wasFinishedOnMount = useRef(false)
   const confettiFiredRef = useRef(false)
 
   const [timerEnabled, setTimerEnabled] = useState(false)
-  const [timerSeconds, setTimerSeconds] = useState<number>(() => {
-    if (typeof window === "undefined") return 30
-    try {
-      return Number(localStorage.getItem("react-dojo-timer-secs")) || 30
-    } catch {
-      return 30
-    }
-  })
+  const [timerSeconds, setTimerSeconds] = useLocalStorage("react-dojo-timer-secs", 30)
   const [timeLeft, setTimeLeft] = useState(timerSeconds)
   const [timerPickerOpen, setTimerPickerOpen] = useState(false)
   const timerPickerRef = useRef<HTMLDivElement>(null)
   const audioCtxRef = useRef<AudioContext | null>(null)
 
-  useEffect(() => {
-    const saved = loadSession(quiz.id)
-    wasFinishedOnMount.current = saved.finished
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSession(saved)
-  }, [quiz.id])
-
+  // Capture whether the quiz was already finished when this quiz was loaded
   useEffect(() => {
     try {
-      localStorage.setItem("react-dojo-timer-secs", String(timerSeconds))
-    } catch {}
-  }, [timerSeconds])
+      const raw = localStorage.getItem(sessionKey(quiz.id))
+      wasFinishedOnMount.current = raw
+        ? ((JSON.parse(raw) as QuizSession).finished ?? false)
+        : false
+    } catch {
+      wasFinishedOnMount.current = false
+    }
+  }, [quiz.id])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -141,7 +112,7 @@ export function QuizPage({ quiz, allQuizzes }: QuizPageProps) {
       }
     }, TIMER_TICK_MS)
     return () => clearTimeout(id)
-  }, [timeLeft, timerEnabled, session.selected, session.finished, browsing])
+  }, [timeLeft, timerEnabled, session.selected, session.finished, browsing, setSession])
 
   const { saveQuizScore, quizScores } = useProgress()
   const { currentIndex, selected, score, finished } = session
@@ -154,8 +125,7 @@ export function QuizPage({ quiz, allQuizzes }: QuizPageProps) {
   const wasCompleted = bestScore !== undefined
 
   function restartAndStart() {
-    clearSession(quiz.id)
-    setSession(DEFAULT_SESSION)
+    removeSession()
     setBrowsing(false)
     try {
       if (!audioCtxRef.current || audioCtxRef.current.state === "closed") {
@@ -163,10 +133,6 @@ export function QuizPage({ quiz, allQuizzes }: QuizPageProps) {
       }
     } catch {}
   }
-
-  useEffect(() => {
-    saveSession(quiz.id, session)
-  }, [quiz.id, session])
 
   function handleSelect(index: number) {
     if (answered) return
