@@ -473,6 +473,92 @@ export default function App() {
   },
 
   {
+    id: "componentes-puros",
+    label: "Componentes puros",
+    kicker: "Entrevista · Rendimiento",
+    title: "El mismo input, siempre el mismo output",
+    lede: "Un componente puro es aquel que dado las mismas props produce exactamente el mismo JSX — sin efectos secundarios en el render. React puede saltarse su re-render si las props no cambiaron, haciendo la UI predecible y optimizable.",
+    sections: [
+      {
+        heading: "React.memo",
+        body: (
+          <p>
+            <code>memo(Componente)</code> envuelve el componente y memoriza el último output. En el
+            siguiente render, si las props son iguales por referencia (shallow equality), React
+            reutiliza el resultado anterior sin llamar a la función. Útil en hijos costosos que
+            reciben props estables.
+          </p>
+        ),
+      },
+      {
+        heading: "La trampa de las referencias",
+        body: (
+          <p>
+            <code>memo</code> compara props con <code>Object.is</code>. Si el padre pasa un objeto
+            literal o función inline, crea una nueva referencia en cada render — <code>memo</code>{" "}
+            siempre ve props "distintas" y nunca se salta el render. Por eso se combina con{" "}
+            <code>useMemo</code> y <code>useCallback</code>.
+          </p>
+        ),
+      },
+    ],
+    playground: (
+      <Playground
+        files={{
+          "/App.js": `import { useState, memo, useCallback } from "react";
+
+let renderCount = 0;
+
+const ExpensiveChild = memo(function ExpensiveChild({ onClick, label }) {
+  renderCount++;
+  return (
+    <div style={{ border: "1px solid var(--line)", borderRadius: 6, padding: 12 }}>
+      <p style={{ margin: 0 }}>{label}</p>
+      <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--fg-muted)" }}>
+        Renders: {renderCount}
+      </p>
+      <button onClick={onClick} style={{ marginTop: 8 }}>Acción</button>
+    </div>
+  );
+});
+
+export default function App() {
+  const [count, setCount] = useState(0);
+  const [stable, setStable] = useState(true);
+
+  // Con useCallback: referencia estable → memo funciona
+  const stableClick = useCallback(() => alert("click"), []);
+  // Sin useCallback: nueva función cada render → memo falla
+  const unstableClick = () => alert("click");
+
+  return (
+    <div style={{ padding: 24, fontFamily: "system-ui" }}>
+      <p>Contador padre: <strong>{count}</strong></p>
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        <button onClick={() => setCount((c) => c + 1)}>Re-render padre</button>
+        <button onClick={() => setStable((v) => !v)}>
+          {stable ? "Pasar función inestable" : "Pasar useCallback"}
+        </button>
+      </div>
+      <ExpensiveChild
+        onClick={stable ? stableClick : unstableClick}
+        label={stable ? "Con useCallback (memo funciona)" : "Sin useCallback (memo falla)"}
+      />
+    </div>
+  );
+}
+`,
+        }}
+      />
+    ),
+    pitfalls: [
+      "memo no es gratis — tiene un costo de comparación. Solo úsalo cuando el render del hijo sea mediblemente costoso.",
+      "memo solo hace shallow comparison. Si pasas objetos anidados con la misma estructura pero distinta referencia, siempre re-renderiza.",
+      "Un componente puede ser puro conceptualmente aunque use hooks — lo que importa es que el render sea determinístico dadas las mismas props y estado.",
+    ],
+  },
+
+  {
     id: "jsx",
     label: "JSX",
     kicker: "Entrevista · Fundamentos",
@@ -924,92 +1010,6 @@ export default function App() {
       "Si el doble montaje rompe tu efecto, no elimines StrictMode — es una señal de que el efecto necesita un return de cleanup.",
       "StrictMode no afecta a los componentes de producción — solo es una herramienta de desarrollo para detectar bugs temprano.",
       "En React 18+, el doble montaje también verifica que los componentes soporten unmount/remount sin perder datos — útil para future Offscreen API.",
-    ],
-  },
-
-  {
-    id: "componentes-puros",
-    label: "Componentes puros",
-    kicker: "Entrevista · Rendimiento",
-    title: "El mismo input, siempre el mismo output",
-    lede: "Un componente puro es aquel que dado las mismas props produce exactamente el mismo JSX — sin efectos secundarios en el render. React puede saltarse su re-render si las props no cambiaron, haciendo la UI predecible y optimizable.",
-    sections: [
-      {
-        heading: "React.memo",
-        body: (
-          <p>
-            <code>memo(Componente)</code> envuelve el componente y memoriza el último output. En el
-            siguiente render, si las props son iguales por referencia (shallow equality), React
-            reutiliza el resultado anterior sin llamar a la función. Útil en hijos costosos que
-            reciben props estables.
-          </p>
-        ),
-      },
-      {
-        heading: "La trampa de las referencias",
-        body: (
-          <p>
-            <code>memo</code> compara props con <code>Object.is</code>. Si el padre pasa un objeto
-            literal o función inline, crea una nueva referencia en cada render — <code>memo</code>{" "}
-            siempre ve props "distintas" y nunca se salta el render. Por eso se combina con{" "}
-            <code>useMemo</code> y <code>useCallback</code>.
-          </p>
-        ),
-      },
-    ],
-    playground: (
-      <Playground
-        files={{
-          "/App.js": `import { useState, memo, useCallback } from "react";
-
-let renderCount = 0;
-
-const ExpensiveChild = memo(function ExpensiveChild({ onClick, label }) {
-  renderCount++;
-  return (
-    <div style={{ border: "1px solid var(--line)", borderRadius: 6, padding: 12 }}>
-      <p style={{ margin: 0 }}>{label}</p>
-      <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--fg-muted)" }}>
-        Renders: {renderCount}
-      </p>
-      <button onClick={onClick} style={{ marginTop: 8 }}>Acción</button>
-    </div>
-  );
-});
-
-export default function App() {
-  const [count, setCount] = useState(0);
-  const [stable, setStable] = useState(true);
-
-  // Con useCallback: referencia estable → memo funciona
-  const stableClick = useCallback(() => alert("click"), []);
-  // Sin useCallback: nueva función cada render → memo falla
-  const unstableClick = () => alert("click");
-
-  return (
-    <div style={{ padding: 24, fontFamily: "system-ui" }}>
-      <p>Contador padre: <strong>{count}</strong></p>
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        <button onClick={() => setCount((c) => c + 1)}>Re-render padre</button>
-        <button onClick={() => setStable((v) => !v)}>
-          {stable ? "Pasar función inestable" : "Pasar useCallback"}
-        </button>
-      </div>
-      <ExpensiveChild
-        onClick={stable ? stableClick : unstableClick}
-        label={stable ? "Con useCallback (memo funciona)" : "Sin useCallback (memo falla)"}
-      />
-    </div>
-  );
-}
-`,
-        }}
-      />
-    ),
-    pitfalls: [
-      "memo no es gratis — tiene un costo de comparación. Solo úsalo cuando el render del hijo sea mediblemente costoso.",
-      "memo solo hace shallow comparison. Si pasas objetos anidados con la misma estructura pero distinta referencia, siempre re-renderiza.",
-      "Un componente puede ser puro conceptualmente aunque use hooks — lo que importa es que el render sea determinístico dadas las mismas props y estado.",
     ],
   },
 ]
