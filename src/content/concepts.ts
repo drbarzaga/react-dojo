@@ -71,6 +71,11 @@ export const categories: Category[] = [
       "hoc",
       "render-props",
       "componentes-puros",
+      "jsx",
+      "key-prop",
+      "hydration",
+      "forward-ref",
+      "strict-mode",
     ],
   },
 ]

@@ -2428,6 +2428,447 @@ export default function App() {
       "A retry button that only resets hasError won't help if the child still throws. Pass a key that changes when you want React to fully unmount and remount the boundary from scratch.",
     ],
   },
+  jsx: {
+    kicker: "Interview · Fundamentals",
+    title: "What is JSX and what does it compile to?",
+    lede: "JSX is syntactic sugar over React.createElement. The browser doesn't understand it — a compiler (Babel/SWC) transforms it into JS function calls before it runs.",
+    sections: [
+      {
+        heading: "What the compiler does",
+        body: (
+          <p>
+            <code>{'<Button color="red">Click</Button>'}</code> becomes{" "}
+            <code>{'React.createElement(Button, { color: "red" }, "Click")'}</code>. JSX isn't magic
+            — it's a more readable way to create objects that describe nodes in the UI tree.
+          </p>
+        ),
+      },
+      {
+        heading: "JSX is not HTML",
+        body: (
+          <p>
+            Key differences: <code>className</code> instead of <code>class</code>,{" "}
+            <code>htmlFor</code> instead of <code>for</code>, events in camelCase (
+            <code>onClick</code>), and <code>style</code> takes a JS object instead of a string.
+            Also, all elements must be closed — including <code>{"<br />"}</code> and{" "}
+            <code>{"<img />"}</code>.
+          </p>
+        ),
+      },
+    ],
+    pitfalls: [
+      "Since React 17 you no longer need to import React to use JSX — the new transform injects it automatically.",
+      "Expressions inside {} must be valid JS expressions, not statements. You can't use if directly — use a ternary or &&.",
+      "A component must return a single root element. Use <></> (Fragment) to wrap multiple elements without adding extra DOM nodes.",
+    ],
+    playground: (
+      <Playground
+        files={{
+          "/App.js": `import React from "react";
+
+// JSX — what you write
+function WithJSX() {
+  return (
+    <div className="card" style={{ padding: 16, border: "1px solid var(--line)", borderRadius: 6 }}>
+      <p style={{ margin: 0, fontWeight: "bold" }}>Hello from JSX</p>
+      <button onClick={() => alert("JSX")} style={{ marginTop: 8 }}>Click me</button>
+    </div>
+  );
+}
+
+// Equivalent — what the compiler produces
+function WithoutJSX() {
+  return React.createElement(
+    "div",
+    { style: { padding: 16, border: "1px solid var(--line)", borderRadius: 6 } },
+    React.createElement("p", { style: { margin: 0, fontWeight: "bold" } }, "Hello without JSX"),
+    React.createElement("button", { onClick: () => alert("createElement"), style: { marginTop: 8 } }, "Click me")
+  );
+}
+
+export default function App() {
+  return (
+    <div style={{ fontFamily: "system-ui", padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+      <p style={{ margin: 0, fontSize: 13, color: "var(--fg-muted)" }}>
+        Both produce the same result. JSX is just syntactic sugar.
+      </p>
+      <div>
+        <p style={{ margin: "0 0 8px", fontSize: 12, color: "var(--fg-muted)" }}>With JSX:</p>
+        <WithJSX />
+      </div>
+      <div>
+        <p style={{ margin: "0 0 8px", fontSize: 12, color: "var(--fg-muted)" }}>Without JSX (React.createElement):</p>
+        <WithoutJSX />
+      </div>
+    </div>
+  );
+}
+`,
+        }}
+      />
+    ),
+  },
+  "key-prop": {
+    label: "Key prop",
+    kicker: "Interview · Reconciliation",
+    title: "key is not just for lists",
+    lede: "The key prop tells React which DOM node corresponds to which element between renders. When key changes, React unmounts the old component and mounts a fresh one — which lets you reset state intentionally.",
+    sections: [
+      {
+        heading: "The identity mechanism",
+        body: (
+          <p>
+            React compares the new tree against the previous one by type and position. If an element
+            has the same <code>key</code> as before, React reuses it (updates). If the{" "}
+            <code>key</code> changes, React unmounts it and mounts from scratch — including its
+            internal state and effects.
+          </p>
+        ),
+      },
+      {
+        heading: "key as intentional reset",
+        body: (
+          <p>
+            Passing a <code>key</code> that changes with an external ID is the idiomatic way to
+            reset a component without adding reset logic inside it. When the user switches items,
+            the <code>key</code> changes and React mounts a clean instance automatically.
+          </p>
+        ),
+      },
+    ],
+    pitfalls: [
+      "Using the array index as a key is an anti-pattern when the list can be reordered — React will reuse the wrong node.",
+      "key is not a readable prop — you can't access it with props.key. If you need the value, pass it as a separate prop.",
+      "key must be unique among siblings, not globally. The same value can appear in separate lists without issue.",
+    ],
+    playground: (
+      <Playground
+        files={{
+          "/App.js": `import { useState } from "react";
+
+const users = ["Ana", "Carlos", "Maria"];
+
+// Form with its own internal state
+function UserForm({ name }) {
+  const [notes, setNotes] = useState("");
+  return (
+    <div style={{ border: "1px solid var(--line)", borderRadius: 6, padding: 12 }}>
+      <p style={{ margin: "0 0 8px", fontWeight: "bold" }}>User: {name}</p>
+      <input
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+        placeholder="Notes about this user..."
+        style={{ width: "100%", boxSizing: "border-box" }}
+      />
+      {notes && (
+        <p style={{ margin: "8px 0 0", fontSize: 12, color: "var(--fg-muted)" }}>
+          Saved: "{notes}"
+        </p>
+      )}
+    </div>
+  );
+}
+
+export default function App() {
+  const [userId, setUserId] = useState(0);
+
+  return (
+    <div style={{ fontFamily: "system-ui", padding: 24 }}>
+      <p style={{ margin: "0 0 12px", fontSize: 13, color: "var(--fg-muted)" }}>
+        Type something in the input, then switch users.
+      </p>
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        {users.map((u, i) => (
+          <button
+            key={u}
+            onClick={() => setUserId(i)}
+            style={{ fontWeight: userId === i ? "bold" : "normal" }}
+          >
+            {u}
+          </button>
+        ))}
+      </div>
+
+      <p style={{ margin: "0 0 8px", fontSize: 12, color: "var(--fg-muted)" }}>Without key — state persists across users:</p>
+      <UserForm name={users[userId]} />
+
+      <p style={{ margin: "16px 0 8px", fontSize: 12, color: "var(--fg-muted)" }}>With key={"{userId}"} — state resets on change:</p>
+      <UserForm key={userId} name={users[userId]} />
+    </div>
+  );
+}
+`,
+        }}
+      />
+    ),
+  },
+  hydration: {
+    label: "Hydration",
+    kicker: "Interview · SSR",
+    title: "What does hydrating mean in React?",
+    lede: "Hydration is the process by which React takes control of server-generated HTML. Instead of recreating the DOM, it attaches event listeners to the existing HTML — the user sees content immediately while React makes it interactive.",
+    sections: [
+      {
+        heading: "The SSR + hydration flow",
+        body: (
+          <p>
+            <strong>Server →</strong> generates static HTML the browser shows instantly.{" "}
+            <strong>Client →</strong> downloads the JS and React calls <code>hydrateRoot</code>{" "}
+            instead of <code>createRoot</code>. React walks the existing HTML, compares it with what
+            it would generate, and attaches handlers — without repainting the DOM if everything
+            matches.
+          </p>
+        ),
+      },
+      {
+        heading: "Hydration mismatch",
+        body: (
+          <p>
+            If the server HTML doesn't match what React would render on the client (e.g. a{" "}
+            <code>new Date()</code>, a <code>localStorage</code> value, or a random number), React
+            warns and rebuilds that subtree from scratch. The fix is to defer that content to a{" "}
+            <code>useEffect</code> or mark the node with <code>suppressHydrationWarning</code>.
+          </p>
+        ),
+      },
+    ],
+    pitfalls: [
+      "In Next.js App Router, Server Components are not hydrated — only Client Components ('use client') need hydration.",
+      "suppressHydrationWarning only suppresses the warning on the marked node, it doesn't resolve the actual mismatch. Use it only for intentionally dynamic content (timestamps, ads).",
+      "A hydration mismatch can cause a visual flash if React has to reconstruct part of the DOM on the client.",
+    ],
+    playground: (
+      <Playground
+        files={{
+          "/App.js": `import { useState, useEffect } from "react";
+
+// Pattern: component that only renders on the client
+function ClientOnly({ children, fallback = null }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  return mounted ? children : fallback;
+}
+
+// This would cause a hydration mismatch in a real SSR app:
+// server and client generate different times
+function LiveClock() {
+  const [time, setTime] = useState(new Date());
+  useEffect(() => {
+    const id = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  return <span>{time.toLocaleTimeString()}</span>;
+}
+
+export default function App() {
+  return (
+    <div style={{ fontFamily: "system-ui", padding: 24, display: "flex", flexDirection: "column", gap: 20 }}>
+      <div>
+        <p style={{ margin: "0 0 4px", fontSize: 12, color: "var(--fg-muted)" }}>
+          ⚠️ Direct render — would cause mismatch in SSR:
+        </p>
+        <LiveClock />
+      </div>
+      <div>
+        <p style={{ margin: "0 0 4px", fontSize: 12, color: "var(--fg-muted)" }}>
+          ✅ With ClientOnly — renders only on the client:
+        </p>
+        <ClientOnly fallback={<span style={{ color: "var(--fg-muted)" }}>--:--:--</span>}>
+          <LiveClock />
+        </ClientOnly>
+      </div>
+      <p style={{ margin: 0, fontSize: 12, color: "var(--fg-muted)" }}>
+        The fallback is what the server would have rendered. The client replaces it after mounting.
+      </p>
+    </div>
+  );
+}
+`,
+        }}
+      />
+    ),
+  },
+  "forward-ref": {
+    label: "forwardRef",
+    kicker: "Interview · Refs",
+    title: "Passing a ref into a component",
+    lede: "forwardRef lets a component expose its internal DOM node to a parent via ref. Without it, passing ref to a custom component does nothing — ref is not a regular prop and React intercepts it.",
+    sections: [
+      {
+        heading: "Why ref is not a prop",
+        body: (
+          <p>
+            React reserves <code>ref</code> (along with <code>key</code>) and doesn't pass it as a
+            regular prop. If you want the parent to access a child's internal DOM, the child must
+            explicitly opt in with <code>forwardRef</code>.
+          </p>
+        ),
+      },
+      {
+        heading: "useImperativeHandle",
+        body: (
+          <p>
+            Instead of exposing the raw DOM node, you can use <code>useImperativeHandle</code>{" "}
+            together with <code>forwardRef</code> to expose only the operations you want to allow
+            (focus, scroll, play…) — hiding the real DOM and maintaining the component's
+            encapsulation.
+          </p>
+        ),
+      },
+    ],
+    pitfalls: [
+      "In React 19, forwardRef is no longer needed — ref can be passed as a regular prop. If you're on React 18 or earlier, it's still required.",
+      "Exposing the raw DOM breaks encapsulation. Prefer useImperativeHandle to limit what the parent can do.",
+      "forwardRef only forwards the ref one level — if your inner component is also custom, it needs its own forwardRef.",
+    ],
+    playground: (
+      <Playground
+        files={{
+          "/App.js": `import { useRef, forwardRef, useImperativeHandle } from "react";
+
+// Basic forwardRef: exposes the input directly
+const BasicInput = forwardRef(function BasicInput({ label }, ref) {
+  return (
+    <div>
+      <label style={{ display: "block", marginBottom: 4, fontSize: 13 }}>{label}</label>
+      <input
+        ref={ref}
+        style={{ border: "1px solid var(--line)", borderRadius: 4, padding: "6px 10px", width: "100%", boxSizing: "border-box" }}
+        placeholder="Field with forwardRef..."
+      />
+    </div>
+  );
+});
+
+// useImperativeHandle: exposes only what we want
+const SecureInput = forwardRef(function SecureInput({ label }, ref) {
+  const inputRef = useRef(null);
+
+  useImperativeHandle(ref, () => ({
+    focus: () => inputRef.current?.focus(),
+    clear: () => { if (inputRef.current) inputRef.current.value = ""; },
+    // The real DOM is not exposed — only these two operations
+  }));
+
+  return (
+    <div>
+      <label style={{ display: "block", marginBottom: 4, fontSize: 13 }}>{label}</label>
+      <input
+        ref={inputRef}
+        style={{ border: "1px solid var(--line)", borderRadius: 4, padding: "6px 10px", width: "100%", boxSizing: "border-box" }}
+        placeholder="Field with useImperativeHandle..."
+      />
+    </div>
+  );
+});
+
+export default function App() {
+  const basicRef = useRef(null);
+  const secureRef = useRef(null);
+
+  return (
+    <div style={{ fontFamily: "system-ui", padding: 24, display: "flex", flexDirection: "column", gap: 20 }}>
+      <div>
+        <BasicInput ref={basicRef} label="Basic forwardRef" />
+        <button onClick={() => basicRef.current?.focus()} style={{ marginTop: 8 }}>
+          Focus
+        </button>
+      </div>
+      <div>
+        <SecureInput ref={secureRef} label="With useImperativeHandle" />
+        <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+          <button onClick={() => secureRef.current?.focus()}>Focus</button>
+          <button onClick={() => secureRef.current?.clear()}>Clear</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+`,
+        }}
+      />
+    ),
+  },
+  "strict-mode": {
+    label: "StrictMode",
+    kicker: "Interview · Tooling",
+    title: "Why do my effects run twice?",
+    lede: "StrictMode activates extra behaviors only in development to catch subtle bugs: it mounts and unmounts components twice to verify effects have cleanup, and warns about deprecated APIs.",
+    sections: [
+      {
+        heading: "The double mount",
+        body: (
+          <p>
+            In development, React mounts the component, unmounts it, and mounts it again. This
+            simulates what happens with fast refresh and real remount scenarios. If your{" "}
+            <code>useEffect</code> breaks when run twice, it means the cleanup function is missing.
+          </p>
+        ),
+      },
+      {
+        heading: "Development only",
+        body: (
+          <p>
+            The double mount doesn't happen in production. Its only purpose is to surface effects
+            without cleanup before they reach users. The right signal isn't "why does this run
+            twice?" but "does my effect work correctly if it runs twice?".
+          </p>
+        ),
+      },
+    ],
+    pitfalls: [
+      "If the double mount breaks your effect, don't remove StrictMode — it's a signal the effect needs a cleanup return.",
+      "StrictMode doesn't affect production components — it's only a development tool to catch bugs early.",
+      "In React 18+, the double mount also verifies components support unmount/remount without losing data — useful for the future Offscreen API.",
+    ],
+    playground: (
+      <Playground
+        files={{
+          "/App.js": `import { useState, useEffect, StrictMode } from "react";
+
+function Timer({ label, withCleanup }) {
+  const [seconds, setSeconds] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setSeconds((s) => s + 1), 1000);
+
+    if (withCleanup) {
+      // With cleanup: StrictMode unmounts → clears the interval → remounts
+      // Only 1 interval runs at the end
+      return () => clearInterval(id);
+    }
+    // Without cleanup: StrictMode creates 2 intervals → counter runs at double speed
+  }, []);
+
+  return (
+    <div style={{ border: "1px solid var(--line)", borderRadius: 6, padding: 12 }}>
+      <p style={{ margin: 0, fontSize: 13 }}>{label}</p>
+      <p style={{ margin: "8px 0 0", fontSize: 24, fontVariantNumeric: "tabular-nums" }}>
+        {seconds}s
+      </p>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <StrictMode>
+      <div style={{ fontFamily: "system-ui", padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+        <p style={{ margin: 0, fontSize: 13, color: "var(--fg-muted)" }}>
+          In StrictMode (dev), effects mount → unmount → mount.
+          Without cleanup, resources are duplicated.
+        </p>
+        <Timer label="✅ With cleanup (return () => clearInterval)" withCleanup={true} />
+        <Timer label="⚠️ Without cleanup — double speed due to duplicate interval" withCleanup={false} />
+      </div>
+    </StrictMode>
+  );
+}
+`,
+        }}
+      />
+    ),
+  },
 }
 
 function applyOverrides(concepts: Concept[]): Concept[] {
@@ -2501,6 +2942,11 @@ export const categories: Category[] = [
       "hoc",
       "render-props",
       "componentes-puros",
+      "jsx",
+      "key-prop",
+      "hydration",
+      "forward-ref",
+      "strict-mode",
     ],
   },
 ]

@@ -473,6 +473,461 @@ export default function App() {
   },
 
   {
+    id: "jsx",
+    label: "JSX",
+    kicker: "Entrevista · Fundamentos",
+    title: "¿Qué es JSX y en qué se convierte?",
+    lede: "JSX es azúcar sintáctica sobre React.createElement. El navegador no lo entiende — un compilador (Babel/SWC) lo transforma a llamadas de función JS antes de ejecutarse.",
+    sections: [
+      {
+        heading: "Lo que hace el compilador",
+        body: (
+          <p>
+            <code>{'<Button color="red">Click</Button>'}</code> se convierte en{" "}
+            <code>{'React.createElement(Button, { color: "red" }, "Click")'}</code>. JSX no es magia
+            — es una forma más legible de crear objetos que describen nodos del árbol de UI.
+          </p>
+        ),
+      },
+      {
+        heading: "JSX no es HTML",
+        body: (
+          <p>
+            Las diferencias clave: <code>className</code> en vez de <code>class</code>,{" "}
+            <code>htmlFor</code> en vez de <code>for</code>, eventos en camelCase (
+            <code>onClick</code>), y <code>style</code> acepta objetos JS en lugar de strings.
+            Además, todos los elementos deben cerrarse — incluyendo <code>{"<br />"}</code> y{" "}
+            <code>{"<img />"}</code>.
+          </p>
+        ),
+      },
+    ],
+    playground: (
+      <Playground
+        files={{
+          "/App.js": `import React from "react";
+
+// JSX — lo que escribes
+function WithJSX() {
+  return (
+    <div className="card" style={{ padding: 16, border: "1px solid var(--line)", borderRadius: 6 }}>
+      <p style={{ margin: 0, fontWeight: "bold" }}>Hola desde JSX</p>
+      <button onClick={() => alert("JSX")} style={{ marginTop: 8 }}>Presionar</button>
+    </div>
+  );
+}
+
+// Equivalente — lo que el compilador produce
+function WithoutJSX() {
+  return React.createElement(
+    "div",
+    { style: { padding: 16, border: "1px solid var(--line)", borderRadius: 6 } },
+    React.createElement("p", { style: { margin: 0, fontWeight: "bold" } }, "Hola sin JSX"),
+    React.createElement("button", { onClick: () => alert("createElement"), style: { marginTop: 8 } }, "Presionar")
+  );
+}
+
+export default function App() {
+  return (
+    <div style={{ fontFamily: "system-ui", padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+      <p style={{ margin: 0, fontSize: 13, color: "var(--fg-muted)" }}>
+        Ambos producen el mismo resultado. JSX es solo syntactic sugar.
+      </p>
+      <div>
+        <p style={{ margin: "0 0 8px", fontSize: 12, color: "var(--fg-muted)" }}>Con JSX:</p>
+        <WithJSX />
+      </div>
+      <div>
+        <p style={{ margin: "0 0 8px", fontSize: 12, color: "var(--fg-muted)" }}>Sin JSX (React.createElement):</p>
+        <WithoutJSX />
+      </div>
+    </div>
+  );
+}
+`,
+        }}
+      />
+    ),
+    pitfalls: [
+      "Desde React 17 ya no es necesario importar React para usar JSX — el nuevo transform lo inyecta automáticamente.",
+      "Las expresiones dentro de {} deben ser expresiones JS válidas, no statements. No puedes poner un if directamente — usa ternario o &&.",
+      "Un componente debe retornar un único elemento raíz. Usa <></> (Fragment) para envolver varios elementos sin agregar nodos extra al DOM.",
+    ],
+  },
+
+  {
+    id: "key-prop",
+    label: "Prop key",
+    kicker: "Entrevista · Reconciliación",
+    title: "key no es solo para listas",
+    lede: "La prop key le dice a React qué nodo del DOM corresponde a qué elemento entre renders. Cuando key cambia, React desmonta el componente antiguo y monta uno nuevo — lo que permite resetear estado de forma intencional.",
+    sections: [
+      {
+        heading: "El mecanismo de identidad",
+        body: (
+          <p>
+            React compara el árbol nuevo contra el anterior por tipo y posición. Si un elemento
+            tiene la misma <code>key</code> que antes, React lo reutiliza (actualiza). Si la{" "}
+            <code>key</code> cambia, React lo desmonta y monta desde cero — incluyendo su estado
+            interno y efectos.
+          </p>
+        ),
+      },
+      {
+        heading: "key como reset intencional",
+        body: (
+          <p>
+            Pasar una <code>key</code> que cambia según un ID externo es la forma idiomática de
+            reiniciar un componente sin añadir lógica de reset dentro de él. Cuando el usuario
+            cambia de elemento, la <code>key</code> cambia y React monta una instancia limpia
+            automáticamente.
+          </p>
+        ),
+      },
+    ],
+    playground: (
+      <Playground
+        files={{
+          "/App.js": `import { useState } from "react";
+
+const users = ["Ana", "Carlos", "María"];
+
+// Formulario con su propio estado interno
+function UserForm({ name }) {
+  const [notes, setNotes] = useState("");
+  return (
+    <div style={{ border: "1px solid var(--line)", borderRadius: 6, padding: 12 }}>
+      <p style={{ margin: "0 0 8px", fontWeight: "bold" }}>Usuario: {name}</p>
+      <input
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+        placeholder="Notas sobre este usuario..."
+        style={{ width: "100%", boxSizing: "border-box" }}
+      />
+      {notes && (
+        <p style={{ margin: "8px 0 0", fontSize: 12, color: "var(--fg-muted)" }}>
+          Guardado: "{notes}"
+        </p>
+      )}
+    </div>
+  );
+}
+
+export default function App() {
+  const [userId, setUserId] = useState(0);
+
+  return (
+    <div style={{ fontFamily: "system-ui", padding: 24 }}>
+      <p style={{ margin: "0 0 12px", fontSize: 13, color: "var(--fg-muted)" }}>
+        Escribe algo en el input, luego cambia de usuario.
+      </p>
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        {users.map((u, i) => (
+          <button
+            key={u}
+            onClick={() => setUserId(i)}
+            style={{ fontWeight: userId === i ? "bold" : "normal" }}
+          >
+            {u}
+          </button>
+        ))}
+      </div>
+
+      <p style={{ margin: "0 0 8px", fontSize: 12, color: "var(--fg-muted)" }}>Sin key — el estado persiste entre usuarios:</p>
+      <UserForm name={users[userId]} />
+
+      <p style={{ margin: "16px 0 8px", fontSize: 12, color: "var(--fg-muted)" }}>Con key={"{userId}"} — estado se resetea al cambiar:</p>
+      <UserForm key={userId} name={users[userId]} />
+    </div>
+  );
+}
+`,
+        }}
+      />
+    ),
+    pitfalls: [
+      "Usar el índice del array como key es un anti-patrón cuando la lista puede reordenarse — React reutilizará el nodo equivocado.",
+      "key no es una prop accesible desde el componente — no puedes leerla con props.key. Si necesitas el valor, pásalo como prop aparte.",
+      "key debe ser único entre hermanos, no globalmente. El mismo valor puede repetirse en listas separadas sin problema.",
+    ],
+  },
+
+  {
+    id: "hydration",
+    label: "Hidratación",
+    kicker: "Entrevista · SSR",
+    title: "¿Qué significa hidratar en React?",
+    lede: "La hidratación es el proceso por el que React toma control del HTML generado en el servidor. En lugar de recrear el DOM, adjunta event listeners al HTML existente — el usuario ve contenido de inmediato mientras React lo hace interactivo.",
+    sections: [
+      {
+        heading: "El flujo SSR + hydration",
+        body: (
+          <p>
+            <strong>Servidor →</strong> genera HTML estático que el navegador muestra al instante.{" "}
+            <strong>Cliente →</strong> descarga el JS y React llama a <code>hydrateRoot</code> en
+            lugar de <code>createRoot</code>. React recorre el HTML existente, lo compara con el
+            árbol que generaría, y adjunta los handlers — sin repintar el DOM si todo coincide.
+          </p>
+        ),
+      },
+      {
+        heading: "Hydration mismatch",
+        body: (
+          <p>
+            Si el HTML del servidor no coincide con lo que React renderizaría en el cliente (por
+            ejemplo, una fecha con <code>new Date()</code>, un valor de <code>localStorage</code>, o
+            un número aleatorio), React lanza una advertencia y reconstruye ese subárbol desde cero.
+            La solución es diferir ese contenido a un <code>useEffect</code> o marcar el nodo con{" "}
+            <code>suppressHydrationWarning</code>.
+          </p>
+        ),
+      },
+    ],
+    playground: (
+      <Playground
+        files={{
+          "/App.js": `import { useState, useEffect } from "react";
+
+// Patrón: componente que solo renderiza en el cliente
+function ClientOnly({ children, fallback = null }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  return mounted ? children : fallback;
+}
+
+// Esto causaría hydration mismatch en una app SSR real:
+// el servidor y el cliente generan horas distintas
+function LiveClock() {
+  const [time, setTime] = useState(new Date());
+  useEffect(() => {
+    const id = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  return <span>{time.toLocaleTimeString()}</span>;
+}
+
+export default function App() {
+  return (
+    <div style={{ fontFamily: "system-ui", padding: 24, display: "flex", flexDirection: "column", gap: 20 }}>
+      <div>
+        <p style={{ margin: "0 0 4px", fontSize: 12, color: "var(--fg-muted)" }}>
+          ⚠️ Renderizado directo — causaría mismatch en SSR:
+        </p>
+        <LiveClock />
+      </div>
+      <div>
+        <p style={{ margin: "0 0 4px", fontSize: 12, color: "var(--fg-muted)" }}>
+          ✅ Con ClientOnly — se renderiza solo en el cliente:
+        </p>
+        <ClientOnly fallback={<span style={{ color: "var(--fg-muted)" }}>--:--:--</span>}>
+          <LiveClock />
+        </ClientOnly>
+      </div>
+      <p style={{ margin: 0, fontSize: 12, color: "var(--fg-muted)" }}>
+        El fallback es lo que el servidor habría renderizado. El cliente lo reemplaza tras montar.
+      </p>
+    </div>
+  );
+}
+`,
+        }}
+      />
+    ),
+    pitfalls: [
+      "En Next.js App Router, los Server Components no se hidratan — solo los Client Components ('use client') necesitan hidratación.",
+      "suppressHydrationWarning solo suprime el warning en el nodo marcado, no resuelve el mismatch real. Úsalo solo cuando el contenido dinámico sea esperado (timestamps, ads).",
+      "Un mismatch de hydration puede provocar un flash visual si React tiene que reconstruir parte del DOM en el cliente.",
+    ],
+  },
+
+  {
+    id: "forward-ref",
+    label: "forwardRef",
+    kicker: "Entrevista · Refs",
+    title: "Pasar una ref hacia adentro de un componente",
+    lede: "forwardRef permite que un componente exponga su nodo DOM interno al padre vía ref. Sin él, pasar ref a un componente personalizado no hace nada — ref no es una prop normal y React la intercepta.",
+    sections: [
+      {
+        heading: "Por qué ref no es una prop",
+        body: (
+          <p>
+            React reserva <code>ref</code> (junto con <code>key</code>) y no la pasa al componente
+            como prop regular. Si quieres que el padre acceda al DOM interno de un componente hijo,
+            el hijo debe opt-in explícitamente con <code>forwardRef</code>.
+          </p>
+        ),
+      },
+      {
+        heading: "useImperativeHandle",
+        body: (
+          <p>
+            En lugar de exponer el nodo DOM directamente, puedes usar{" "}
+            <code>useImperativeHandle</code> junto con <code>forwardRef</code> para exponer solo las
+            operaciones que quieres permitir (focus, scroll, play…) — ocultando el DOM real y
+            manteniendo la encapsulación del componente.
+          </p>
+        ),
+      },
+    ],
+    playground: (
+      <Playground
+        files={{
+          "/App.js": `import { useRef, forwardRef, useImperativeHandle } from "react";
+
+// forwardRef básico: expone el input directamente
+const BasicInput = forwardRef(function BasicInput({ label }, ref) {
+  return (
+    <div>
+      <label style={{ display: "block", marginBottom: 4, fontSize: 13 }}>{label}</label>
+      <input
+        ref={ref}
+        style={{ border: "1px solid var(--line)", borderRadius: 4, padding: "6px 10px", width: "100%", boxSizing: "border-box" }}
+        placeholder="Campo con forwardRef..."
+      />
+    </div>
+  );
+});
+
+// useImperativeHandle: expone solo lo que queremos
+const SecureInput = forwardRef(function SecureInput({ label }, ref) {
+  const inputRef = useRef(null);
+
+  useImperativeHandle(ref, () => ({
+    focus: () => inputRef.current?.focus(),
+    clear: () => { if (inputRef.current) inputRef.current.value = ""; },
+    // El DOM real no se expone — solo estas dos operaciones
+  }));
+
+  return (
+    <div>
+      <label style={{ display: "block", marginBottom: 4, fontSize: 13 }}>{label}</label>
+      <input
+        ref={inputRef}
+        style={{ border: "1px solid var(--line)", borderRadius: 4, padding: "6px 10px", width: "100%", boxSizing: "border-box" }}
+        placeholder="Campo con useImperativeHandle..."
+      />
+    </div>
+  );
+});
+
+export default function App() {
+  const basicRef = useRef(null);
+  const secureRef = useRef(null);
+
+  return (
+    <div style={{ fontFamily: "system-ui", padding: 24, display: "flex", flexDirection: "column", gap: 20 }}>
+      <div>
+        <BasicInput ref={basicRef} label="forwardRef básico" />
+        <button onClick={() => basicRef.current?.focus()} style={{ marginTop: 8 }}>
+          Enfocar
+        </button>
+      </div>
+      <div>
+        <SecureInput ref={secureRef} label="Con useImperativeHandle" />
+        <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+          <button onClick={() => secureRef.current?.focus()}>Enfocar</button>
+          <button onClick={() => secureRef.current?.clear()}>Limpiar</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+`,
+        }}
+      />
+    ),
+    pitfalls: [
+      "En React 19, forwardRef ya no es necesario — ref puede pasarse como prop normal. Si usas React 18 o anterior, sigue siendo requerido.",
+      "Exponer el DOM directamente rompe la encapsulación. Prefiere useImperativeHandle para limitar qué puede hacer el padre.",
+      "forwardRef solo reenvía la ref al primer nivel — si tu componente interno también es personalizado, necesitas otro forwardRef.",
+    ],
+  },
+
+  {
+    id: "strict-mode",
+    label: "StrictMode",
+    kicker: "Entrevista · Herramientas",
+    title: "¿Por qué mis efectos corren dos veces?",
+    lede: "StrictMode activa comportamientos extra solo en desarrollo para detectar bugs sutiles: monta y desmonta componentes dos veces para verificar que los efectos tienen cleanup, y detecta APIs deprecadas.",
+    sections: [
+      {
+        heading: "El doble montaje",
+        body: (
+          <p>
+            En desarrollo, React monta el componente, lo desmonta, y lo vuelve a montar. Esto simula
+            lo que ocurre en React 18+ con fast refresh y en casos de remontaje real. Si tu{" "}
+            <code>useEffect</code> se rompe al correr dos veces, significa que le falta la función
+            de cleanup.
+          </p>
+        ),
+      },
+      {
+        heading: "Solo en desarrollo",
+        body: (
+          <p>
+            El doble montaje no ocurre en producción. Su único propósito es hacer visibles los
+            efectos sin cleanup antes de que lleguen al usuario. La señal correcta no es "¿por qué
+            se ejecuta dos veces?" sino "¿mi efecto funciona correctamente si se ejecuta dos
+            veces?".
+          </p>
+        ),
+      },
+    ],
+    playground: (
+      <Playground
+        files={{
+          "/App.js": `import { useState, useEffect, StrictMode } from "react";
+
+function Timer({ label, withCleanup }) {
+  const [seconds, setSeconds] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setSeconds((s) => s + 1), 1000);
+
+    if (withCleanup) {
+      // Con cleanup: StrictMode desmonta → limpia el intervalo → remonta
+      // Solo corre 1 intervalo al final
+      return () => clearInterval(id);
+    }
+    // Sin cleanup: StrictMode crea 2 intervalos → el contador corre al doble de velocidad
+  }, []);
+
+  return (
+    <div style={{ border: "1px solid var(--line)", borderRadius: 6, padding: 12 }}>
+      <p style={{ margin: 0, fontSize: 13 }}>{label}</p>
+      <p style={{ margin: "8px 0 0", fontSize: 24, fontVariantNumeric: "tabular-nums" }}>
+        {seconds}s
+      </p>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <StrictMode>
+      <div style={{ fontFamily: "system-ui", padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+        <p style={{ margin: 0, fontSize: 13, color: "var(--fg-muted)" }}>
+          En StrictMode (dev), los efectos montan → desmontan → montan.
+          Sin cleanup, los recursos se duplican.
+        </p>
+        <Timer label="✅ Con cleanup (return () => clearInterval)" withCleanup={true} />
+        <Timer label="⚠️ Sin cleanup — doble velocidad por intervalo duplicado" withCleanup={false} />
+      </div>
+    </StrictMode>
+  );
+}
+`,
+        }}
+      />
+    ),
+    pitfalls: [
+      "Si el doble montaje rompe tu efecto, no elimines StrictMode — es una señal de que el efecto necesita un return de cleanup.",
+      "StrictMode no afecta a los componentes de producción — solo es una herramienta de desarrollo para detectar bugs temprano.",
+      "En React 18+, el doble montaje también verifica que los componentes soporten unmount/remount sin perder datos — útil para future Offscreen API.",
+    ],
+  },
+
+  {
     id: "componentes-puros",
     label: "Componentes puros",
     kicker: "Entrevista · Rendimiento",
