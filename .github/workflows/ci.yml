@@ -26,3 +26,6 @@ jobs:
 
       - name: Check Prettier formatting
         run: bun run format:check
+
+      - name: Run Tests
+        run: bun run test:run
