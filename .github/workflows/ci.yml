@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  lint-and-format:
-    name: Lint & Format
+  lint-format-test:
+    name: Lint - Format - Test
     runs-on: ubuntu-latest
 
     steps:
