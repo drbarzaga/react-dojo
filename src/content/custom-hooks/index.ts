@@ -20,6 +20,7 @@ import { useKeyPress } from "./use-key-press"
 import { useLongPress } from "./use-long-press"
 import { useScrollPosition } from "./use-scroll-position"
 import { useIdle } from "./use-idle"
+import { useResizeObserver } from "./use-resize-observer"
 
 export const allCustomHooks: CustomHook[] = [
   useLocalStorage,
@@ -41,6 +42,7 @@ export const allCustomHooks: CustomHook[] = [
   useLongPress,
   useScrollPosition,
   useIdle,
+  useResizeObserver,
 ]
 
 export const customHookIndex: Record<string, CustomHook> = Object.fromEntries(
