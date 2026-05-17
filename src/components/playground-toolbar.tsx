@@ -20,9 +20,11 @@ import {
   Copy,
   Eye,
   EyeOff,
+  Loader2,
   Maximize2,
   Minimize2,
   Rows2,
+  Share2,
   Sparkles,
   Undo2,
 } from "lucide-react"
@@ -62,6 +64,7 @@ export function PlaygroundToolbar({
   const [copied, setCopied] = useState(false)
   const [formatted, setFormatted] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
+  const [gistState, setGistState] = useState<"idle" | "creating" | "done" | "error">("idle")
   const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -96,6 +99,35 @@ export function PlaygroundToolbar({
       setTimeout(() => setFormatted(false), 1500)
     }
   }, [sandpack])
+
+  const handleCreateGist = useCallback(async () => {
+    if (gistState !== "idle") return
+    setGistState("creating")
+    const files: Record<string, { content: string }> = {}
+    for (const [path, file] of Object.entries(sandpack.files)) {
+      if (path === THEME_FILE_NAME) continue
+      const code = typeof file === "string" ? file : file.code
+      if (code) {
+        files[path.replace(/^\//, "")] = { content: code }
+      }
+    }
+    try {
+      const res = await fetch("https://api.github.com/gists", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: "React Dojo", public: true, files }),
+      })
+      if (!res.ok) throw new Error("Failed")
+      const data = await res.json()
+      await navigator.clipboard.writeText(data.html_url)
+      window.open(data.html_url, "_blank", "noopener,noreferrer")
+      setGistState("done")
+    } catch {
+      setGistState("error")
+    } finally {
+      setTimeout(() => setGistState("idle"), 2000)
+    }
+  }, [gistState, sandpack])
 
   const handleReset = useCallback(() => {
     if (!confirmReset) {
@@ -190,6 +222,23 @@ export function PlaygroundToolbar({
             iconActive={formatted}
             onClick={handleFormat}
           />
+          <ToolbarButton
+            label={
+              gistState === "creating"
+                ? t("gistCreating")
+                : gistState === "done"
+                  ? t("gistDone")
+                  : gistState === "error"
+                    ? t("gistError")
+                    : t("gist")
+            }
+            tooltip={t("gistTooltip")}
+            icon={gistState === "done" ? Check : gistState === "creating" ? Loader2 : Share2}
+            iconActive={gistState === "done"}
+            destructive={gistState === "error"}
+            iconClassName={gistState === "creating" ? "animate-spin" : undefined}
+            onClick={handleCreateGist}
+          />
           {enableReset && (
             <ToolbarButton
               label={confirmReset ? t("resetConfirm") : t("reset")}
@@ -268,6 +317,7 @@ interface ToolbarButtonProps {
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>
   iconActive?: boolean
   destructive?: boolean
+  iconClassName?: string
   onClick: () => void
 }
 
@@ -277,6 +327,7 @@ function ToolbarButton({
   icon: Icon,
   iconActive,
   destructive,
+  iconClassName,
   onClick,
 }: ToolbarButtonProps) {
   return (
@@ -294,7 +345,7 @@ function ToolbarButton({
               !iconActive && !destructive && "text-fg-muted hover:text-fg"
             )}
           >
-            <Icon className="h-[13px] w-[13px]" strokeWidth={1.8} />
+            <Icon className={cn("h-[13px] w-[13px]", iconClassName)} strokeWidth={1.8} />
             <span>{label}</span>
           </button>
         }
