@@ -178,12 +178,7 @@
     "layoutHorizontal": "Horizontal layout",
     "layoutVertical": "Vertical layout",
     "saving": "Saving…",
-    "saved": "Saved",
-    "gist": "Gist",
-    "gistCreating": "Sharing…",
-    "gistDone": "Shared!",
-    "gistError": "Error",
-    "gistTooltip": "Share as anonymous GitHub Gist"
+    "saved": "Saved"
   },
   "LocaleSwitcher": {
     "label": "Language"
