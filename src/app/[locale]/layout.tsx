@@ -56,11 +56,12 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
     cookies(),
   ])
   const initialSidebarState = parseSidebarOpenState(cookieStore.get(SIDEBAR_OPEN_STATE_KEY)?.value)
+  const initialTheme = cookieStore.get("theme")?.value === "light" ? "light" : "dark"
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
       <ContentProvider {...content}>
-        <AppProviders>
+        <AppProviders initialTheme={initialTheme}>
           <AppShell initialSidebarState={initialSidebarState}>{children}</AppShell>
         </AppProviders>
       </ContentProvider>
