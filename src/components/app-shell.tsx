@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { usePathname } from "next/navigation"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -21,6 +21,7 @@ export function AppShell({ children, initialSidebarState }: AppShellProps) {
   const [searchOpen, setSearchOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const pathname = usePathname()
+  const isFirstMount = useRef(true)
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -65,7 +66,16 @@ export function AppShell({ children, initialSidebarState }: AppShellProps) {
             className="min-h-0 flex-1 overflow-y-auto outline-none"
             tabIndex={-1}
           >
-            <div key={pathname} className="page-enter">
+            <div
+              key={pathname}
+              ref={(node) => {
+                if (node && isFirstMount.current) {
+                  isFirstMount.current = false
+                  node.classList.remove("page-enter")
+                }
+              }}
+              className="page-enter"
+            >
               {children}
             </div>
           </main>

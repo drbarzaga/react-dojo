@@ -1,8 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google"
-import Script from "next/script"
 import "./globals.css"
 import { Analytics } from "@vercel/analytics/next"
 import { getLocale } from "next-intl/server"
+import { cookies } from "next/headers"
 
 const themeScript = `(function(){try{var s=localStorage.getItem("theme"),p=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,t=s||(p?"dark":"light");document.documentElement.dataset.theme=t;if(t==="dark")document.documentElement.classList.add("dark")}catch(e){document.documentElement.dataset.theme="dark";document.documentElement.classList.add("dark")}})();`
 
@@ -11,19 +11,18 @@ const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono"
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale()
+  const cookieStore = await cookies()
+  const theme = cookieStore.get("theme")?.value === "light" ? "light" : "dark"
 
   return (
     <html
       lang={locale}
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable}`}
+      data-theme={theme}
+      className={`${geistSans.variable} ${geistMono.variable}${theme === "dark" ? "dark" : ""}`}
     >
       <body>
-        <Script
-          id="theme-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: themeScript }}
-        />
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {children}
         <Analytics />
       </body>

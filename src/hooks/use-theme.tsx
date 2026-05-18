@@ -20,24 +20,26 @@ interface ThemeContextValue {
 
 const Ctx = createContext<ThemeContextValue | null>(null)
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark")
-  const isInitialized = useRef(false)
+export function ThemeProvider({
+  children,
+  initialTheme = "dark",
+}: {
+  children: ReactNode
+  initialTheme?: Theme
+}) {
+  const [theme, setTheme] = useState<Theme>(initialTheme)
+  const isMounted = useRef(false)
 
   useEffect(() => {
-    if (!isInitialized.current) {
-      isInitialized.current = true
-      const attr = document.documentElement.dataset.theme
-      const initialTheme = attr === "light" || attr === "dark" ? attr : "dark"
-      setTheme(initialTheme)
+    if (!isMounted.current) {
+      isMounted.current = true
+      return
     }
-  }, [])
-
-  useEffect(() => {
     document.documentElement.dataset.theme = theme
     document.documentElement.classList.toggle("dark", theme === "dark")
     try {
       localStorage.setItem("theme", theme)
+      document.cookie = `theme=${theme}; path=/; max-age=31536000; SameSite=Lax`
     } catch {
       /* ignore */
     }
