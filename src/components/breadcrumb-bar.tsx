@@ -28,7 +28,7 @@ export function BreadcrumbBar() {
 
   const path = stripLocale(pathname)
 
-  let items: { label: string; href?: string }[] = []
+  let items: { label: string; href?: string }[]
 
   if (path.startsWith("/learn/")) {
     const id = path.replace("/learn/", "")
