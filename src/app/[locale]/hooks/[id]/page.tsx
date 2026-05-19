@@ -3,6 +3,7 @@ import { routing, type Locale } from "@/i18n/routing"
 import { allCustomHooks as allHooksEs } from "@/content/custom-hooks"
 import { getCustomHooksForLocale } from "@/content/custom-hooks/loader"
 import { HookDetailPage } from "@/components/hook-detail-page"
+import { buildPageMetadata } from "@/lib/metadata"
 import type { Metadata } from "next"
 
 interface Props {
@@ -14,8 +15,16 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params
-  return { title: id }
+  const { locale, id } = await params
+  const { customHookIndex } = await getCustomHooksForLocale(locale as Locale)
+  const hook = customHookIndex[id]
+  if (!hook) return {}
+  return buildPageMetadata({
+    title: hook.label,
+    description: hook.description,
+    path: `/hooks/${id}`,
+    locale,
+  })
 }
 
 export default async function HookDetailRoute({ params }: Props) {

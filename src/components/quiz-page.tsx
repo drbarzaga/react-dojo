@@ -7,7 +7,7 @@ import type { Quiz } from "@/content/quiz"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { useLocaleRouter } from "@/hooks/use-locale-router"
 import { useProgress } from "@/hooks/use-progress"
-import { TIMER_TICK_MS } from "@/lib/constants"
+import { BASE_URL, TIMER_TICK_MS } from "@/lib/constants"
 import { cn } from "@/lib/utils"
 import confetti from "canvas-confetti"
 import { Timer } from "lucide-react"
@@ -384,7 +384,7 @@ export function QuizPage({ quiz, allQuizzes }: QuizPageProps) {
 
   /* ── Finished screen ── */
   if (finished) {
-    const shareUrl = `https://react-dojo.vercel.app/quiz/${quiz.id}`
+    const shareUrl = `${BASE_URL}/quiz/${quiz.id}`
     const shareText = t("shareText", { label: quiz.label, score, total, pct })
     const links = {
       x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
