@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import { ConceptPage } from "@/components/concept-page"
 import { getContentForLocale } from "@/content/loader"
 import { routing, type Locale } from "@/i18n/routing"
+import { buildPageMetadata } from "@/lib/metadata"
 import type { Metadata } from "next"
 
 interface Props {
@@ -23,7 +24,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { conceptIndex } = await getContentForLocale(locale as Locale)
   const concept = conceptIndex[id]
   if (!concept) return {}
-  return { title: concept.label }
+  return buildPageMetadata({
+    title: concept.label,
+    description: concept.lede,
+    path: `/${id}`,
+    locale,
+  })
 }
 
 export default async function ConceptRoute({ params }: Props) {

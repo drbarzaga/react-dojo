@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import { ExercisePage } from "@/components/exercise-page"
 import { getContentForLocale } from "@/content/loader"
 import { routing, type Locale } from "@/i18n/routing"
+import { buildPageMetadata } from "@/lib/metadata"
 import type { Metadata } from "next"
 
 interface Props {
@@ -23,7 +24,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { exerciseIndex } = await getContentForLocale(locale as Locale)
   const exercise = exerciseIndex[id]
   if (!exercise) return {}
-  return { title: exercise.label }
+  return buildPageMetadata({
+    title: exercise.label,
+    description: exercise.lede,
+    path: `/learn/${id}`,
+    locale,
+  })
 }
 
 export default async function ExerciseRoute({ params }: Props) {

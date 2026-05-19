@@ -57,6 +57,8 @@ export const EDITOR_THEMES_META: Record<EditorThemeId, EditorThemeMeta> = {
   },
 }
 
+export const BASE_URL = "https://react-dojo.vercel.app"
+
 export const REPOSITORY = "drbarzaga/react-dojo"
 export const DISCORD_URL = "https://discord.gg/ymGswJ9sp3"
 

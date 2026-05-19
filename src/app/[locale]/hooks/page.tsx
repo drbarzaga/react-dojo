@@ -1,6 +1,7 @@
 import { HooksListingPage } from "@/components/hooks-listing-page"
 import { getCustomHooksForLocale } from "@/content/custom-hooks/loader"
 import { routing, type Locale } from "@/i18n/routing"
+import { buildPageMetadata } from "@/lib/metadata"
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
@@ -15,7 +16,13 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "CustomHooks" })
-  return { title: t("title") }
+  return buildPageMetadata({
+    title: t("title"),
+    description: t("description"),
+    path: "/hooks",
+    locale,
+    type: "website",
+  })
 }
 
 export default async function HooksPage({ params }: Props) {

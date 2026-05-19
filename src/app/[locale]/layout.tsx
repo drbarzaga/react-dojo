@@ -8,7 +8,7 @@ import { AppProviders } from "@/providers/app-provider"
 import { AppShell } from "@/components/app-shell"
 import { ContentProvider } from "@/providers/content-provider"
 import { getContentForLocale } from "@/content/loader"
-import { SIDEBAR_OPEN_STATE_KEY } from "@/lib/constants"
+import { BASE_URL, SIDEBAR_OPEN_STATE_KEY } from "@/lib/constants"
 import { parseSidebarOpenState } from "@/lib/sidebar-state"
 
 interface LocaleLayoutProps {
@@ -27,20 +27,29 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "Metadata" })
+  const description = t("description")
   return {
     title: { default: t("titleDefault"), template: t("titleTemplate") },
-    description: t("description"),
-    metadataBase: new URL("https://react-dojo.vercel.app"),
+    description,
+    metadataBase: new URL(BASE_URL),
+    alternates: {
+      languages: {
+        en: `${BASE_URL}/en`,
+        es: `${BASE_URL}/es`,
+        "x-default": `${BASE_URL}/en`,
+      },
+    },
     openGraph: {
       title: "React Dojo",
-      description: t("description"),
-      url: "https://react-dojo.vercel.app",
+      description,
+      url: `${BASE_URL}/${locale}`,
       type: "website",
+      siteName: "React Dojo",
     },
     twitter: {
       card: "summary_large_image",
       title: "React Dojo",
-      description: t("description"),
+      description,
     },
   }
 }

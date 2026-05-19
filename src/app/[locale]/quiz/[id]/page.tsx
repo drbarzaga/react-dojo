@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import { QuizPage } from "@/components/quiz-page"
 import { getContentForLocale } from "@/content/loader"
 import { routing, type Locale } from "@/i18n/routing"
+import { buildPageMetadata } from "@/lib/metadata"
 import type { Metadata } from "next"
 
 interface Props {
@@ -23,7 +24,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { quizIndex } = await getContentForLocale(locale as Locale)
   const quiz = quizIndex[id]
   if (!quiz) return {}
-  return { title: quiz.label }
+  return buildPageMetadata({
+    title: quiz.label,
+    description: quiz.description,
+    path: `/quiz/${id}`,
+    locale,
+  })
 }
 
 export default async function QuizRoute({ params }: Props) {
