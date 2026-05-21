@@ -22,6 +22,7 @@ import { useScrollPosition } from "./use-scroll-position"
 import { useIdle } from "./use-idle"
 import { useResizeObserver } from "./use-resize-observer"
 import { useList } from "./use-list"
+import { useUndoRedo } from "./use-undo-redo"
 
 export const allCustomHooks: CustomHook[] = [
   useLocalStorage,
@@ -45,6 +46,7 @@ export const allCustomHooks: CustomHook[] = [
   useIdle,
   useResizeObserver,
   useList,
+  useUndoRedo,
 ]
 
 export const customHookIndex: Record<string, CustomHook> = Object.fromEntries(
