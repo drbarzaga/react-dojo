@@ -19,7 +19,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       lang={locale}
       suppressHydrationWarning
       data-theme={theme}
-      className={`${geistSans.variable} ${geistMono.variable}${theme === "dark" ? "dark" : ""}`}
+      className={`${geistSans.variable} ${geistMono.variable} ${theme === "dark" ? "dark" : ""}`.trim()}
     >
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
