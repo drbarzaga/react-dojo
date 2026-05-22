@@ -4,6 +4,7 @@ import { rendimiento } from "./rendimiento"
 import { concurrencia } from "./concurrencia"
 import { composicion } from "./composicion"
 import { entrevistas } from "./entrevistas"
+import { practicas } from "./practicas"
 import type { Category, Concept } from "./types"
 
 export type { Concept, Category, Section } from "./types"
@@ -15,6 +16,7 @@ export const allConcepts: Concept[] = [
   ...concurrencia,
   ...composicion,
   ...entrevistas,
+  ...practicas,
 ]
 
 export const conceptIndex: Record<string, Concept> = Object.fromEntries(
@@ -77,5 +79,11 @@ export const categories: Category[] = [
       "forward-ref",
       "strict-mode",
     ],
+  },
+  {
+    id: "practices",
+    kicker: "VII",
+    title: "Buenas prácticas",
+    conceptIds: ["key-estable", "estado-derivado", "efectos-innecesarios"],
   },
 ]

@@ -16,6 +16,7 @@ import {
   Boxes,
   Check,
   ChevronDown,
+  CircleCheck,
   Component,
   Gauge,
   Hourglass,
@@ -73,6 +74,7 @@ const categoryIcon: Record<string, IconC> = {
   concurrency: Hourglass,
   composition: Component,
   interviews: MessageCircleQuestion,
+  practices: CircleCheck,
 }
 
 const difficultyDot: Record<Difficulty, string> = {
