@@ -4,6 +4,7 @@ import { rendimiento } from "@/content/rendimiento"
 import { concurrencia } from "@/content/concurrencia"
 import { composicion } from "@/content/composicion"
 import { entrevistas } from "@/content/entrevistas"
+import { practicas } from "@/content/practicas"
 import { Playground } from "@/components/playground"
 import type { Concept, Category } from "@/content/types"
 
@@ -2869,6 +2870,303 @@ export default function App() {
       />
     ),
   },
+  "key-estable": {
+    label: "stable key",
+    kicker: "Practice · Lists",
+    playground: (
+      <Playground
+        files={{
+          "/App.js": `import { useState } from "react";
+
+const initialColors = [
+  { id: "r", name: "Red" },
+  { id: "g", name: "Green" },
+  { id: "b", name: "Blue" },
+];
+
+function List({ useKey }) {
+  const [items, setItems] = useState(initialColors);
+  const shuffle = () => setItems((p) => [...p].sort(() => Math.random() - 0.5));
+  const remove = () => setItems((p) => p.slice(1));
+
+  return (
+    <div style={{ marginBottom: 32 }}>
+      <strong>{useKey ? "✅ key={item.id}" : "❌ key={index}"}</strong>
+      <div style={{ display: "flex", gap: 8, margin: "8px 0" }}>
+        <button onClick={shuffle}>Shuffle</button>
+        <button onClick={remove}>Remove first</button>
+      </div>
+      <ul style={{ listStyle: "none", padding: 0 }}>
+        {items.map((item, i) => (
+          <li key={useKey ? item.id : i} style={{ display: "flex", gap: 8, marginBottom: 4 }}>
+            <span style={{ width: 60 }}>{item.name}</span>
+            <input placeholder="type something..." />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <div style={{ fontFamily: "system-ui", padding: 24 }}>
+      <p style={{ marginBottom: 16, fontSize: 13, color: "#888" }}>
+        Type in the inputs, then shuffle or remove the first item.
+      </p>
+      <List useKey={false} />
+      <List useKey={true} />
+    </div>
+  );
+}
+`,
+        }}
+      />
+    ),
+    title: "The index is not an identity",
+    lede: 'Using the array index as a key tells React "the third element is always the same element". When the list is reordered, filtered, or items are inserted, that assumption breaks and React reuses the wrong DOM node.',
+    sections: [
+      {
+        heading: "Why it matters",
+        body: (
+          <p>
+            React uses the <code>key</code> to match nodes from the previous render to the new one.
+            With <code>key=&#123;i&#125;</code>, the node at position 0 is always reused for the
+            item at position 0, regardless of whether it's a different item. The result: local state
+            (inputs, animations, focus) gets attached to the wrong node.
+          </p>
+        ),
+      },
+      {
+        heading: "The rule",
+        body: (
+          <p>
+            Use a stable, unique identifier from the data: <code>item.id</code>,{" "}
+            <code>item.slug</code>, or any field that doesn't change when the array is transformed.
+            The index is only safe when the list is completely static and never reordered or
+            filtered.
+          </p>
+        ),
+      },
+    ],
+    pitfalls: [
+      "key={index} on dynamic lists causes local state (inputs, animations) to stick to the wrong node when reordering.",
+      "If your data has no id, generate it when creating the item — not in the render (each render would produce a new key and React would unmount the component).",
+      "The key is only visible to React; it doesn't reach the child component as a prop.",
+    ],
+  },
+  "estado-derivado": {
+    label: "derived state",
+    kicker: "Practice · State",
+    playground: (
+      <Playground
+        files={{
+          "/App.js": `import { useState } from "react";
+
+// ❌ BAD: total stored as separate state
+function CartBad() {
+  const [items, setItems] = useState([
+    { id: 1, name: "Coffee", price: 3.5 },
+    { id: 2, name: "Book", price: 12 },
+  ]);
+  const [total, setTotal] = useState(15.5); // can get out of sync
+
+  const add = () => {
+    const newItem = { id: Date.now(), name: "Extra", price: 5 };
+    setItems((p) => [...p, newItem]);
+    // If you forget this line, total becomes stale:
+    setTotal((t) => t + newItem.price);
+  };
+
+  return (
+    <div style={{ marginBottom: 32 }}>
+      <strong>❌ Duplicated state</strong>
+      <ul>{items.map((i) => <li key={i.id}>{i.name} — \${i.price}</li>)}</ul>
+      <p>Total: <strong>\${total}</strong></p>
+      <button onClick={add}>Add item</button>
+    </div>
+  );
+}
+
+// ✅ GOOD: total derived during render
+function CartGood() {
+  const [items, setItems] = useState([
+    { id: 1, name: "Coffee", price: 3.5 },
+    { id: 2, name: "Book", price: 12 },
+  ]);
+
+  // Single source of truth, always in sync
+  const total = items.reduce((s, i) => s + i.price, 0);
+
+  const add = () => {
+    setItems((p) => [...p, { id: Date.now(), name: "Extra", price: 5 }]);
+  };
+
+  return (
+    <div>
+      <strong>✅ Derived state</strong>
+      <ul>{items.map((i) => <li key={i.id}>{i.name} — \${i.price}</li>)}</ul>
+      <p>Total: <strong>\${total.toFixed(2)}</strong></p>
+      <button onClick={add}>Add item</button>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <div style={{ fontFamily: "system-ui", padding: 24 }}>
+      <CartBad />
+      <CartGood />
+    </div>
+  );
+}
+`,
+        }}
+      />
+    ),
+    title: "If you can compute it, don't store it",
+    lede: "Every useState is an independent source of truth. When a value can be computed from other state or props, storing it separately creates two truths that will eventually fall out of sync.",
+    sections: [
+      {
+        heading: "The problem",
+        body: (
+          <p>
+            Storing in state something that already exists in other state (or props) means you have
+            to keep them in sync manually — with <code>useEffect</code> or multiple{" "}
+            <code>setState</code> calls per event. Any path where you forget to update one
+            introduces a silent bug.
+          </p>
+        ),
+      },
+      {
+        heading: "The solution",
+        body: (
+          <p>
+            Compute the derived value directly during render. It's a plain variable, not a{" "}
+            <code>useState</code>. If the calculation is expensive and the list is very large, wrap
+            it in <code>useMemo</code> — but only with real evidence of slowness, not preemptively.
+          </p>
+        ),
+      },
+    ],
+    pitfalls: [
+      "Deriving with useEffect introduces an extra render: the old state renders first, then the effect updates the derived value and triggers another render.",
+      "Not everything that looks derived actually is: if the user can edit it independently of the source, it needs its own state.",
+      "useMemo is only for expensive calculations — filtering a 20-item array doesn't justify it.",
+    ],
+  },
+  "efectos-innecesarios": {
+    label: "unnecessary effects",
+    kicker: "Practice · Effects",
+    playground: (
+      <Playground
+        files={{
+          "/App.js": `import { useState, useEffect } from "react";
+
+const products = [
+  { id: 1, name: "Monitor", category: "tech", price: 300 },
+  { id: 2, name: "Keyboard", category: "tech", price: 80 },
+  { id: 3, name: "Chair", category: "furniture", price: 250 },
+  { id: 4, name: "Lamp", category: "furniture", price: 45 },
+  { id: 5, name: "Headphones", category: "tech", price: 120 },
+];
+
+// ❌ BAD: useEffect to filter (causes extra render)
+function FilterBad() {
+  const [category, setCategory] = useState("all");
+  const [filtered, setFiltered] = useState(products);
+
+  useEffect(() => {
+    // This runs AFTER the render — there's a render with stale data
+    setFiltered(
+      category === "all"
+        ? products
+        : products.filter((p) => p.category === category)
+    );
+  }, [category]);
+
+  return (
+    <div style={{ marginBottom: 32 }}>
+      <strong>❌ useEffect to filter</strong>
+      <select value={category} onChange={(e) => setCategory(e.target.value)}
+        style={{ display: "block", margin: "8px 0" }}>
+        <option value="all">All</option>
+        <option value="tech">Tech</option>
+        <option value="furniture">Furniture</option>
+      </select>
+      <ul>{filtered.map((p) => <li key={p.id}>{p.name} — \${p.price}</li>)}</ul>
+    </div>
+  );
+}
+
+// ✅ GOOD: filter during render
+function FilterGood() {
+  const [category, setCategory] = useState("all");
+
+  // Computed during render, always fresh, no effect needed
+  const filtered =
+    category === "all"
+      ? products
+      : products.filter((p) => p.category === category);
+
+  return (
+    <div>
+      <strong>✅ Filtered in render</strong>
+      <select value={category} onChange={(e) => setCategory(e.target.value)}
+        style={{ display: "block", margin: "8px 0" }}>
+        <option value="all">All</option>
+        <option value="tech">Tech</option>
+        <option value="furniture">Furniture</option>
+      </select>
+      <ul>{filtered.map((p) => <li key={p.id}>{p.name} — \${p.price}</li>)}</ul>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <div style={{ fontFamily: "system-ui", padding: 24 }}>
+      <FilterBad />
+      <FilterGood />
+    </div>
+  );
+}
+`,
+        }}
+      />
+    ),
+    title: "useEffect is not a lifecycle hook",
+    lede: "useEffect exists to synchronize with external systems (APIs, DOM, timers). Using it to transform data or compute state in response to other state is the most common pattern that causes double renders, sync bugs, and hard-to-follow code.",
+    sections: [
+      {
+        heading: "When NOT to use useEffect",
+        body: (
+          <p>
+            If the code inside the effect only reads props or state and updates other state, it
+            doesn't need an effect. Do it during render: compute the derived value directly as a
+            variable. The result is the same but without the extra render the effect produces after
+            the first render.
+          </p>
+        ),
+      },
+      {
+        heading: "When to use useEffect",
+        body: (
+          <p>
+            Reserve <code>useEffect</code> for real synchronization with the outside world:{" "}
+            <code>fetch</code>, subscriptions to DOM or external API events, direct DOM node
+            manipulation, or integration with third-party libraries that operate outside the React
+            tree.
+          </p>
+        ),
+      },
+    ],
+    pitfalls: [
+      "useEffect with setState always produces at least one extra render: the initial one with stale state, and another when the effect updates it.",
+      "Chaining effects (one effect updates state that triggers another effect) is almost always a sign that the logic should live in the render or an event handler.",
+      "fetch inside useEffect without cleanup can update state of an already-unmounted component — always return a function that cancels the request or ignores the response.",
+    ],
+  },
 }
 
 function applyOverrides(concepts: Concept[]): Concept[] {
@@ -2886,6 +3184,7 @@ export const allConcepts: Concept[] = [
   ...applyOverrides(concurrencia),
   ...applyOverrides(composicion),
   ...applyOverrides(entrevistas),
+  ...applyOverrides(practicas),
 ]
 
 export const conceptIndex: Record<string, Concept> = Object.fromEntries(
@@ -2948,5 +3247,11 @@ export const categories: Category[] = [
       "forward-ref",
       "strict-mode",
     ],
+  },
+  {
+    id: "practices",
+    kicker: "VII",
+    title: "Best Practices",
+    conceptIds: ["key-estable", "estado-derivado", "efectos-innecesarios"],
   },
 ]
