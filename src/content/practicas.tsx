@@ -303,4 +303,109 @@ export default function App() {
       "fetch en useEffect sin cleanup puede actualizar estado de un componente ya desmontado — siempre retorna una función que cancela la petición o ignora la respuesta.",
     ],
   },
+  {
+    id: "inmutabilidad-estado",
+    label: "inmutabilidad",
+    kicker: "Práctica · Estado",
+    title: "Nunca mutes el estado directamente",
+    lede: "React detecta cambios comparando referencias, no valores internos. Si mutas un array u objeto directamente, la referencia sigue siendo la misma y React no sabe que algo cambió — el componente no se re-renderiza.",
+    sections: [
+      {
+        heading: "El problema",
+        body: (
+          <p>
+            Operaciones como <code>array.push()</code>, <code>array.splice()</code> o{" "}
+            <code>obj.propiedad = valor</code> modifican el objeto original en memoria. Como la
+            referencia no cambia, React asume que el estado es idéntico al anterior y omite el
+            re-render. El bug es silencioso: la lógica se ejecuta, pero la UI no se actualiza.
+          </p>
+        ),
+      },
+      {
+        heading: "La solución",
+        body: (
+          <p>
+            Siempre crea una nueva referencia al actualizar estado. Para arrays usa el spread{" "}
+            <code>[...arr, nuevoItem]</code>, <code>arr.filter()</code> o <code>arr.map()</code> —
+            todos retornan un nuevo array. Para objetos usa{" "}
+            <code>{"{ ...obj, campo: valor }"}</code>. Para estructuras anidadas, copia en cada
+            nivel que cambia.
+          </p>
+        ),
+      },
+    ],
+    playground: (
+      <Playground
+        files={{
+          "/App.js": `import { useState } from "react";
+
+// ❌ MAL: mutación directa — React no ve el cambio
+function ListaMal() {
+  const [items, setItems] = useState(["Manzana", "Banana"]);
+
+  const agregar = () => {
+    items.push("Naranja"); // muta el array original
+    setItems(items);       // misma referencia → React no re-renderiza
+  };
+
+  const eliminar = () => {
+    items.splice(0, 1);  // muta el array original
+    setItems(items);
+  };
+
+  return (
+    <div style={{ marginBottom: 32 }}>
+      <strong>❌ Mutación directa</strong>
+      <ul>{items.map((it, i) => <li key={i}>{it}</li>)}</ul>
+      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+        <button onClick={agregar}>Agregar Naranja</button>
+        <button onClick={eliminar}>Eliminar primero</button>
+      </div>
+      <p style={{ fontSize: 12, color: "#888" }}>Los botones no actualizan la UI</p>
+    </div>
+  );
+}
+
+// ✅ BIEN: nueva referencia en cada actualización
+function ListaBien() {
+  const [items, setItems] = useState(["Manzana", "Banana"]);
+
+  const agregar = () => {
+    setItems((prev) => [...prev, "Naranja"]); // nuevo array
+  };
+
+  const eliminar = () => {
+    setItems((prev) => prev.slice(1)); // nuevo array
+  };
+
+  return (
+    <div>
+      <strong>✅ Nueva referencia</strong>
+      <ul>{items.map((it, i) => <li key={i}>{it}</li>)}</ul>
+      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+        <button onClick={agregar}>Agregar Naranja</button>
+        <button onClick={eliminar}>Eliminar primero</button>
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <div style={{ fontFamily: "system-ui", padding: 24 }}>
+      <ListaMal />
+      <ListaBien />
+    </div>
+  );
+}
+`,
+        }}
+      />
+    ),
+    pitfalls: [
+      "array.push(), array.pop(), array.splice() y array.sort() mutan el array original — nunca los uses directamente sobre estado.",
+      "Para objetos anidados debes copiar en cada nivel: { ...obj, nested: { ...obj.nested, campo: valor } }. Considera Immer si la estructura es muy profunda.",
+      "structuredClone() hace una copia profunda pero es costoso — úsalo solo cuando necesitas clonar un objeto complejo que no puedes copiar nivel por nivel.",
+    ],
+  },
 ]
