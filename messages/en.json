@@ -269,6 +269,11 @@
     "noExercises": "You have not completed any exercises yet.",
     "basic": "Basic",
     "intermediate": "Intermediate",
-    "advanced": "Advanced"
+    "advanced": "Advanced",
+    "nextRank": "Next rank",
+    "maxRank": "Maximum rank reached",
+    "scoreLabel": "score",
+    "ofTotal": "of {total}",
+    "signInButton": "Sign in with GitHub"
   }
 }

@@ -58,7 +58,7 @@ export default async function ProfileRoute({ params }: Props) {
           <h2 className="text-fg font-mono text-lg font-bold">{t("signIn")}</h2>
           <p className="text-fg-muted mt-2 max-w-sm text-sm">{t("signInDesc")}</p>
         </div>
-        <GitHubSignInButton label="Sign in with GitHub" />
+        <GitHubSignInButton label={t("signInButton")} />
       </div>
     )
   }
