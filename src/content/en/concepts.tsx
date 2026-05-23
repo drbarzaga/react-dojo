@@ -3167,6 +3167,109 @@ export default function App() {
       "fetch inside useEffect without cleanup can update state of an already-unmounted component — always return a function that cancels the request or ignores the response.",
     ],
   },
+  "inmutabilidad-estado": {
+    label: "immutability",
+    kicker: "Practice · State",
+    title: "Never mutate state directly",
+    lede: "React detects changes by comparing references, not internal values. If you mutate an array or object directly, the reference stays the same and React doesn't know anything changed — the component won't re-render.",
+    sections: [
+      {
+        heading: "The problem",
+        body: (
+          <p>
+            Operations like <code>array.push()</code>, <code>array.splice()</code>, or{" "}
+            <code>obj.property = value</code> modify the original object in memory. Since the
+            reference doesn't change, React assumes the state is identical to the previous one and
+            skips the re-render. The bug is silent: the logic runs, but the UI doesn't update.
+          </p>
+        ),
+      },
+      {
+        heading: "The solution",
+        body: (
+          <p>
+            Always create a new reference when updating state. For arrays use spread{" "}
+            <code>[...arr, newItem]</code>, <code>arr.filter()</code>, or <code>arr.map()</code> —
+            they all return a new array. For objects use <code>{"{ ...obj, field: value }"}</code>.
+            For nested structures, copy at every level that changes.
+          </p>
+        ),
+      },
+    ],
+    playground: (
+      <Playground
+        files={{
+          "/App.js": `import { useState } from "react";
+
+// ❌ BAD: direct mutation — React doesn't see the change
+function ListBad() {
+  const [items, setItems] = useState(["Apple", "Banana"]);
+
+  const add = () => {
+    items.push("Orange"); // mutates the original array
+    setItems(items);      // same reference → React won't re-render
+  };
+
+  const remove = () => {
+    items.splice(0, 1);  // mutates the original array
+    setItems(items);
+  };
+
+  return (
+    <div style={{ marginBottom: 32 }}>
+      <strong>❌ Direct mutation</strong>
+      <ul>{items.map((it, i) => <li key={i}>{it}</li>)}</ul>
+      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+        <button onClick={add}>Add Orange</button>
+        <button onClick={remove}>Remove first</button>
+      </div>
+      <p style={{ fontSize: 12, color: "#888" }}>Buttons don't update the UI</p>
+    </div>
+  );
+}
+
+// ✅ GOOD: new reference on every update
+function ListGood() {
+  const [items, setItems] = useState(["Apple", "Banana"]);
+
+  const add = () => {
+    setItems((prev) => [...prev, "Orange"]); // new array
+  };
+
+  const remove = () => {
+    setItems((prev) => prev.slice(1)); // new array
+  };
+
+  return (
+    <div>
+      <strong>✅ New reference</strong>
+      <ul>{items.map((it, i) => <li key={i}>{it}</li>)}</ul>
+      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+        <button onClick={add}>Add Orange</button>
+        <button onClick={remove}>Remove first</button>
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <div style={{ fontFamily: "system-ui", padding: 24 }}>
+      <ListBad />
+      <ListGood />
+    </div>
+  );
+}
+`,
+        }}
+      />
+    ),
+    pitfalls: [
+      "array.push(), array.pop(), array.splice(), and array.sort() all mutate the original array — never call them directly on state.",
+      "For nested objects you must copy at each level: { ...obj, nested: { ...obj.nested, field: value } }. Consider Immer if the structure is deeply nested.",
+      "structuredClone() performs a deep copy but is expensive — use it only when you need to clone a complex object you can't copy level by level.",
+    ],
+  },
 }
 
 function applyOverrides(concepts: Concept[]): Concept[] {
@@ -3252,6 +3355,6 @@ export const categories: Category[] = [
     id: "practices",
     kicker: "VII",
     title: "Best Practices",
-    conceptIds: ["key-estable", "estado-derivado", "efectos-innecesarios"],
+    conceptIds: ["key-estable", "estado-derivado", "efectos-innecesarios", "inmutabilidad-estado"],
   },
 ]
