@@ -249,5 +249,26 @@
     "cta": "Donate via PayPal",
     "ctaKofi": "Support React Dojo on Ko-fi",
     "note": "Every contribution, no matter the size, is greatly appreciated."
+  },
+  "Profile": {
+    "title": "My Profile",
+    "memberSince": "Member since",
+    "signIn": "Sign in to view your profile",
+    "signInDesc": "Your progress, rank and stats all in one place.",
+    "concepts": "Concepts",
+    "exercises": "Exercises",
+    "quizzes": "Quizzes",
+    "visited": "visited",
+    "completed": "completed",
+    "attempted": "attempted",
+    "overallProgress": "Overall progress",
+    "byCategory": "Progress by category",
+    "quizScores": "Quiz scores",
+    "completedExercises": "Completed exercises",
+    "noQuizzes": "You have not attempted any quizzes yet.",
+    "noExercises": "You have not completed any exercises yet.",
+    "basic": "Basic",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced"
   }
 }

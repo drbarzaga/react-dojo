@@ -168,6 +168,7 @@ export function Sidebar({ initialState }: SidebarProps) {
   const isQuizRoute = current.startsWith("quiz/")
   const isHooksRoute = current === "hooks" || current.startsWith("hooks/")
   const isDirectoryRoute = current === "directory" || current.startsWith("directory/")
+  const isProfileRoute = current === "profile"
   const activeExId = isExerciseRoute ? current.slice(6) : null
 
   const totalConcepts = allConcepts.length
@@ -623,37 +624,50 @@ export function Sidebar({ initialState }: SidebarProps) {
             </button>
           </div>
           {session ? (
-            <div className="border-sidebar-border/50 bg-sidebar-accent/25 hover:border-sidebar-border hover:bg-sidebar-accent/40 mt-1 flex items-center gap-2.5 rounded-lg border p-2 transition-colors">
-              <div className="ring-sidebar-border/40 shrink-0 rounded-full ring-1">
-                {session.user.image ? (
-                  <Image
-                    src={session.user.image}
-                    alt={session.user.name}
-                    width={36}
-                    height={36}
-                    className="rounded-full"
-                  />
-                ) : (
-                  <div className="bg-sidebar-accent text-sidebar-foreground/80 flex h-9 w-9 items-center justify-center rounded-full text-[14px] font-bold">
-                    {session.user.name[0]}
-                  </div>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sidebar-foreground truncate text-[12px] leading-tight font-medium">
-                  {session.user.name}
-                </p>
-                <p className="text-sidebar-foreground/45 truncate text-[10px] leading-tight">
-                  {session.user.email}
-                </p>
-              </div>
+            <div
+              className={cn(
+                "mt-1 flex items-center gap-2.5 rounded-lg border p-2 transition-colors",
+                isProfileRoute
+                  ? "border-sidebar-border bg-sidebar-accent/40"
+                  : "border-sidebar-border/50 bg-sidebar-accent/25 hover:border-sidebar-border hover:bg-sidebar-accent/40"
+              )}
+            >
+              <button
+                type="button"
+                onClick={() => push("/profile")}
+                className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-left"
+              >
+                <div className="ring-sidebar-border/40 shrink-0 rounded-full ring-1">
+                  {session.user.image ? (
+                    <Image
+                      src={session.user.image}
+                      alt={session.user.name}
+                      width={36}
+                      height={36}
+                      className="rounded-full"
+                    />
+                  ) : (
+                    <div className="bg-sidebar-accent text-sidebar-foreground/80 flex h-9 w-9 items-center justify-center rounded-full text-[14px] font-bold">
+                      {session.user.name[0]}
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sidebar-foreground truncate text-[12px] leading-tight font-medium">
+                    {session.user.name}
+                  </p>
+                  <p className="text-sidebar-foreground/45 truncate text-[10px] leading-tight">
+                    {session.user.email}
+                  </p>
+                </div>
+              </button>
               <Tooltip>
                 <TooltipTrigger
                   aria-label="Sign out"
                   className="text-sidebar-foreground/35 hover:bg-sidebar-accent hover:text-sidebar-foreground/85 grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-md transition-colors"
                   onClick={async () => {
                     await authClient.signOut()
-                    if (current.startsWith("directory")) {
+                    if (current.startsWith("directory") || current === "profile") {
                       push("/")
                     }
                   }}
