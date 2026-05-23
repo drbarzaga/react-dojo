@@ -116,28 +116,28 @@ function ScoreRing({
   color: string
   animated: boolean
 }) {
-  const r = 40
+  const r = 46
   const circ = 2 * Math.PI * r
   const offset = circ * (1 - (animated ? score : 0) / 100)
 
   return (
-    <svg width="96" height="96" viewBox="0 0 96 96" className="-rotate-90">
+    <svg width="112" height="112" viewBox="0 0 112 112" className="-rotate-90">
       <circle
-        cx="48"
-        cy="48"
+        cx="56"
+        cy="56"
         r={r}
         fill="none"
         stroke="currentColor"
-        strokeWidth="7"
+        strokeWidth="8"
         className="text-white/8"
       />
       <circle
-        cx="48"
-        cy="48"
+        cx="56"
+        cy="56"
         r={r}
         fill="none"
         stroke={color}
-        strokeWidth="7"
+        strokeWidth="8"
         strokeLinecap="round"
         strokeDasharray={circ}
         strokeDashoffset={offset}
@@ -195,21 +195,21 @@ function AnimatedStat({
   const pct = Math.min((value / total) * 100, 100)
 
   return (
-    <div className="border-line/60 flex flex-col gap-1 rounded-2xl border bg-white/3 p-5">
-      <span className="text-[10px] font-semibold tracking-[0.18em] text-white/40 uppercase">
+    <div className="border-line/50 flex flex-col gap-1.5 rounded-2xl border bg-white/[0.025] p-5 transition-colors hover:bg-white/[0.04]">
+      <span className="text-[10px] font-semibold tracking-[0.18em] text-white/35 uppercase">
         {label}
       </span>
       <div className="flex items-end gap-1.5">
         <span className="font-mono text-4xl leading-none font-bold text-white">{animated}</span>
-        <span className="mb-0.5 font-mono text-[13px] text-white/30">
+        <span className="mb-0.5 font-mono text-[13px] text-white/25">
           {t("ofTotal", { total })}
         </span>
       </div>
-      <span className="text-[11px] text-white/35">{sublabel}</span>
-      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/8">
+      <span className="text-[11px] text-white/30">{sublabel}</span>
+      <div className="mt-2.5 h-[3px] w-full overflow-hidden rounded-full bg-white/8">
         <div
           className="h-full rounded-full transition-all duration-1000"
-          style={{ width: `${pct}%`, background: accent }}
+          style={{ width: `${pct}%`, background: accent, boxShadow: `0 0 8px ${accent}80` }}
         />
       </div>
     </div>
@@ -265,18 +265,32 @@ export function ProfilePage({
 
   // Hero gradient from rank color
   const heroGradient: Record<string, string> = {
-    "text-yellow-400": "from-yellow-500/15 via-yellow-500/5 to-transparent",
-    "text-orange-400": "from-orange-500/15 via-orange-500/5 to-transparent",
-    "text-purple-400": "from-purple-500/15 via-purple-500/5 to-transparent",
-    "text-blue-400": "from-blue-500/15 via-blue-500/5 to-transparent",
-    "text-cyan-400": "from-cyan-500/15 via-cyan-500/5 to-transparent",
-    "text-green-400": "from-green-500/15 via-green-500/5 to-transparent",
-    "text-emerald-400": "from-emerald-500/15 via-emerald-500/5 to-transparent",
-    "text-emerald-500": "from-emerald-500/15 via-emerald-500/5 to-transparent",
-    "text-zinc-400": "from-zinc-500/10 via-zinc-500/5 to-transparent",
-    "text-zinc-500": "from-zinc-500/8 via-zinc-500/3 to-transparent",
+    "text-yellow-400": "from-yellow-500/10 via-yellow-500/3 to-transparent",
+    "text-orange-400": "from-orange-500/10 via-orange-500/3 to-transparent",
+    "text-purple-400": "from-purple-500/10 via-purple-500/3 to-transparent",
+    "text-blue-400": "from-blue-500/10 via-blue-500/3 to-transparent",
+    "text-cyan-400": "from-cyan-500/10 via-cyan-500/3 to-transparent",
+    "text-green-400": "from-green-500/10 via-green-500/3 to-transparent",
+    "text-emerald-400": "from-emerald-500/10 via-emerald-500/3 to-transparent",
+    "text-emerald-500": "from-emerald-500/10 via-emerald-500/3 to-transparent",
+    "text-zinc-400": "from-zinc-500/7 via-zinc-500/2 to-transparent",
+    "text-zinc-500": "from-zinc-500/5 via-zinc-500/1 to-transparent",
   }
-  const gradient = heroGradient[rank.textColor] ?? "from-zinc-500/8 to-transparent"
+  const gradient = heroGradient[rank.textColor] ?? "from-zinc-500/6 to-transparent"
+
+  const avatarRingMap: Record<string, string> = {
+    "text-yellow-400": "ring-yellow-400/50",
+    "text-orange-400": "ring-orange-400/50",
+    "text-purple-400": "ring-purple-400/50",
+    "text-blue-400": "ring-blue-400/50",
+    "text-cyan-400": "ring-cyan-400/50",
+    "text-green-400": "ring-green-400/50",
+    "text-emerald-400": "ring-emerald-400/50",
+    "text-emerald-500": "ring-emerald-500/50",
+    "text-zinc-400": "ring-white/15",
+    "text-zinc-500": "ring-white/10",
+  }
+  const avatarRing = avatarRingMap[rank.textColor] ?? "ring-white/15"
 
   const formatDate = (d: Date | string) =>
     new Date(d).toLocaleDateString(undefined, { month: "long", year: "numeric" })
@@ -295,7 +309,7 @@ export function ProfilePage({
       {/* ── Hero card ─────────────────────────────────────────────── */}
       <div
         className={cn(
-          "border-line/60 relative mb-6 overflow-hidden rounded-3xl border bg-linear-to-br",
+          "border-line/60 relative mb-6 overflow-hidden rounded-3xl border bg-linear-to-r",
           gradient
         )}
       >
@@ -317,17 +331,22 @@ export function ProfilePage({
                 alt={user.name}
                 width={80}
                 height={80}
-                className="rounded-2xl ring-2 ring-white/15"
+                className={cn("rounded-2xl ring-2", avatarRing)}
               />
             ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white/8 font-mono text-3xl font-bold text-white/60 ring-2 ring-white/10">
+              <div
+                className={cn(
+                  "flex h-20 w-20 items-center justify-center rounded-2xl bg-white/8 font-mono text-3xl font-bold text-white/60 ring-2",
+                  avatarRing
+                )}
+              >
                 {user.name[0].toUpperCase()}
               </div>
             )}
-            {/* Rank dot */}
+            {/* Rank badge */}
             <span
               className={cn(
-                "absolute -right-1.5 -bottom-1.5 rounded-full border-2 border-black px-1.5 py-0.5 font-mono text-[9px] font-bold",
+                "absolute -right-2 -bottom-2 rounded-full border-2 border-[#0d0d0d] px-2 py-0.5 font-mono text-[9px] font-bold tracking-wide",
                 rank.color,
                 rank.textColor
               )}
@@ -373,57 +392,69 @@ export function ProfilePage({
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <span className="text-[13px] text-yellow-400">✦</span>
-                <span className="font-mono text-[12px] text-yellow-400/80">{t("maxRank")}</span>
+              <div
+                className={cn(
+                  "inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1",
+                  rank.color,
+                  rank.textColor,
+                  "border-current/20"
+                )}
+              >
+                <span className="text-[9px]">✦</span>
+                <span className="font-mono text-[11px] font-semibold">{t("maxRank")}</span>
               </div>
             )}
           </div>
 
           {/* Score ring */}
-          <div className="relative shrink-0 self-center">
+          <div
+            className="relative shrink-0 self-center"
+            style={{ filter: `drop-shadow(0 0 20px ${strokeColor}55)` }}
+          >
             <ScoreRing score={score} color={strokeColor} animated={mounted} />
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="font-mono text-2xl leading-none font-bold text-white">
+              <span className="font-mono text-3xl leading-none font-bold text-white">
                 {animatedScore}
               </span>
-              <span className="font-mono text-[10px] text-white/30">{t("scoreLabel")}</span>
+              <span className="mt-0.5 font-mono text-[10px] text-white/30">{t("scoreLabel")}</span>
             </div>
           </div>
         </div>
 
         {/* Rank ladder strip */}
-        <div className="border-t border-white/6 px-6 py-3 sm:px-8">
-          <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
+        <div className="border-t border-white/6 px-6 py-5 sm:px-8">
+          <div className="relative flex justify-between">
+            {/* Track line */}
+            <div className="absolute inset-x-0 top-[8px] h-px bg-white/8" />
             {[...RANK_LADDER].reverse().map((r) => {
               const isActive = r.label === rank.label
               const isPast = RANK_LADDER.findIndex((x) => x.label === r.label) > currentIdx
               return (
-                <div
-                  key={r.label}
-                  className={cn(
-                    "flex shrink-0 flex-col items-center gap-0.5 rounded-lg border px-2 py-1.5 transition-all",
-                    isActive
-                      ? cn("border", r.border, r.bg, "scale-105 shadow-sm")
-                      : isPast
-                        ? "border-transparent opacity-30"
-                        : "border-transparent opacity-50"
-                  )}
-                >
+                <div key={r.label} className="relative z-10 flex flex-col items-center gap-2">
+                  <div
+                    className={cn(
+                      "flex h-4 w-4 items-center justify-center rounded-full border transition-all duration-300",
+                      isActive
+                        ? cn(r.bg, r.border, "scale-[1.25] shadow-sm")
+                        : isPast
+                          ? "border-white/20 bg-white/12"
+                          : "border-white/12 bg-transparent"
+                    )}
+                  >
+                    {isActive && (
+                      <div
+                        className={cn("h-1.5 w-1.5 rounded-full", r.color.replace("text-", "bg-"))}
+                      />
+                    )}
+                  </div>
                   <span
                     className={cn(
-                      "font-mono text-[9px] font-bold",
-                      isActive ? r.color : "text-white/50"
+                      "font-mono text-[7.5px] font-bold whitespace-nowrap",
+                      isActive ? r.color : isPast ? "text-white/22" : "text-white/30"
                     )}
                   >
                     {r.label}
                   </span>
-                  <div
-                    className={cn(
-                      "h-1 w-4 rounded-full",
-                      isActive ? r.color.replace("text-", "bg-") : "bg-white/15"
-                    )}
-                  />
                 </div>
               )
             })}
@@ -513,15 +544,15 @@ export function ProfilePage({
                 >
                   <span className="text-fg-muted min-w-0 truncate text-[12px]">{q.label}</span>
                   <div className="ml-3 flex shrink-0 items-center gap-2">
-                    <div className="h-1 w-14 overflow-hidden rounded-full bg-white/8">
+                    <div className="h-[3px] w-16 overflow-hidden rounded-full bg-white/8">
                       <div
                         className={cn(
                           "h-full rounded-full",
                           q.score >= 80
-                            ? "bg-emerald-400/70"
+                            ? "bg-emerald-400/80"
                             : q.score >= 50
-                              ? "bg-amber-400/70"
-                              : "bg-rose-400/70"
+                              ? "bg-amber-400/80"
+                              : "bg-rose-400/80"
                         )}
                         style={{ width: `${q.score}%` }}
                       />
