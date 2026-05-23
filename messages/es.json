@@ -249,5 +249,26 @@
     "cta": "Donar vía PayPal",
     "ctaKofi": "Donar vía Ko-fi",
     "note": "Toda contribución, sin importar el monto, es muy apreciada."
+  },
+  "Profile": {
+    "title": "Mi Perfil",
+    "memberSince": "Miembro desde",
+    "signIn": "Inicia sesión para ver tu perfil",
+    "signInDesc": "Tu progreso, rango y estadísticas en un solo lugar.",
+    "concepts": "Conceptos",
+    "exercises": "Ejercicios",
+    "quizzes": "Quizzes",
+    "visited": "visitados",
+    "completed": "completados",
+    "attempted": "intentados",
+    "overallProgress": "Progreso global",
+    "byCategory": "Progreso por categoría",
+    "quizScores": "Resultados de quizzes",
+    "completedExercises": "Ejercicios completados",
+    "noQuizzes": "Aún no has intentado ningún quiz.",
+    "noExercises": "Aún no has completado ningún ejercicio.",
+    "basic": "Básico",
+    "intermediate": "Intermedio",
+    "advanced": "Avanzado"
   }
 }
