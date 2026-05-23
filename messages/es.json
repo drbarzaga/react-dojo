@@ -269,6 +269,11 @@
     "noExercises": "Aún no has completado ningún ejercicio.",
     "basic": "Básico",
     "intermediate": "Intermedio",
-    "advanced": "Avanzado"
+    "advanced": "Avanzado",
+    "nextRank": "Próximo rango",
+    "maxRank": "Rango máximo alcanzado",
+    "scoreLabel": "score",
+    "ofTotal": "de {total}",
+    "signInButton": "Iniciar sesión con GitHub"
   }
 }
