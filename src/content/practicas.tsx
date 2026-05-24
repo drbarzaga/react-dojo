@@ -1,4 +1,8 @@
 import { Playground } from "@/components/playground"
+import { EstadoDerivadoAnimation } from "@/components/remotion/EstadoDerivadoAnimation"
+import { EfectosAnimation } from "@/components/remotion/EfectosAnimation"
+import { InmutabilidadAnimation } from "@/components/remotion/InmutabilidadAnimation"
+import { KeyStableAnimation } from "@/components/remotion/KeyStableAnimation"
 import type { Concept } from "./types"
 
 export const practicas: Concept[] = [
@@ -19,6 +23,9 @@ export const practicas: Concept[] = [
             animaciones, foco) queda atado al nodo equivocado.
           </p>
         ),
+      },
+      {
+        body: <KeyStableAnimation />,
       },
       {
         heading: "La regla",
@@ -105,6 +112,9 @@ export default function App() {
             uno introduce un bug silencioso.
           </p>
         ),
+      },
+      {
+        body: <EstadoDerivadoAnimation />,
       },
       {
         heading: "La solución",
@@ -207,6 +217,9 @@ export default function App() {
             ejecutarse después del primer render.
           </p>
         ),
+      },
+      {
+        body: <EfectosAnimation />,
       },
       {
         heading: "Cuándo SÍ usar useEffect",
@@ -320,6 +333,9 @@ export default function App() {
             re-render. El bug es silencioso: la lógica se ejecuta, pero la UI no se actualiza.
           </p>
         ),
+      },
+      {
+        body: <InmutabilidadAnimation />,
       },
       {
         heading: "La solución",
