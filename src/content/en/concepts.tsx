@@ -6,6 +6,10 @@ import { composicion } from "@/content/composicion"
 import { entrevistas } from "@/content/entrevistas"
 import { practicas } from "@/content/practicas"
 import { Playground } from "@/components/playground"
+import { KeyStableAnimation } from "@/components/remotion/KeyStableAnimation"
+import { EstadoDerivadoAnimation } from "@/components/remotion/EstadoDerivadoAnimation"
+import { EfectosAnimation } from "@/components/remotion/EfectosAnimation"
+import { InmutabilidadAnimation } from "@/components/remotion/InmutabilidadAnimation"
 import type { Concept, Category } from "@/content/types"
 
 export type { Concept, Category, Section } from "@/content/types"
@@ -2938,6 +2942,9 @@ export default function App() {
         ),
       },
       {
+        body: <KeyStableAnimation />,
+      },
+      {
         heading: "The rule",
         body: (
           <p>
@@ -3037,6 +3044,9 @@ export default function App() {
             introduces a silent bug.
           </p>
         ),
+      },
+      {
+        body: <EstadoDerivadoAnimation />,
       },
       {
         heading: "The solution",
@@ -3150,6 +3160,9 @@ export default function App() {
         ),
       },
       {
+        body: <EfectosAnimation />,
+      },
+      {
         heading: "When to use useEffect",
         body: (
           <p>
@@ -3183,6 +3196,9 @@ export default function App() {
             skips the re-render. The bug is silent: the logic runs, but the UI doesn't update.
           </p>
         ),
+      },
+      {
+        body: <InmutabilidadAnimation />,
       },
       {
         heading: "The solution",

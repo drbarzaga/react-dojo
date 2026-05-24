@@ -63,16 +63,20 @@ export function ConceptPage({ concept, prev, next }: ConceptPageProps) {
       <Separator className="border-line mt-12" />
 
       <div className="mt-10 space-y-10">
-        {concept.sections.map((s, i) => (
-          <section key={i}>
-            {s.heading && (
+        {concept.sections.map((s, i) =>
+          s.heading ? (
+            <section key={i}>
               <h2 className="text-fg mb-3 text-[13px] font-semibold tracking-widest uppercase">
                 {s.heading}
               </h2>
-            )}
-            <div className="prose">{s.body}</div>
-          </section>
-        ))}
+              <div className="prose">{s.body}</div>
+            </section>
+          ) : (
+            <section key={i} className="-mx-5 overflow-hidden md:-mx-12">
+              {s.body}
+            </section>
+          )
+        )}
       </div>
 
       <div className="-mx-8 mt-12 md:-mx-12 lg:-mx-24">{concept.playground}</div>
