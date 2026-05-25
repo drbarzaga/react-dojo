@@ -808,33 +808,82 @@ export default function App() {
     playground: (
       <Playground
         files={{
-          "/App.js": `import { memo, useCallback, useState } from "react";
+          "/App.js": `import { memo, useCallback, useState, useRef, useEffect } from "react";
 
-const Item = memo(function Item({ label, onClick }) {
-  console.log("render Item:", label);
-  return <button onClick={onClick} style={{ marginRight: 6 }}>{label}</button>;
+function useRenderFlash(name) {
+  const ref = useRef(null);
+  const count = useRef(0);
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    count.current += 1;
+    const el = ref.current;
+    if (!el) return;
+    el.style.position = "relative";
+    el.style.transition = "none";
+    el.style.outline = "1.5px solid #fb923c";
+    el.style.backgroundColor = "rgba(251,146,60,0.1)";
+    let chip = el.querySelector("[data-rf]");
+    if (!chip) {
+      chip = document.createElement("div");
+      chip.setAttribute("data-rf", "");
+      chip.style.cssText = "position:absolute;top:0;left:0;background:#fb923c;color:#fff;font:bold 9px/1 monospace;padding:2px 5px;border-radius:0 0 3px 0;pointer-events:none;z-index:9999;white-space:nowrap;";
+      el.appendChild(chip);
+    }
+    chip.textContent = name + " ×" + count.current;
+    chip.style.opacity = "1";
+    chip.style.transition = "none";
+    const t = setTimeout(() => {
+      el.style.transition = "outline 0.6s, background-color 0.6s";
+      el.style.outline = "1.5px solid transparent";
+      el.style.backgroundColor = "transparent";
+      chip.style.transition = "opacity 0.6s";
+      chip.style.opacity = "0";
+    }, 500);
+    return () => clearTimeout(t);
+  });
+  return ref;
+}
+
+// ❌ memo but receives a new function on every render → re-renders anyway
+const ItemBad = memo(function ItemBad({ onAction }) {
+  const ref = useRenderFlash("ItemBad");
+  return (
+    <div ref={ref} style={{ padding: "12px 16px", border: "1px solid #333", borderRadius: 6 }}>
+      <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: "bold", whiteSpace: "nowrap" }}>❌ without useCallback</p>
+      <p style={{ margin: 0, fontSize: 11, color: "#888", whiteSpace: "nowrap" }}>new function every render</p>
+    </div>
+  );
+});
+
+// ✅ memo + stable callback → skips the re-render
+const ItemGood = memo(function ItemGood({ onAction }) {
+  const ref = useRenderFlash("ItemGood");
+  return (
+    <div ref={ref} style={{ padding: "12px 16px", border: "1px solid #333", borderRadius: 6 }}>
+      <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: "bold", whiteSpace: "nowrap" }}>✅ with useCallback</p>
+      <p style={{ margin: 0, fontSize: 11, color: "#888", whiteSpace: "nowrap" }}>stable reference</p>
+    </div>
+  );
 });
 
 export default function App() {
-  const [count, setCount] = useState(0);
-  const [other, setOther] = useState(0);
+  const [tick, setTick] = useState(0);
 
-  // Without useCallback, Item would re-render even with memo.
-  const handleA = useCallback(() => setCount((c) => c + 1), []);
-  const handleB = useCallback(() => setCount((c) => c - 1), []);
+  const handleBad = () => {};
+  const handleGood = useCallback(() => {}, []);
 
   return (
     <div style={{ fontFamily: "system-ui", padding: 24 }}>
-      <p>count: {count} · other: {other}</p>
-      <Item label="+1" onClick={handleA} />
-      <Item label="−1" onClick={handleB} />
-      <hr style={{ margin: "16px 0" }} />
-      <button onClick={() => setOther((x) => x + 1)}>
-        change ONLY 'other' ({other})
+      <button onClick={() => setTick((t) => t + 1)} style={{ marginBottom: 20 }}>
+        Re-render App (tick: {tick})
       </button>
-      <p style={{ color: "var(--fg-muted)", fontSize: 13, marginTop: 8 }}>
-        Open the console: Item does NOT re-render when 'other' changes
-        thanks to memo + stable callback.
+      <div style={{ display: "flex", gap: 16 }}>
+        <ItemBad onAction={handleBad} />
+        <ItemGood onAction={handleGood} />
+      </div>
+      <p style={{ color: "#888", fontSize: 12, marginTop: 16 }}>
+        Click the button — only ItemBad flashes because it receives a new function on every render.
       </p>
     </div>
   );
@@ -877,12 +926,47 @@ export default function App() {
     playground: (
       <Playground
         files={{
-          "/App.js": `import { memo, useMemo, useState } from "react";
+          "/App.js": `import { memo, useMemo, useState, useRef, useEffect } from "react";
+
+function useRenderFlash(name) {
+  const ref = useRef(null);
+  const count = useRef(0);
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    count.current += 1;
+    const el = ref.current;
+    if (!el) return;
+    el.style.position = "relative";
+    el.style.transition = "none";
+    el.style.outline = "1.5px solid #fb923c";
+    el.style.backgroundColor = "rgba(251,146,60,0.1)";
+    let chip = el.querySelector("[data-rf]");
+    if (!chip) {
+      chip = document.createElement("div");
+      chip.setAttribute("data-rf", "");
+      chip.style.cssText = "position:absolute;top:0;left:0;background:#fb923c;color:#fff;font:bold 9px/1 monospace;padding:2px 5px;border-radius:0 0 3px 0;pointer-events:none;z-index:9999;white-space:nowrap;";
+      el.appendChild(chip);
+    }
+    chip.textContent = name + " ×" + count.current;
+    chip.style.opacity = "1";
+    chip.style.transition = "none";
+    const t = setTimeout(() => {
+      el.style.transition = "outline 0.6s, background-color 0.6s";
+      el.style.outline = "1.5px solid transparent";
+      el.style.backgroundColor = "transparent";
+      chip.style.transition = "opacity 0.6s";
+      chip.style.opacity = "0";
+    }, 500);
+    return () => clearTimeout(t);
+  });
+  return ref;
+}
 
 const Card = memo(function Card({ user }) {
-  console.log("render Card:", user.name);
+  const ref = useRenderFlash("Card");
   return (
-    <div style={{ padding: 12, background: "var(--surface-1)", borderRadius: 4, marginTop: 6, border: "1px solid var(--line)"}}>
+    <div ref={ref} style={{ padding: 12, background: "var(--surface-1)", borderRadius: 4, marginTop: 6, border: "1px solid var(--line)"}}>
       <strong>{user.name}</strong> · {user.role}
     </div>
   );
@@ -903,7 +987,7 @@ export default function App() {
       <button onClick={() => setTick((t) => t + 1)}>+1 tick</button>
 
       <p style={{ marginTop: 16, marginBottom: 0, fontSize: 13, color: "var(--fg-muted)" }}>
-        Without stabilizing (re-renders every tick):
+        Without stabilizing — re-renders every tick:
       </p>
       <Card user={userUnstable} />
 
@@ -912,8 +996,8 @@ export default function App() {
       </p>
       <Card user={userStable} />
 
-      <p style={{ color: "var(--fg-muted)", fontSize: 12, marginTop: 12 }}>
-        Open the console and click +1 tick. You'll see Ada every time, Lin only once.
+      <p style={{ color: "#888", fontSize: 12, marginTop: 12 }}>
+        Click +1 tick — only Ada's Card flashes.
       </p>
     </div>
   );
@@ -3072,7 +3156,27 @@ export default function App() {
     playground: (
       <Playground
         files={{
-          "/App.js": `import { useState, useEffect } from "react";
+          "/App.js": `import { useState, useEffect, useRef } from "react";
+
+function useRenderFlash() {
+  const ref = useRef(null);
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    const el = ref.current;
+    if (!el) return;
+    el.style.transition = "none";
+    el.style.outline = "1.5px solid #fb923c";
+    el.style.backgroundColor = "rgba(251,146,60,0.1)";
+    const t = setTimeout(() => {
+      el.style.transition = "outline 0.6s, background-color 0.6s";
+      el.style.outline = "1.5px solid transparent";
+      el.style.backgroundColor = "transparent";
+    }, 500);
+    return () => clearTimeout(t);
+  });
+  return ref;
+}
 
 const products = [
   { id: 1, name: "Monitor", category: "tech", price: 300 },
@@ -3082,13 +3186,15 @@ const products = [
   { id: 5, name: "Headphones", category: "tech", price: 120 },
 ];
 
-// ❌ BAD: useEffect to filter (causes extra render)
-function FilterBad() {
-  const [category, setCategory] = useState("all");
+// ❌ BAD: keeps filtered in state — useEffect syncs it (extra render)
+function FilterBad({ category }) {
+  const ref = useRenderFlash();
+  const renders = useRef(0);
+  renders.current += 1;
+
   const [filtered, setFiltered] = useState(products);
 
   useEffect(() => {
-    // This runs AFTER the render — there's a render with stale data
     setFiltered(
       category === "all"
         ? products
@@ -3097,48 +3203,56 @@ function FilterBad() {
   }, [category]);
 
   return (
-    <div style={{ marginBottom: 32 }}>
-      <strong>❌ useEffect to filter</strong>
-      <select value={category} onChange={(e) => setCategory(e.target.value)}
-        style={{ display: "block", margin: "8px 0" }}>
-        <option value="all">All</option>
-        <option value="tech">Tech</option>
-        <option value="furniture">Furniture</option>
-      </select>
-      <ul>{filtered.map((p) => <li key={p.id}>{p.name} — \${p.price}</li>)}</ul>
+    <div ref={ref} style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "nowrap" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}>❌ useEffect</span>
+        <code style={{ fontSize: 11, color: "#fb923c", background: "rgba(251,146,60,0.12)", padding: "1px 6px", borderRadius: 4, whiteSpace: "nowrap" }}>×{renders.current}</code>
+      </div>
+      <ul style={{ margin: 0, paddingLeft: 16 }}>{filtered.map((p) => <li key={p.id}>{p.name}</li>)}</ul>
     </div>
   );
 }
 
-// ✅ GOOD: filter during render
-function FilterGood() {
-  const [category, setCategory] = useState("all");
+// ✅ GOOD: derives filtered from prop — one render
+function FilterGood({ category }) {
+  const ref = useRenderFlash();
+  const renders = useRef(0);
+  renders.current += 1;
 
-  // Computed during render, always fresh, no effect needed
   const filtered =
     category === "all"
       ? products
       : products.filter((p) => p.category === category);
 
   return (
-    <div>
-      <strong>✅ Filtered in render</strong>
-      <select value={category} onChange={(e) => setCategory(e.target.value)}
-        style={{ display: "block", margin: "8px 0" }}>
-        <option value="all">All</option>
-        <option value="tech">Tech</option>
-        <option value="furniture">Furniture</option>
-      </select>
-      <ul>{filtered.map((p) => <li key={p.id}>{p.name} — \${p.price}</li>)}</ul>
+    <div ref={ref} style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "nowrap" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}>✅ render</span>
+        <code style={{ fontSize: 11, color: "#fb923c", background: "rgba(251,146,60,0.12)", padding: "1px 6px", borderRadius: 4, whiteSpace: "nowrap" }}>×{renders.current}</code>
+      </div>
+      <ul style={{ margin: 0, paddingLeft: 16 }}>{filtered.map((p) => <li key={p.id}>{p.name}</li>)}</ul>
     </div>
   );
 }
 
 export default function App() {
+  const [category, setCategory] = useState("all");
+
   return (
     <div style={{ fontFamily: "system-ui", padding: 24 }}>
-      <FilterBad />
-      <FilterGood />
+      <p style={{ fontSize: 12, color: "#888", marginBottom: 8 }}>
+        One selector updates both — the render counter diverges with each change.
+      </p>
+      <select value={category} onChange={(e) => setCategory(e.target.value)}
+        style={{ marginBottom: 16 }}>
+        <option value="all">All</option>
+        <option value="tech">Tech</option>
+        <option value="furniture">Furniture</option>
+      </select>
+      <div style={{ display: "flex", gap: 32 }}>
+        <FilterBad category={category} />
+        <FilterGood category={category} />
+      </div>
     </div>
   );
 }
@@ -3322,12 +3436,55 @@ export default function App() {
     playground: (
       <Playground
         files={{
-          "/App.js": `import { useState } from "react";
+          "/App.js": `import { useState, useRef, useEffect } from "react";
+
+function useRenderFlash(name) {
+  const ref = useRef(null);
+  const count = useRef(0);
+  const first = useRef(true);
+
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    count.current += 1;
+    const el = ref.current;
+    if (!el) return;
+
+    el.style.position = "relative";
+    el.style.transition = "none";
+    el.style.outline = "1.5px solid #fb923c";
+    el.style.backgroundColor = "rgba(251,146,60,0.1)";
+
+    let chip = el.querySelector("[data-rf]");
+    if (!chip) {
+      chip = document.createElement("div");
+      chip.setAttribute("data-rf", "");
+      chip.style.cssText =
+        "position:absolute;top:0;left:0;background:#fb923c;color:#fff;" +
+        "font:bold 9px/1 monospace;padding:2px 5px;border-radius:0 0 3px 0;" +
+        "pointer-events:none;z-index:9999;white-space:nowrap;";
+      el.appendChild(chip);
+    }
+    chip.textContent = name + " ×" + count.current;
+    chip.style.opacity = "1";
+    chip.style.transition = "none";
+
+    const t = setTimeout(() => {
+      el.style.transition = "outline 0.6s, background-color 0.6s";
+      el.style.outline = "1.5px solid transparent";
+      el.style.backgroundColor = "transparent";
+      chip.style.transition = "opacity 0.6s";
+      chip.style.opacity = "0";
+    }, 500);
+
+    return () => clearTimeout(t);
+  });
+
+  return ref;
+}
 
 // ❌ BAD: open lives in App even though only Dropdown uses it
 function AppBad() {
   const [open, setOpen] = useState(false);
-
   return (
     <div style={{ marginBottom: 32 }}>
       <strong>❌ State in the parent</strong>
@@ -3357,23 +3514,23 @@ function AppGood() {
 }
 
 function Header({ label }) {
-  console.log("Header render");
-  return <div style={{ padding: "6px 0", borderBottom: "1px solid #eee" }}>{label}</div>;
+  const ref = useRenderFlash("Header");
+  return <div ref={ref} style={{ padding: "6px 0", borderBottom: "1px solid #eee" }}>{label}</div>;
 }
 
 function Sidebar({ links }) {
-  console.log("Sidebar render");
+  const ref = useRenderFlash("Sidebar");
   return (
-    <ul style={{ fontSize: 13, margin: "6px 0", paddingLeft: 16 }}>
+    <ul ref={ref} style={{ fontSize: 13, margin: "6px 0", paddingLeft: 16 }}>
       {links.map((l) => <li key={l}>{l}</li>)}
     </ul>
   );
 }
 
 function Dropdown({ open, onToggle }) {
-  console.log("Dropdown render");
+  const ref = useRenderFlash("Dropdown");
   return (
-    <div>
+    <div ref={ref}>
       <button onClick={onToggle}>{open ? "▲ Close" : "▼ Open"}</button>
       {open && <div style={{ padding: 8, border: "1px solid #ddd", marginTop: 4 }}>Dropdown content</div>}
     </div>
@@ -3382,9 +3539,9 @@ function Dropdown({ open, onToggle }) {
 
 function DropdownColocated() {
   const [open, setOpen] = useState(false);
-  console.log("DropdownColocated render");
+  const ref = useRenderFlash("Dropdown");
   return (
-    <div>
+    <div ref={ref}>
       <button onClick={() => setOpen((o) => !o)}>{open ? "▲ Close" : "▼ Open"}</button>
       {open && <div style={{ padding: 8, border: "1px solid #ddd", marginTop: 4 }}>Dropdown content</div>}
     </div>
@@ -3395,7 +3552,7 @@ export default function App() {
   return (
     <div style={{ fontFamily: "system-ui", padding: 24 }}>
       <p style={{ fontSize: 12, color: "#888", marginBottom: 16 }}>
-        Open the console and click the buttons to see which components re-render.
+        Click the buttons — the orange outline and label show each re-render.
       </p>
       <AppBad />
       <AppGood />

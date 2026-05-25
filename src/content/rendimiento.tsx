@@ -113,33 +113,82 @@ export default function App() {
     playground: (
       <Playground
         files={{
-          "/App.js": `import { memo, useCallback, useState } from "react";
+          "/App.js": `import { memo, useCallback, useState, useRef, useEffect } from "react";
 
-const Item = memo(function Item({ label, onClick }) {
-  console.log("render Item:", label);
-  return <button onClick={onClick} style={{ marginRight: 6 }}>{label}</button>;
+function useRenderFlash(name) {
+  const ref = useRef(null);
+  const count = useRef(0);
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    count.current += 1;
+    const el = ref.current;
+    if (!el) return;
+    el.style.position = "relative";
+    el.style.transition = "none";
+    el.style.outline = "1.5px solid #fb923c";
+    el.style.backgroundColor = "rgba(251,146,60,0.1)";
+    let chip = el.querySelector("[data-rf]");
+    if (!chip) {
+      chip = document.createElement("div");
+      chip.setAttribute("data-rf", "");
+      chip.style.cssText = "position:absolute;top:0;left:0;background:#fb923c;color:#fff;font:bold 9px/1 monospace;padding:2px 5px;border-radius:0 0 3px 0;pointer-events:none;z-index:9999;white-space:nowrap;";
+      el.appendChild(chip);
+    }
+    chip.textContent = name + " ×" + count.current;
+    chip.style.opacity = "1";
+    chip.style.transition = "none";
+    const t = setTimeout(() => {
+      el.style.transition = "outline 0.6s, background-color 0.6s";
+      el.style.outline = "1.5px solid transparent";
+      el.style.backgroundColor = "transparent";
+      chip.style.transition = "opacity 0.6s";
+      chip.style.opacity = "0";
+    }, 500);
+    return () => clearTimeout(t);
+  });
+  return ref;
+}
+
+// ❌ memo pero recibe función nueva en cada render → se re-renderiza igual
+const ItemMal = memo(function ItemMal({ onAction }) {
+  const ref = useRenderFlash("ItemMal");
+  return (
+    <div ref={ref} style={{ padding: "12px 16px", border: "1px solid #333", borderRadius: 6 }}>
+      <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: "bold", whiteSpace: "nowrap" }}>❌ sin useCallback</p>
+      <p style={{ margin: 0, fontSize: 11, color: "#888", whiteSpace: "nowrap" }}>función nueva en cada render</p>
+    </div>
+  );
+});
+
+// ✅ memo + callback estable → se salta el re-render
+const ItemBien = memo(function ItemBien({ onAction }) {
+  const ref = useRenderFlash("ItemBien");
+  return (
+    <div ref={ref} style={{ padding: "12px 16px", border: "1px solid #333", borderRadius: 6 }}>
+      <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: "bold", whiteSpace: "nowrap" }}>✅ con useCallback</p>
+      <p style={{ margin: 0, fontSize: 11, color: "#888", whiteSpace: "nowrap" }}>referencia estable</p>
+    </div>
+  );
 });
 
 export default function App() {
-  const [count, setCount] = useState(0);
-  const [other, setOther] = useState(0);
+  const [tick, setTick] = useState(0);
 
-  // Sin useCallback, Item se re-renderizaría aunque memo esté.
-  const handleA = useCallback(() => setCount((c) => c + 1), []);
-  const handleB = useCallback(() => setCount((c) => c - 1), []);
+  const handleMal = () => {};
+  const handleBien = useCallback(() => {}, []);
 
   return (
     <div style={{ fontFamily: "system-ui", padding: 24 }}>
-      <p>count: {count} · other: {other}</p>
-      <Item label="+1" onClick={handleA} />
-      <Item label="−1" onClick={handleB} />
-      <hr style={{ margin: "16px 0" }} />
-      <button onClick={() => setOther((x) => x + 1)}>
-        cambiar SOLO 'other' ({other})
+      <button onClick={() => setTick((t) => t + 1)} style={{ marginBottom: 20 }}>
+        Re-renderizar App (tick: {tick})
       </button>
-      <p style={{ color: "var(--fg-muted)", fontSize: 13, marginTop: 8 }}>
-        Abre la consola y mira: Item NO se re-renderiza al cambiar 'other'
-        gracias a memo + callback estable.
+      <div style={{ display: "flex", gap: 16 }}>
+        <ItemMal onAction={handleMal} />
+        <ItemBien onAction={handleBien} />
+      </div>
+      <p style={{ color: "#888", fontSize: 12, marginTop: 16 }}>
+        Haz clic en el botón — solo ItemMal flashea porque recibe una función nueva en cada render.
       </p>
     </div>
   );
@@ -184,12 +233,47 @@ export default function App() {
     playground: (
       <Playground
         files={{
-          "/App.js": `import { memo, useMemo, useState } from "react";
+          "/App.js": `import { memo, useMemo, useState, useRef, useEffect } from "react";
+
+function useRenderFlash(name) {
+  const ref = useRef(null);
+  const count = useRef(0);
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    count.current += 1;
+    const el = ref.current;
+    if (!el) return;
+    el.style.position = "relative";
+    el.style.transition = "none";
+    el.style.outline = "1.5px solid #fb923c";
+    el.style.backgroundColor = "rgba(251,146,60,0.1)";
+    let chip = el.querySelector("[data-rf]");
+    if (!chip) {
+      chip = document.createElement("div");
+      chip.setAttribute("data-rf", "");
+      chip.style.cssText = "position:absolute;top:0;left:0;background:#fb923c;color:#fff;font:bold 9px/1 monospace;padding:2px 5px;border-radius:0 0 3px 0;pointer-events:none;z-index:9999;white-space:nowrap;";
+      el.appendChild(chip);
+    }
+    chip.textContent = name + " ×" + count.current;
+    chip.style.opacity = "1";
+    chip.style.transition = "none";
+    const t = setTimeout(() => {
+      el.style.transition = "outline 0.6s, background-color 0.6s";
+      el.style.outline = "1.5px solid transparent";
+      el.style.backgroundColor = "transparent";
+      chip.style.transition = "opacity 0.6s";
+      chip.style.opacity = "0";
+    }, 500);
+    return () => clearTimeout(t);
+  });
+  return ref;
+}
 
 const Card = memo(function Card({ user }) {
-  console.log("render Card:", user.name);
+  const ref = useRenderFlash("Card");
   return (
-    <div style={{ padding: 12, background: "var(--surface-1)", borderRadius: 4, marginTop: 6, border: "1px solid var(--line)"}}>
+    <div ref={ref} style={{ padding: 12, background: "var(--surface-1)", borderRadius: 4, marginTop: 6, border: "1px solid var(--line)"}}>
       <strong>{user.name}</strong> · {user.role}
     </div>
   );
@@ -210,17 +294,17 @@ export default function App() {
       <button onClick={() => setTick((t) => t + 1)}>+1 tick</button>
 
       <p style={{ marginTop: 16, marginBottom: 0, fontSize: 13, color: "var(--fg-muted)" }}>
-        Sin estabilizar (re-renderiza en cada tick):
+        Sin estabilizar — re-renderiza en cada tick:
       </p>
       <Card user={userUnstable} />
 
-      <p style={{ marginTop: 16, marginBottom: 0, fontSize: 13, color: "var(--fg)" }}>
-        Con useMemo (NO re-renderiza):
+      <p style={{ marginTop: 16, marginBottom: 0, fontSize: 13 }}>
+        Con useMemo — NO re-renderiza:
       </p>
       <Card user={userStable} />
 
-      <p style={{ color: "var(--fg-muted)", fontSize: 12, marginTop: 12 }}>
-        Abre la consola y haz click en +1 tick. Verás Ada cada vez, Lin solo una.
+      <p style={{ color: "#888", fontSize: 12, marginTop: 12 }}>
+        Haz clic en +1 tick — solo la Card de Ada flashea.
       </p>
     </div>
   );

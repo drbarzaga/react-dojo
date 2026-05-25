@@ -567,6 +567,7 @@ interface PlaygroundProps {
   showConsole?: boolean
   height?: number
   dependencies?: Record<string, string>
+  externalResources?: string[]
   exerciseId?: string
   enablePersistence?: boolean
   objectives?: string[]
@@ -582,6 +583,7 @@ export function Playground({
   showConsole = false,
   height = 650,
   dependencies,
+  externalResources,
   exerciseId,
   enablePersistence = false,
   objectives,
@@ -799,6 +801,7 @@ export function Playground({
           theme={themeWithFont}
           files={initialFiles}
           customSetup={sandpackCustomSetup}
+          options={externalResources ? { externalResources } : undefined}
         >
           <ThemeSync appTheme={appTheme} />
           {enablePersistence && exerciseId && (
