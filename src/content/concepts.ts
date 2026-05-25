@@ -84,6 +84,12 @@ export const categories: Category[] = [
     id: "practices",
     kicker: "VII",
     title: "Buenas prácticas",
-    conceptIds: ["key-estable", "estado-derivado", "efectos-innecesarios", "inmutabilidad-estado"],
+    conceptIds: [
+      "key-estable",
+      "estado-derivado",
+      "efectos-innecesarios",
+      "inmutabilidad-estado",
+      "colocacion-estado",
+    ],
   },
 ]

@@ -1,4 +1,5 @@
 import { Playground } from "@/components/playground"
+import { ColocacionEstadoAnimation } from "@/components/remotion/ColocacionEstadoAnimation"
 import { EstadoDerivadoAnimation } from "@/components/remotion/EstadoDerivadoAnimation"
 import { EfectosAnimation } from "@/components/remotion/EfectosAnimation"
 import { InmutabilidadAnimation } from "@/components/remotion/InmutabilidadAnimation"
@@ -422,6 +423,133 @@ export default function App() {
       "array.push(), array.pop(), array.splice() y array.sort() mutan el array original — nunca los uses directamente sobre estado.",
       "Para objetos anidados debes copiar en cada nivel: { ...obj, nested: { ...obj.nested, campo: valor } }. Considera Immer si la estructura es muy profunda.",
       "structuredClone() hace una copia profunda pero es costoso — úsalo solo cuando necesitas clonar un objeto complejo que no puedes copiar nivel por nivel.",
+    ],
+  },
+  {
+    id: "colocacion-estado",
+    label: "colocación de estado",
+    kicker: "Práctica · Estado",
+    title: "El estado más cerca de quien lo usa",
+    lede: "Cuando el estado vive más arriba de lo necesario en el árbol, cada cambio re-renderiza componentes que no lo necesitan. La regla: empieza con el estado lo más local posible y súbelo solo cuando dos o más componentes necesiten compartirlo.",
+    sections: [
+      {
+        heading: "El problema",
+        body: (
+          <p>
+            Si <code>useState</code> está en <code>App</code> pero solo lo usa <code>Dropdown</code>
+            , cada vez que ese estado cambia React re-renderiza <code>App</code> y todos sus hijos —
+            incluyendo <code>Header</code> y <code>Sidebar</code>, que no tienen nada que ver con el
+            estado. El resultado son renders innecesarios que crecen con el árbol.
+          </p>
+        ),
+      },
+      {
+        body: <ColocacionEstadoAnimation />,
+      },
+      {
+        heading: "La solución",
+        body: (
+          <p>
+            Mueve el estado al componente que lo necesita. Si solo <code>Dropdown</code> usa{" "}
+            <code>open</code>, el <code>useState</code> va dentro de <code>Dropdown</code>. Cuando
+            el estado cambia, solo ese componente re-renderiza. El árbol exterior no se entera. Sube
+            el estado al padre únicamente cuando dos componentes hermanos necesiten leerlo o
+            escribirlo.
+          </p>
+        ),
+      },
+    ],
+    playground: (
+      <Playground
+        files={{
+          "/App.js": `import { useState } from "react";
+
+// ❌ MAL: open vive en App aunque solo Dropdown lo usa
+function AppMal() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div style={{ marginBottom: 32 }}>
+      <strong>❌ Estado en el padre</strong>
+      <p style={{ fontSize: 12, color: "#888" }}>
+        Header y Sidebar re-renderizan cada vez que open cambia.
+      </p>
+      <Header label="Mi App" />
+      <Sidebar links={["Inicio", "Perfil"]} />
+      <Dropdown open={open} onToggle={() => setOpen((o) => !o)} />
+    </div>
+  );
+}
+
+// ✅ BIEN: open vive dentro de Dropdown, el único que lo necesita
+function AppBien() {
+  return (
+    <div>
+      <strong>✅ Estado colocado</strong>
+      <p style={{ fontSize: 12, color: "#888" }}>
+        Solo Dropdown re-renderiza cuando open cambia.
+      </p>
+      <Header label="Mi App" />
+      <Sidebar links={["Inicio", "Perfil"]} />
+      <DropdownColocado />
+    </div>
+  );
+}
+
+function Header({ label }) {
+  console.log("Header render");
+  return <div style={{ padding: "6px 0", borderBottom: "1px solid #eee" }}>{label}</div>;
+}
+
+function Sidebar({ links }) {
+  console.log("Sidebar render");
+  return (
+    <ul style={{ fontSize: 13, margin: "6px 0", paddingLeft: 16 }}>
+      {links.map((l) => <li key={l}>{l}</li>)}
+    </ul>
+  );
+}
+
+function Dropdown({ open, onToggle }) {
+  console.log("Dropdown render");
+  return (
+    <div>
+      <button onClick={onToggle}>{open ? "▲ Cerrar" : "▼ Abrir"}</button>
+      {open && <div style={{ padding: 8, border: "1px solid #ddd", marginTop: 4 }}>Contenido del dropdown</div>}
+    </div>
+  );
+}
+
+function DropdownColocado() {
+  const [open, setOpen] = useState(false);
+  console.log("DropdownColocado render");
+  return (
+    <div>
+      <button onClick={() => setOpen((o) => !o)}>{open ? "▲ Cerrar" : "▼ Abrir"}</button>
+      {open && <div style={{ padding: 8, border: "1px solid #ddd", marginTop: 4 }}>Contenido del dropdown</div>}
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <div style={{ fontFamily: "system-ui", padding: 24 }}>
+      <p style={{ fontSize: 12, color: "#888", marginBottom: 16 }}>
+        Abre la consola y haz clic en los botones para ver qué componentes re-renderizan.
+      </p>
+      <AppMal />
+      <AppBien />
+    </div>
+  );
+}
+`,
+        }}
+      />
+    ),
+    pitfalls: [
+      "No levantes el estado 'por si acaso' lo necesitas arriba más tarde — YAGNI. Muévelo hacia arriba solo cuando dos componentes hermanos lo necesiten de verdad.",
+      "Si descubres que necesitas el estado en dos ramas distintas del árbol, considera Context o un store global — pero solo cuando el drilling real te lo exija.",
+      "Colocar estado local no impide que componentes hijos usen memo para evitar renders por cambios de props no relacionados.",
     ],
   },
 ]

@@ -9,6 +9,7 @@ import { Playground } from "@/components/playground"
 import { KeyStableAnimation } from "@/components/remotion/KeyStableAnimation"
 import { EstadoDerivadoAnimation } from "@/components/remotion/EstadoDerivadoAnimation"
 import { EfectosAnimation } from "@/components/remotion/EfectosAnimation"
+import { ColocacionEstadoAnimation } from "@/components/remotion/ColocacionEstadoAnimation"
 import { InmutabilidadAnimation } from "@/components/remotion/InmutabilidadAnimation"
 import type { Concept, Category } from "@/content/types"
 
@@ -3286,6 +3287,131 @@ export default function App() {
       "structuredClone() performs a deep copy but is expensive — use it only when you need to clone a complex object you can't copy level by level.",
     ],
   },
+  "colocacion-estado": {
+    label: "state colocation",
+    kicker: "Practice · State",
+    title: "Keep state close to where it's used",
+    lede: "When state lives higher in the tree than necessary, every update re-renders components that don't use it. The rule: start with state as local as possible and lift it only when two or more components need to share it.",
+    sections: [
+      {
+        heading: "The problem",
+        body: (
+          <p>
+            If <code>useState</code> is in <code>App</code> but only <code>Dropdown</code> uses it,
+            every state change causes React to re-render <code>App</code> and all its children —
+            including <code>Header</code> and <code>Sidebar</code>, which have nothing to do with
+            that state. The result: unnecessary renders that grow with the tree.
+          </p>
+        ),
+      },
+      {
+        body: <ColocacionEstadoAnimation />,
+      },
+      {
+        heading: "The solution",
+        body: (
+          <p>
+            Move the state to the component that needs it. If only <code>Dropdown</code> uses{" "}
+            <code>open</code>, the <code>useState</code> belongs inside <code>Dropdown</code>. When
+            the state changes, only that component re-renders — the rest of the tree is untouched.
+            Lift state to a parent only when two sibling components both need to read or write it.
+          </p>
+        ),
+      },
+    ],
+    playground: (
+      <Playground
+        files={{
+          "/App.js": `import { useState } from "react";
+
+// ❌ BAD: open lives in App even though only Dropdown uses it
+function AppBad() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div style={{ marginBottom: 32 }}>
+      <strong>❌ State in the parent</strong>
+      <p style={{ fontSize: 12, color: "#888" }}>
+        Header and Sidebar re-render every time open changes.
+      </p>
+      <Header label="My App" />
+      <Sidebar links={["Home", "Profile"]} />
+      <Dropdown open={open} onToggle={() => setOpen((o) => !o)} />
+    </div>
+  );
+}
+
+// ✅ GOOD: open lives inside Dropdown, the only one that needs it
+function AppGood() {
+  return (
+    <div>
+      <strong>✅ Colocated state</strong>
+      <p style={{ fontSize: 12, color: "#888" }}>
+        Only Dropdown re-renders when open changes.
+      </p>
+      <Header label="My App" />
+      <Sidebar links={["Home", "Profile"]} />
+      <DropdownColocated />
+    </div>
+  );
+}
+
+function Header({ label }) {
+  console.log("Header render");
+  return <div style={{ padding: "6px 0", borderBottom: "1px solid #eee" }}>{label}</div>;
+}
+
+function Sidebar({ links }) {
+  console.log("Sidebar render");
+  return (
+    <ul style={{ fontSize: 13, margin: "6px 0", paddingLeft: 16 }}>
+      {links.map((l) => <li key={l}>{l}</li>)}
+    </ul>
+  );
+}
+
+function Dropdown({ open, onToggle }) {
+  console.log("Dropdown render");
+  return (
+    <div>
+      <button onClick={onToggle}>{open ? "▲ Close" : "▼ Open"}</button>
+      {open && <div style={{ padding: 8, border: "1px solid #ddd", marginTop: 4 }}>Dropdown content</div>}
+    </div>
+  );
+}
+
+function DropdownColocated() {
+  const [open, setOpen] = useState(false);
+  console.log("DropdownColocated render");
+  return (
+    <div>
+      <button onClick={() => setOpen((o) => !o)}>{open ? "▲ Close" : "▼ Open"}</button>
+      {open && <div style={{ padding: 8, border: "1px solid #ddd", marginTop: 4 }}>Dropdown content</div>}
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <div style={{ fontFamily: "system-ui", padding: 24 }}>
+      <p style={{ fontSize: 12, color: "#888", marginBottom: 16 }}>
+        Open the console and click the buttons to see which components re-render.
+      </p>
+      <AppBad />
+      <AppGood />
+    </div>
+  );
+}
+`,
+        }}
+      />
+    ),
+    pitfalls: [
+      "Don't lift state 'just in case' you need it higher later — YAGNI. Move it up only when two sibling components genuinely need it.",
+      "If you find state is needed in two distinct branches of the tree, consider Context or a global store — but only when real prop drilling forces the issue.",
+      "Colocating local state doesn't prevent child components from using memo to skip renders caused by unrelated prop changes.",
+    ],
+  },
 }
 
 function applyOverrides(concepts: Concept[]): Concept[] {
@@ -3371,6 +3497,12 @@ export const categories: Category[] = [
     id: "practices",
     kicker: "VII",
     title: "Best Practices",
-    conceptIds: ["key-estable", "estado-derivado", "efectos-innecesarios", "inmutabilidad-estado"],
+    conceptIds: [
+      "key-estable",
+      "estado-derivado",
+      "efectos-innecesarios",
+      "inmutabilidad-estado",
+      "colocacion-estado",
+    ],
   },
 ]
