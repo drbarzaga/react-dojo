@@ -237,7 +237,27 @@ export default function App() {
     playground: (
       <Playground
         files={{
-          "/App.js": `import { useState, useEffect } from "react";
+          "/App.js": `import { useState, useEffect, useRef } from "react";
+
+function useRenderFlash() {
+  const ref = useRef(null);
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    const el = ref.current;
+    if (!el) return;
+    el.style.transition = "none";
+    el.style.outline = "1.5px solid #fb923c";
+    el.style.backgroundColor = "rgba(251,146,60,0.1)";
+    const t = setTimeout(() => {
+      el.style.transition = "outline 0.6s, background-color 0.6s";
+      el.style.outline = "1.5px solid transparent";
+      el.style.backgroundColor = "transparent";
+    }, 500);
+    return () => clearTimeout(t);
+  });
+  return ref;
+}
 
 const productos = [
   { id: 1, nombre: "Monitor", categoria: "tech", precio: 300 },
@@ -247,13 +267,15 @@ const productos = [
   { id: 5, nombre: "Auriculares", categoria: "tech", precio: 120 },
 ];
 
-// ❌ MAL: useEffect para filtrar (causa render extra)
-function FiltroMal() {
-  const [categoria, setCategoria] = useState("todos");
+// ❌ MAL: guarda filtrados en estado — useEffect lo sincroniza (render extra)
+function FiltroMal({ categoria }) {
+  const ref = useRenderFlash();
+  const renders = useRef(0);
+  renders.current += 1;
+
   const [filtrados, setFiltrados] = useState(productos);
 
   useEffect(() => {
-    // Esto corre DESPUÉS del render — hay un render con datos viejos
     setFiltrados(
       categoria === "todos"
         ? productos
@@ -262,48 +284,56 @@ function FiltroMal() {
   }, [categoria]);
 
   return (
-    <div style={{ marginBottom: 32 }}>
-      <strong>❌ useEffect para filtrar</strong>
-      <select value={categoria} onChange={(e) => setCategoria(e.target.value)}
-        style={{ display: "block", margin: "8px 0" }}>
-        <option value="todos">Todos</option>
-        <option value="tech">Tech</option>
-        <option value="muebles">Muebles</option>
-      </select>
-      <ul>{filtrados.map((p) => <li key={p.id}>{p.nombre} — \${p.precio}</li>)}</ul>
+    <div ref={ref} style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "nowrap" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}>❌ useEffect</span>
+        <code style={{ fontSize: 11, color: "#fb923c", background: "rgba(251,146,60,0.12)", padding: "1px 6px", borderRadius: 4, whiteSpace: "nowrap" }}>×{renders.current}</code>
+      </div>
+      <ul style={{ margin: 0, paddingLeft: 16 }}>{filtrados.map((p) => <li key={p.id}>{p.nombre}</li>)}</ul>
     </div>
   );
 }
 
-// ✅ BIEN: filtrar durante el render
-function FiltroBien() {
-  const [categoria, setCategoria] = useState("todos");
+// ✅ BIEN: deriva filtrados del prop — un solo render
+function FiltroBien({ categoria }) {
+  const ref = useRenderFlash();
+  const renders = useRef(0);
+  renders.current += 1;
 
-  // Calculado en el render, siempre fresco, sin efecto
   const filtrados =
     categoria === "todos"
       ? productos
       : productos.filter((p) => p.categoria === categoria);
 
   return (
-    <div>
-      <strong>✅ Filtrado en render</strong>
-      <select value={categoria} onChange={(e) => setCategoria(e.target.value)}
-        style={{ display: "block", margin: "8px 0" }}>
-        <option value="todos">Todos</option>
-        <option value="tech">Tech</option>
-        <option value="muebles">Muebles</option>
-      </select>
-      <ul>{filtrados.map((p) => <li key={p.id}>{p.nombre} — \${p.precio}</li>)}</ul>
+    <div ref={ref} style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "nowrap" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}>✅ render</span>
+        <code style={{ fontSize: 11, color: "#fb923c", background: "rgba(251,146,60,0.12)", padding: "1px 6px", borderRadius: 4, whiteSpace: "nowrap" }}>×{renders.current}</code>
+      </div>
+      <ul style={{ margin: 0, paddingLeft: 16 }}>{filtrados.map((p) => <li key={p.id}>{p.nombre}</li>)}</ul>
     </div>
   );
 }
 
 export default function App() {
+  const [categoria, setCategoria] = useState("todos");
+
   return (
     <div style={{ fontFamily: "system-ui", padding: 24 }}>
-      <FiltroMal />
-      <FiltroBien />
+      <p style={{ fontSize: 12, color: "#888", marginBottom: 8 }}>
+        Un selector actualiza ambos — el contador de renders diverge con cada cambio.
+      </p>
+      <select value={categoria} onChange={(e) => setCategoria(e.target.value)}
+        style={{ marginBottom: 16 }}>
+        <option value="todos">Todos</option>
+        <option value="tech">Tech</option>
+        <option value="muebles">Muebles</option>
+      </select>
+      <div style={{ display: "flex", gap: 32 }}>
+        <FiltroMal categoria={categoria} />
+        <FiltroBien categoria={categoria} />
+      </div>
     </div>
   );
 }
@@ -462,12 +492,55 @@ export default function App() {
     playground: (
       <Playground
         files={{
-          "/App.js": `import { useState } from "react";
+          "/App.js": `import { useState, useRef, useEffect } from "react";
+
+function useRenderFlash(name) {
+  const ref = useRef(null);
+  const count = useRef(0);
+  const first = useRef(true);
+
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    count.current += 1;
+    const el = ref.current;
+    if (!el) return;
+
+    el.style.position = "relative";
+    el.style.transition = "none";
+    el.style.outline = "1.5px solid #fb923c";
+    el.style.backgroundColor = "rgba(251,146,60,0.1)";
+
+    let chip = el.querySelector("[data-rf]");
+    if (!chip) {
+      chip = document.createElement("div");
+      chip.setAttribute("data-rf", "");
+      chip.style.cssText =
+        "position:absolute;top:0;left:0;background:#fb923c;color:#fff;" +
+        "font:bold 9px/1 monospace;padding:2px 5px;border-radius:0 0 3px 0;" +
+        "pointer-events:none;z-index:9999;white-space:nowrap;";
+      el.appendChild(chip);
+    }
+    chip.textContent = name + " ×" + count.current;
+    chip.style.opacity = "1";
+    chip.style.transition = "none";
+
+    const t = setTimeout(() => {
+      el.style.transition = "outline 0.6s, background-color 0.6s";
+      el.style.outline = "1.5px solid transparent";
+      el.style.backgroundColor = "transparent";
+      chip.style.transition = "opacity 0.6s";
+      chip.style.opacity = "0";
+    }, 500);
+
+    return () => clearTimeout(t);
+  });
+
+  return ref;
+}
 
 // ❌ MAL: open vive en App aunque solo Dropdown lo usa
 function AppMal() {
   const [open, setOpen] = useState(false);
-
   return (
     <div style={{ marginBottom: 32 }}>
       <strong>❌ Estado en el padre</strong>
@@ -497,23 +570,23 @@ function AppBien() {
 }
 
 function Header({ label }) {
-  console.log("Header render");
-  return <div style={{ padding: "6px 0", borderBottom: "1px solid #eee" }}>{label}</div>;
+  const ref = useRenderFlash("Header");
+  return <div ref={ref} style={{ padding: "6px 0", borderBottom: "1px solid #eee" }}>{label}</div>;
 }
 
 function Sidebar({ links }) {
-  console.log("Sidebar render");
+  const ref = useRenderFlash("Sidebar");
   return (
-    <ul style={{ fontSize: 13, margin: "6px 0", paddingLeft: 16 }}>
+    <ul ref={ref} style={{ fontSize: 13, margin: "6px 0", paddingLeft: 16 }}>
       {links.map((l) => <li key={l}>{l}</li>)}
     </ul>
   );
 }
 
 function Dropdown({ open, onToggle }) {
-  console.log("Dropdown render");
+  const ref = useRenderFlash("Dropdown");
   return (
-    <div>
+    <div ref={ref}>
       <button onClick={onToggle}>{open ? "▲ Cerrar" : "▼ Abrir"}</button>
       {open && <div style={{ padding: 8, border: "1px solid #ddd", marginTop: 4 }}>Contenido del dropdown</div>}
     </div>
@@ -522,9 +595,9 @@ function Dropdown({ open, onToggle }) {
 
 function DropdownColocado() {
   const [open, setOpen] = useState(false);
-  console.log("DropdownColocado render");
+  const ref = useRenderFlash("Dropdown");
   return (
-    <div>
+    <div ref={ref}>
       <button onClick={() => setOpen((o) => !o)}>{open ? "▲ Cerrar" : "▼ Abrir"}</button>
       {open && <div style={{ padding: 8, border: "1px solid #ddd", marginTop: 4 }}>Contenido del dropdown</div>}
     </div>
@@ -535,7 +608,7 @@ export default function App() {
   return (
     <div style={{ fontFamily: "system-ui", padding: 24 }}>
       <p style={{ fontSize: 12, color: "#888", marginBottom: 16 }}>
-        Abre la consola y haz clic en los botones para ver qué componentes re-renderizan.
+        Haz clic en los botones — el borde naranja y la etiqueta muestran cada re-render.
       </p>
       <AppMal />
       <AppBien />
