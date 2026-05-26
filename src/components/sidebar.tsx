@@ -27,7 +27,7 @@ import {
 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import Image from "next/image"
-import { usePathname } from "next/navigation"
+import { usePathname } from "@/i18n/navigation"
 import type { ComponentType } from "react"
 import { useEffect, useState } from "react"
 
@@ -144,7 +144,7 @@ interface SidebarProps {
 export function Sidebar({ initialState }: SidebarProps) {
   const t = useTranslations("Sidebar")
   const pathname = usePathname()
-  const { locale, push } = useLocaleRouter()
+  const { push } = useLocaleRouter()
   const { allConcepts, categories, conceptIndex, allExercises, allQuizzes } = useContent()
   const { visitedConcepts, completedExercises, quizScores } = useProgress()
   const { data: session } = useSession()
@@ -155,14 +155,7 @@ export function Sidebar({ initialState }: SidebarProps) {
     advanced: t("advanced"),
   }
 
-  // Strip locale prefix so active-state comparisons work under /en/... and /es/...
-  const rawPath = pathname.slice(1)
-  const current =
-    rawPath === locale
-      ? ""
-      : rawPath.startsWith(`${locale}/`)
-        ? rawPath.slice(locale.length + 1)
-        : rawPath
+  const current = pathname === "/" ? "" : pathname.slice(1)
 
   const isExerciseRoute = current.startsWith("learn/")
   const isQuizRoute = current.startsWith("quiz/")

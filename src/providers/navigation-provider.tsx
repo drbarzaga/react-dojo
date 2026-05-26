@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useTransition, type ReactNode } from "react"
-import { useRouter, useParams } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 
 interface NavigationContextValue {
   isPending: boolean
@@ -12,14 +12,11 @@ const NavigationContext = createContext<NavigationContextValue | null>(null)
 
 export function NavigationProvider({ children }: { children: ReactNode }) {
   const router = useRouter()
-  const params = useParams()
-  const locale = (params.locale as string) || "en"
   const [isPending, startTransition] = useTransition()
 
   const push = (path: string) => {
-    const normalized = path.startsWith("/") ? path : `/${path}`
     startTransition(() => {
-      router.push(`/${locale}${normalized}`)
+      router.push(path)
     })
   }
 
