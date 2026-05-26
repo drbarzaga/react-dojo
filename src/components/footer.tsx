@@ -5,7 +5,7 @@ import { useProgress } from "@/hooks/use-progress"
 import { useContent } from "@/providers/content-provider"
 import { Bug, Heart } from "lucide-react"
 import { useTranslations } from "next-intl"
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { GitHubIcon, ReactIcon } from "./svg-icons"
 
 export function Footer() {

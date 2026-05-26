@@ -12,7 +12,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { PAYPAL_URL, KOFI_URL } from "@/lib/constants"
 import { PayPalIcon } from "./svg-icons"
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 
 const costs = [

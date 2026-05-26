@@ -9,24 +9,15 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { useLocaleRouter } from "@/hooks/use-locale-router"
-import { routing } from "@/i18n/routing"
 import { useContent } from "@/providers/content-provider"
-import { usePathname } from "next/navigation"
-
-function stripLocale(pathname: string) {
-  for (const locale of routing.locales) {
-    if (pathname === `/${locale}`) return "/"
-    if (pathname.startsWith(`/${locale}/`)) return pathname.slice(locale.length + 1)
-  }
-  return pathname
-}
+import { usePathname } from "@/i18n/navigation"
 
 export function BreadcrumbBar() {
   const pathname = usePathname()
   const { push, href } = useLocaleRouter()
   const { allConcepts, allExercises, allQuizzes, categories } = useContent()
 
-  const path = stripLocale(pathname)
+  const path = pathname
 
   let items: { label: string; href?: string }[]
 

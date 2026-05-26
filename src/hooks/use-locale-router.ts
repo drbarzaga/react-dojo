@@ -1,12 +1,12 @@
 "use client"
 
-import { useParams, useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
+import { useLocale } from "next-intl"
 import { useNavigationContext } from "@/providers/navigation-provider"
 
 export function useLocaleRouter() {
   const router = useRouter()
-  const params = useParams()
-  const locale = (params.locale as string) || "en"
+  const locale = useLocale()
   const navCtx = useNavigationContext()
 
   return {
@@ -16,8 +16,7 @@ export function useLocaleRouter() {
       if (navCtx) {
         navCtx.push(path)
       } else {
-        const normalized = path.startsWith("/") ? path : `/${path}`
-        router.push(`/${locale}${normalized}`)
+        router.push(path)
       }
     },
     href(path: string) {
