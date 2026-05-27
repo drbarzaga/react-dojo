@@ -4,6 +4,7 @@ import { EstadoDerivadoAnimation } from "@/components/remotion/EstadoDerivadoAni
 import { EfectosAnimation } from "@/components/remotion/EfectosAnimation"
 import { InmutabilidadAnimation } from "@/components/remotion/InmutabilidadAnimation"
 import { KeyStableAnimation } from "@/components/remotion/KeyStableAnimation"
+import { PropDrillingAnimation } from "@/components/remotion/PropDrillingAnimation"
 import type { Concept } from "./types"
 
 export const practicas: Concept[] = [
@@ -492,24 +493,22 @@ export default function App() {
     playground: (
       <Playground
         files={{
-          "/App.js": `import { useState, useRef, useEffect } from "react";
+          "/useRenderFlash.js": {
+            code: `import { useRef, useEffect } from "react";
 
-function useRenderFlash(name) {
+export function useRenderFlash(name) {
   const ref = useRef(null);
   const count = useRef(0);
   const first = useRef(true);
-
   useEffect(() => {
     if (first.current) { first.current = false; return; }
     count.current += 1;
     const el = ref.current;
     if (!el) return;
-
     el.style.position = "relative";
     el.style.transition = "none";
     el.style.outline = "1.5px solid #fb923c";
     el.style.backgroundColor = "rgba(251,146,60,0.1)";
-
     let chip = el.querySelector("[data-rf]");
     if (!chip) {
       chip = document.createElement("div");
@@ -523,7 +522,6 @@ function useRenderFlash(name) {
     chip.textContent = name + " ×" + count.current;
     chip.style.opacity = "1";
     chip.style.transition = "none";
-
     const t = setTimeout(() => {
       el.style.transition = "outline 0.6s, background-color 0.6s";
       el.style.outline = "1.5px solid transparent";
@@ -531,12 +529,15 @@ function useRenderFlash(name) {
       chip.style.transition = "opacity 0.6s";
       chip.style.opacity = "0";
     }, 500);
-
     return () => clearTimeout(t);
   });
-
   return ref;
 }
+`,
+            hidden: true,
+          },
+          "/App.js": `import { useState } from "react";
+import { useRenderFlash } from "./useRenderFlash";
 
 // ❌ MAL: open vive en App aunque solo Dropdown lo usa
 function AppMal() {
@@ -623,6 +624,197 @@ export default function App() {
       "No levantes el estado 'por si acaso' lo necesitas arriba más tarde — YAGNI. Muévelo hacia arriba solo cuando dos componentes hermanos lo necesiten de verdad.",
       "Si descubres que necesitas el estado en dos ramas distintas del árbol, considera Context o un store global — pero solo cuando el drilling real te lo exija.",
       "Colocar estado local no impide que componentes hijos usen memo para evitar renders por cambios de props no relacionados.",
+    ],
+  },
+  {
+    id: "evitar-prop-drilling",
+    label: "prop drilling",
+    kicker: "Práctica · Composición",
+    title: "Cortar el prop drilling",
+    lede: "Prop drilling es pasar datos a través de capas de componentes que no los usan — solo los reenvían hacia abajo. Cuando el árbol crece, acopla la API de cada capa a los detalles de sus descendientes y hace el código frágil. Context y la composición con children son las herramientas principales para cortarlo.",
+    sections: [
+      {
+        heading: "Cuándo es un problema",
+        body: (
+          <p>
+            Pasar una prop por 2 niveles es normal. El problema aparece cuando componentes
+            intermedios reciben props <em>solo para pasarlas</em> sin usarlas nunca. Cualquier
+            cambio en el consumidor final obliga a tocar todos los intermediarios.
+          </p>
+        ),
+      },
+      {
+        heading: "Dos soluciones",
+        body: (
+          <p>
+            <strong>Context</strong> — ideal para datos globales o semi-globales: usuario activo,
+            tema, locale. El consumidor lee directamente del contexto sin que nadie lo pase.{" "}
+            <strong>Composición</strong> — pasar <code>children</code> o elementos como props evita
+            el tunneling sin necesidad de contexto y suele ser la solución más simple.
+          </p>
+        ),
+      },
+      {
+        body: <PropDrillingAnimation />,
+      },
+    ],
+    playground: (
+      <Playground
+        files={{
+          "/useRenderFlash.js": {
+            code: `import { useRef, useEffect } from "react";
+
+export function useRenderFlash(name) {
+  const ref = useRef(null);
+  const count = useRef(0);
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    count.current += 1;
+    const el = ref.current;
+    if (!el) return;
+    el.style.position = "relative";
+    el.style.transition = "none";
+    el.style.outline = "1.5px solid #fb923c";
+    el.style.backgroundColor = "rgba(251,146,60,0.1)";
+    let chip = el.querySelector("[data-rf]");
+    if (!chip) {
+      chip = document.createElement("div");
+      chip.setAttribute("data-rf", "");
+      chip.style.cssText =
+        "position:absolute;top:0;left:0;background:#fb923c;color:#fff;" +
+        "font:bold 9px/1 monospace;padding:2px 5px;border-radius:0 0 3px 0;" +
+        "pointer-events:none;z-index:9999;white-space:nowrap;";
+      el.appendChild(chip);
+    }
+    chip.textContent = name + " ×" + count.current;
+    chip.style.opacity = "1";
+    chip.style.transition = "none";
+    const t = setTimeout(() => {
+      el.style.transition = "outline 0.6s, background-color 0.6s";
+      el.style.outline = "1.5px solid transparent";
+      el.style.backgroundColor = "transparent";
+      chip.style.transition = "opacity 0.6s";
+      chip.style.opacity = "0";
+    }, 500);
+    return () => clearTimeout(t);
+  });
+  return ref;
+}
+`,
+            hidden: true,
+          },
+          "/App.js": `import { createContext, memo, useContext, useState } from "react";
+import { useRenderFlash } from "./useRenderFlash";
+
+const card = { padding: "6px 10px", border: "1px solid #333", borderRadius: 6, marginTop: 6 };
+
+// ─── ❌ Prop drilling — memo no puede proteger a Layout/Sidebar ───
+
+const UserCardMal = memo(function UserCardMal({ user }) {
+  const ref = useRenderFlash("UserCard");
+  return (
+    <div ref={ref} style={card}>
+      <span style={{ fontSize: 10, color: "#888", fontFamily: "monospace" }}>UserCard</span>
+      <p style={{ margin: "2px 0 0", fontSize: 12 }}>{user.name} · {user.role}</p>
+    </div>
+  );
+});
+const SidebarMal = memo(function SidebarMal({ user }) {
+  const ref = useRenderFlash("Sidebar");
+  return (
+    <div ref={ref} style={card}>
+      <span style={{ fontSize: 10, color: "#888", fontFamily: "monospace" }}>Sidebar</span>
+      <UserCardMal user={user} />
+    </div>
+  );
+});
+const LayoutMal = memo(function LayoutMal({ user }) {
+  const ref = useRenderFlash("Layout");
+  return (
+    <div ref={ref} style={card}>
+      <span style={{ fontSize: 10, color: "#888", fontFamily: "monospace" }}>Layout</span>
+      <SidebarMal user={user} />
+    </div>
+  );
+});
+
+// ─── ✅ Context — memo sí puede proteger a Layout/Sidebar ────────
+
+const UserCtx = createContext(null);
+
+const UserCardBien = memo(function UserCardBien() {
+  const user = useContext(UserCtx);
+  const ref = useRenderFlash("UserCard");
+  return (
+    <div ref={ref} style={card}>
+      <span style={{ fontSize: 10, color: "#888", fontFamily: "monospace" }}>UserCard</span>
+      <p style={{ margin: "2px 0 0", fontSize: 12 }}>{user.name} · {user.role}</p>
+    </div>
+  );
+});
+const SidebarBien = memo(function SidebarBien() {
+  const ref = useRenderFlash("Sidebar");
+  return (
+    <div ref={ref} style={card}>
+      <span style={{ fontSize: 10, color: "#888", fontFamily: "monospace" }}>Sidebar</span>
+      <UserCardBien />
+    </div>
+  );
+});
+const LayoutBien = memo(function LayoutBien() {
+  const ref = useRenderFlash("Layout");
+  return (
+    <div ref={ref} style={card}>
+      <span style={{ fontSize: 10, color: "#888", fontFamily: "monospace" }}>Layout</span>
+      <SidebarBien />
+    </div>
+  );
+});
+
+// ─── App ─────────────────────────────────────────────────────────
+
+const users = [
+  { name: "Ada", role: "Engineer" },
+  { name: "Lin", role: "Designer" },
+  { name: "Max", role: "PM" },
+];
+
+export default function App() {
+  const [idx, setIdx] = useState(0);
+  const user = users[idx];
+  const next = () => setIdx((i) => (i + 1) % users.length);
+
+  return (
+    <div style={{ fontFamily: "system-ui", padding: 24, display: "flex", flexDirection: "column", gap: 24 }}>
+      <button onClick={next} style={{ alignSelf: "flex-start" }}>
+        Cambiar usuario → {user.name}
+      </button>
+      <div>
+        <p style={{ margin: "0 0 4px", fontSize: 12, color: "#f87171", fontWeight: "bold" }}>
+          ❌ Prop drilling — memo no ayuda: user llega como prop
+        </p>
+        <LayoutMal user={user} />
+      </div>
+      <div>
+        <p style={{ margin: "0 0 4px", fontSize: 12, color: "#4ade80", fontWeight: "bold" }}>
+          ✅ Context — solo UserCard re-renderiza
+        </p>
+        <UserCtx.Provider value={user}>
+          <LayoutBien />
+        </UserCtx.Provider>
+      </div>
+    </div>
+  );
+}
+`,
+        }}
+      />
+    ),
+    pitfalls: [
+      "Context no es gratis: cualquier cambio en el valor re-renderiza todos los consumidores. No lo uses para estado que cambia frecuentemente.",
+      "La composición con children suele ser la solución más simple y se olvida con frecuencia — antes de crear un contexto, evalúa si puedes pasar elementos como props.",
+      "No eleves datos a Context solo 'por si acaso' los necesitas en otro lado. Muévelos solo cuando el drilling real sea un problema.",
     ],
   },
 ]

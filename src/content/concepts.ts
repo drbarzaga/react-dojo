@@ -90,6 +90,7 @@ export const categories: Category[] = [
       "efectos-innecesarios",
       "inmutabilidad-estado",
       "colocacion-estado",
+      "evitar-prop-drilling",
     ],
   },
 ]
