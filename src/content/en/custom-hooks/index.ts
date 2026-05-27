@@ -21,6 +21,7 @@ import { useScrollPosition } from "./use-scroll-position"
 import { useIdle } from "./use-idle"
 import { useList } from "./use-list"
 import { useUndoRedo } from "./use-undo-redo"
+import { useGitHubStars } from "./use-github-stars"
 
 import type { CustomHook } from "@/content/custom-hooks/types"
 
@@ -46,6 +47,7 @@ export const allCustomHooks: CustomHook[] = [
   useIdle,
   useList,
   useUndoRedo,
+  useGitHubStars,
 ]
 
 export const customHookIndex: Record<string, CustomHook> = Object.fromEntries(

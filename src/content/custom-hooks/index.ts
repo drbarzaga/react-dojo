@@ -23,6 +23,7 @@ import { useIdle } from "./use-idle"
 import { useResizeObserver } from "./use-resize-observer"
 import { useList } from "./use-list"
 import { useUndoRedo } from "./use-undo-redo"
+import { useGitHubStars } from "./use-github-stars"
 
 export const allCustomHooks: CustomHook[] = [
   useLocalStorage,
@@ -47,6 +48,7 @@ export const allCustomHooks: CustomHook[] = [
   useResizeObserver,
   useList,
   useUndoRedo,
+  useGitHubStars,
 ]
 
 export const customHookIndex: Record<string, CustomHook> = Object.fromEntries(
