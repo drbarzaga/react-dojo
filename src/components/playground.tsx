@@ -825,7 +825,11 @@ export function Playground({
               <SandpackCodeEditor
                 showLineNumbers
                 showInlineErrors
-                showTabs={Object.keys(files).length > 1}
+                showTabs={
+                  Object.values(files).filter(
+                    (f) => typeof f === "string" || !(f as { hidden?: boolean }).hidden
+                  ).length > 1
+                }
                 style={editorPaneStyle}
               />
               <SandpackStack className="min-h-0 min-w-0" style={previewPaneStyle}>

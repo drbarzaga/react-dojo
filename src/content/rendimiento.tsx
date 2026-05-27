@@ -113,9 +113,10 @@ export default function App() {
     playground: (
       <Playground
         files={{
-          "/App.js": `import { memo, useCallback, useState, useRef, useEffect } from "react";
+          "/useRenderFlash.js": {
+            code: `import { useRef, useEffect } from "react";
 
-function useRenderFlash(name) {
+export function useRenderFlash(name) {
   const ref = useRef(null);
   const count = useRef(0);
   const first = useRef(true);
@@ -132,7 +133,10 @@ function useRenderFlash(name) {
     if (!chip) {
       chip = document.createElement("div");
       chip.setAttribute("data-rf", "");
-      chip.style.cssText = "position:absolute;top:0;left:0;background:#fb923c;color:#fff;font:bold 9px/1 monospace;padding:2px 5px;border-radius:0 0 3px 0;pointer-events:none;z-index:9999;white-space:nowrap;";
+      chip.style.cssText =
+        "position:absolute;top:0;left:0;background:#fb923c;color:#fff;" +
+        "font:bold 9px/1 monospace;padding:2px 5px;border-radius:0 0 3px 0;" +
+        "pointer-events:none;z-index:9999;white-space:nowrap;";
       el.appendChild(chip);
     }
     chip.textContent = name + " ×" + count.current;
@@ -149,6 +153,11 @@ function useRenderFlash(name) {
   });
   return ref;
 }
+`,
+            hidden: true,
+          },
+          "/App.js": `import { memo, useCallback, useState } from "react";
+import { useRenderFlash } from "./useRenderFlash";
 
 // ❌ memo pero recibe función nueva en cada render → se re-renderiza igual
 const ItemMal = memo(function ItemMal({ onAction }) {
@@ -233,9 +242,10 @@ export default function App() {
     playground: (
       <Playground
         files={{
-          "/App.js": `import { memo, useMemo, useState, useRef, useEffect } from "react";
+          "/useRenderFlash.js": {
+            code: `import { useRef, useEffect } from "react";
 
-function useRenderFlash(name) {
+export function useRenderFlash(name) {
   const ref = useRef(null);
   const count = useRef(0);
   const first = useRef(true);
@@ -252,7 +262,10 @@ function useRenderFlash(name) {
     if (!chip) {
       chip = document.createElement("div");
       chip.setAttribute("data-rf", "");
-      chip.style.cssText = "position:absolute;top:0;left:0;background:#fb923c;color:#fff;font:bold 9px/1 monospace;padding:2px 5px;border-radius:0 0 3px 0;pointer-events:none;z-index:9999;white-space:nowrap;";
+      chip.style.cssText =
+        "position:absolute;top:0;left:0;background:#fb923c;color:#fff;" +
+        "font:bold 9px/1 monospace;padding:2px 5px;border-radius:0 0 3px 0;" +
+        "pointer-events:none;z-index:9999;white-space:nowrap;";
       el.appendChild(chip);
     }
     chip.textContent = name + " ×" + count.current;
@@ -269,6 +282,11 @@ function useRenderFlash(name) {
   });
   return ref;
 }
+`,
+            hidden: true,
+          },
+          "/App.js": `import { memo, useMemo, useState } from "react";
+import { useRenderFlash } from "./useRenderFlash";
 
 const Card = memo(function Card({ user }) {
   const ref = useRenderFlash("Card");

@@ -11,6 +11,7 @@ import { EstadoDerivadoAnimation } from "@/components/remotion/EstadoDerivadoAni
 import { EfectosAnimation } from "@/components/remotion/EfectosAnimation"
 import { ColocacionEstadoAnimation } from "@/components/remotion/ColocacionEstadoAnimation"
 import { InmutabilidadAnimation } from "@/components/remotion/InmutabilidadAnimation"
+import { PropDrillingAnimation } from "@/components/remotion/PropDrillingAnimation"
 import type { Concept, Category } from "@/content/types"
 
 export type { Concept, Category, Section } from "@/content/types"
@@ -808,9 +809,10 @@ export default function App() {
     playground: (
       <Playground
         files={{
-          "/App.js": `import { memo, useCallback, useState, useRef, useEffect } from "react";
+          "/useRenderFlash.js": {
+            code: `import { useRef, useEffect } from "react";
 
-function useRenderFlash(name) {
+export function useRenderFlash(name) {
   const ref = useRef(null);
   const count = useRef(0);
   const first = useRef(true);
@@ -827,7 +829,10 @@ function useRenderFlash(name) {
     if (!chip) {
       chip = document.createElement("div");
       chip.setAttribute("data-rf", "");
-      chip.style.cssText = "position:absolute;top:0;left:0;background:#fb923c;color:#fff;font:bold 9px/1 monospace;padding:2px 5px;border-radius:0 0 3px 0;pointer-events:none;z-index:9999;white-space:nowrap;";
+      chip.style.cssText =
+        "position:absolute;top:0;left:0;background:#fb923c;color:#fff;" +
+        "font:bold 9px/1 monospace;padding:2px 5px;border-radius:0 0 3px 0;" +
+        "pointer-events:none;z-index:9999;white-space:nowrap;";
       el.appendChild(chip);
     }
     chip.textContent = name + " ×" + count.current;
@@ -844,6 +849,11 @@ function useRenderFlash(name) {
   });
   return ref;
 }
+`,
+            hidden: true,
+          },
+          "/App.js": `import { memo, useCallback, useState } from "react";
+import { useRenderFlash } from "./useRenderFlash";
 
 // ❌ memo but receives a new function on every render → re-renders anyway
 const ItemBad = memo(function ItemBad({ onAction }) {
@@ -926,9 +936,10 @@ export default function App() {
     playground: (
       <Playground
         files={{
-          "/App.js": `import { memo, useMemo, useState, useRef, useEffect } from "react";
+          "/useRenderFlash.js": {
+            code: `import { useRef, useEffect } from "react";
 
-function useRenderFlash(name) {
+export function useRenderFlash(name) {
   const ref = useRef(null);
   const count = useRef(0);
   const first = useRef(true);
@@ -945,7 +956,10 @@ function useRenderFlash(name) {
     if (!chip) {
       chip = document.createElement("div");
       chip.setAttribute("data-rf", "");
-      chip.style.cssText = "position:absolute;top:0;left:0;background:#fb923c;color:#fff;font:bold 9px/1 monospace;padding:2px 5px;border-radius:0 0 3px 0;pointer-events:none;z-index:9999;white-space:nowrap;";
+      chip.style.cssText =
+        "position:absolute;top:0;left:0;background:#fb923c;color:#fff;" +
+        "font:bold 9px/1 monospace;padding:2px 5px;border-radius:0 0 3px 0;" +
+        "pointer-events:none;z-index:9999;white-space:nowrap;";
       el.appendChild(chip);
     }
     chip.textContent = name + " ×" + count.current;
@@ -962,6 +976,11 @@ function useRenderFlash(name) {
   });
   return ref;
 }
+`,
+            hidden: true,
+          },
+          "/App.js": `import { memo, useMemo, useState } from "react";
+import { useRenderFlash } from "./useRenderFlash";
 
 const Card = memo(function Card({ user }) {
   const ref = useRenderFlash("Card");
@@ -3436,24 +3455,22 @@ export default function App() {
     playground: (
       <Playground
         files={{
-          "/App.js": `import { useState, useRef, useEffect } from "react";
+          "/useRenderFlash.js": {
+            code: `import { useRef, useEffect } from "react";
 
-function useRenderFlash(name) {
+export function useRenderFlash(name) {
   const ref = useRef(null);
   const count = useRef(0);
   const first = useRef(true);
-
   useEffect(() => {
     if (first.current) { first.current = false; return; }
     count.current += 1;
     const el = ref.current;
     if (!el) return;
-
     el.style.position = "relative";
     el.style.transition = "none";
     el.style.outline = "1.5px solid #fb923c";
     el.style.backgroundColor = "rgba(251,146,60,0.1)";
-
     let chip = el.querySelector("[data-rf]");
     if (!chip) {
       chip = document.createElement("div");
@@ -3467,7 +3484,6 @@ function useRenderFlash(name) {
     chip.textContent = name + " ×" + count.current;
     chip.style.opacity = "1";
     chip.style.transition = "none";
-
     const t = setTimeout(() => {
       el.style.transition = "outline 0.6s, background-color 0.6s";
       el.style.outline = "1.5px solid transparent";
@@ -3475,12 +3491,15 @@ function useRenderFlash(name) {
       chip.style.transition = "opacity 0.6s";
       chip.style.opacity = "0";
     }, 500);
-
     return () => clearTimeout(t);
   });
-
   return ref;
 }
+`,
+            hidden: true,
+          },
+          "/App.js": `import { useState } from "react";
+import { useRenderFlash } from "./useRenderFlash";
 
 // ❌ BAD: open lives in App even though only Dropdown uses it
 function AppBad() {
@@ -3567,6 +3586,196 @@ export default function App() {
       "Don't lift state 'just in case' you need it higher later — YAGNI. Move it up only when two sibling components genuinely need it.",
       "If you find state is needed in two distinct branches of the tree, consider Context or a global store — but only when real prop drilling forces the issue.",
       "Colocating local state doesn't prevent child components from using memo to skip renders caused by unrelated prop changes.",
+    ],
+  },
+  "evitar-prop-drilling": {
+    label: "prop drilling",
+    kicker: "Practice · Composition",
+    title: "Cut the prop drilling",
+    lede: "Prop drilling is passing data through layers of components that don't use it — they only forward it downward. As the tree grows, it couples every intermediate layer's API to the details of its descendants, making the code brittle. Context and composition with children are the main tools to cut it.",
+    sections: [
+      {
+        heading: "When it's a problem",
+        body: (
+          <p>
+            Passing a prop through 2 levels is normal. The problem appears when intermediate
+            components receive props <em>only to pass them along</em> without ever using them. Any
+            change to the final consumer forces you to touch every intermediary.
+          </p>
+        ),
+      },
+      {
+        heading: "Two solutions",
+        body: (
+          <p>
+            <strong>Context</strong> — ideal for global or semi-global data: current user, theme,
+            locale. The consumer reads directly from context without anyone passing it.{" "}
+            <strong>Composition</strong> — passing <code>children</code> or elements as props avoids
+            tunneling without needing context, and is often the simplest solution.
+          </p>
+        ),
+      },
+      {
+        body: <PropDrillingAnimation />,
+      },
+    ],
+    playground: (
+      <Playground
+        files={{
+          "/useRenderFlash.js": {
+            code: `import { useRef, useEffect } from "react";
+
+export function useRenderFlash(name) {
+  const ref = useRef(null);
+  const count = useRef(0);
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    count.current += 1;
+    const el = ref.current;
+    if (!el) return;
+    el.style.position = "relative";
+    el.style.transition = "none";
+    el.style.outline = "1.5px solid #fb923c";
+    el.style.backgroundColor = "rgba(251,146,60,0.1)";
+    let chip = el.querySelector("[data-rf]");
+    if (!chip) {
+      chip = document.createElement("div");
+      chip.setAttribute("data-rf", "");
+      chip.style.cssText =
+        "position:absolute;top:0;left:0;background:#fb923c;color:#fff;" +
+        "font:bold 9px/1 monospace;padding:2px 5px;border-radius:0 0 3px 0;" +
+        "pointer-events:none;z-index:9999;white-space:nowrap;";
+      el.appendChild(chip);
+    }
+    chip.textContent = name + " ×" + count.current;
+    chip.style.opacity = "1";
+    chip.style.transition = "none";
+    const t = setTimeout(() => {
+      el.style.transition = "outline 0.6s, background-color 0.6s";
+      el.style.outline = "1.5px solid transparent";
+      el.style.backgroundColor = "transparent";
+      chip.style.transition = "opacity 0.6s";
+      chip.style.opacity = "0";
+    }, 500);
+    return () => clearTimeout(t);
+  });
+  return ref;
+}
+`,
+            hidden: true,
+          },
+          "/App.js": `import { createContext, memo, useContext, useState } from "react";
+import { useRenderFlash } from "./useRenderFlash";
+
+const card = { padding: "6px 10px", border: "1px solid #333", borderRadius: 6, marginTop: 6 };
+
+// ─── ❌ Prop drilling — memo can't protect Layout/Sidebar ─────────
+
+const UserCardBad = memo(function UserCardBad({ user }) {
+  const ref = useRenderFlash("UserCard");
+  return (
+    <div ref={ref} style={card}>
+      <span style={{ fontSize: 10, color: "#888", fontFamily: "monospace" }}>UserCard</span>
+      <p style={{ margin: "2px 0 0", fontSize: 12 }}>{user.name} · {user.role}</p>
+    </div>
+  );
+});
+const SidebarBad = memo(function SidebarBad({ user }) {
+  const ref = useRenderFlash("Sidebar");
+  return (
+    <div ref={ref} style={card}>
+      <span style={{ fontSize: 10, color: "#888", fontFamily: "monospace" }}>Sidebar</span>
+      <UserCardBad user={user} />
+    </div>
+  );
+});
+const LayoutBad = memo(function LayoutBad({ user }) {
+  const ref = useRenderFlash("Layout");
+  return (
+    <div ref={ref} style={card}>
+      <span style={{ fontSize: 10, color: "#888", fontFamily: "monospace" }}>Layout</span>
+      <SidebarBad user={user} />
+    </div>
+  );
+});
+
+// ─── ✅ Context — memo works: Layout/Sidebar have no user prop ────
+
+const UserCtx = createContext(null);
+
+const UserCardGood = memo(function UserCardGood() {
+  const user = useContext(UserCtx);
+  const ref = useRenderFlash("UserCard");
+  return (
+    <div ref={ref} style={card}>
+      <span style={{ fontSize: 10, color: "#888", fontFamily: "monospace" }}>UserCard</span>
+      <p style={{ margin: "2px 0 0", fontSize: 12 }}>{user.name} · {user.role}</p>
+    </div>
+  );
+});
+const SidebarGood = memo(function SidebarGood() {
+  const ref = useRenderFlash("Sidebar");
+  return (
+    <div ref={ref} style={card}>
+      <span style={{ fontSize: 10, color: "#888", fontFamily: "monospace" }}>Sidebar</span>
+      <UserCardGood />
+    </div>
+  );
+});
+const LayoutGood = memo(function LayoutGood() {
+  const ref = useRenderFlash("Layout");
+  return (
+    <div ref={ref} style={card}>
+      <span style={{ fontSize: 10, color: "#888", fontFamily: "monospace" }}>Layout</span>
+      <SidebarGood />
+    </div>
+  );
+});
+
+// ─── App ─────────────────────────────────────────────────────────
+
+const users = [
+  { name: "Ada", role: "Engineer" },
+  { name: "Lin", role: "Designer" },
+  { name: "Max", role: "PM" },
+];
+
+export default function App() {
+  const [idx, setIdx] = useState(0);
+  const user = users[idx];
+  const next = () => setIdx((i) => (i + 1) % users.length);
+
+  return (
+    <div style={{ fontFamily: "system-ui", padding: 24, display: "flex", flexDirection: "column", gap: 24 }}>
+      <button onClick={next} style={{ alignSelf: "flex-start" }}>
+        Change user → {user.name}
+      </button>
+      <div>
+        <p style={{ margin: "0 0 4px", fontSize: 12, color: "#f87171", fontWeight: "bold" }}>
+          ❌ Prop drilling — memo can't help: user arrives as prop
+        </p>
+        <LayoutBad user={user} />
+      </div>
+      <div>
+        <p style={{ margin: "0 0 4px", fontSize: 12, color: "#4ade80", fontWeight: "bold" }}>
+          ✅ Context — only UserCard re-renders
+        </p>
+        <UserCtx.Provider value={user}>
+          <LayoutGood />
+        </UserCtx.Provider>
+      </div>
+    </div>
+  );
+}
+`,
+        }}
+      />
+    ),
+    pitfalls: [
+      "Context is not free: any change to the value re-renders all consumers. Don't use it for state that changes frequently.",
+      "Composition with children is often the simplest solution and gets overlooked — before creating a context, check if you can pass elements as props instead.",
+      "Don't lift data into Context 'just in case' it's needed elsewhere. Move it only when real drilling is a problem.",
     ],
   },
 }
@@ -3660,6 +3869,7 @@ export const categories: Category[] = [
       "efectos-innecesarios",
       "inmutabilidad-estado",
       "colocacion-estado",
+      "evitar-prop-drilling",
     ],
   },
 ]
