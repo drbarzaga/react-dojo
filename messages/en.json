@@ -58,7 +58,8 @@
     "advanced": "Advanced",
     "customHooks": "Hooks Library",
     "directory": "Developer Directory",
-    "signIn": "Sign in with GitHub"
+    "signIn": "Sign in with GitHub",
+    "typescript": "TypeScript for React"
   },
   "Footer": {
     "madeWith": "Made with",
@@ -275,5 +276,22 @@
     "scoreLabel": "score",
     "ofTotal": "of {total}",
     "signInButton": "Sign in with GitHub"
+  },
+  "TypeScript": {
+    "sectionLabel": "TypeScript for React",
+    "title": "TypeScript for React",
+    "description": "Concrete patterns for typing props, events, refs, generics, and more. Copy the code and use it directly in your projects.",
+    "recipeCount": "{count} recipes",
+    "viewRecipe": "View recipe",
+    "noRecipes": "No recipes in this category.",
+    "backToRecipes": "TypeScript Recipes",
+    "tabCode": "Code",
+    "tabPlayground": "Usage",
+    "copy": "Copy",
+    "copied": "Copied",
+    "prev": "← previous",
+    "next": "next →",
+    "do": "Do this",
+    "dont": "Don't do this"
   }
 }
