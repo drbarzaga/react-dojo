@@ -9,6 +9,7 @@ import { typingGenerics } from "./typing-generics"
 import { typingContext } from "./typing-context"
 import { extendHtmlProps } from "./extend-html-props"
 import { discriminatedUnions } from "./discriminated-unions"
+import { forwardRef } from "./forward-ref"
 
 export const allRecipes: TypeScriptRecipe[] = [
   typingProps,
@@ -18,6 +19,7 @@ export const allRecipes: TypeScriptRecipe[] = [
   typingContext,
   extendHtmlProps,
   discriminatedUnions,
+  forwardRef,
 ]
 
 export const recipeIndex: Record<string, TypeScriptRecipe> = Object.fromEntries(
