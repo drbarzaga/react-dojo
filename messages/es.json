@@ -58,7 +58,8 @@
     "advanced": "Avanzado",
     "customHooks": "Librería de Hooks",
     "directory": "Directorio de Devs",
-    "signIn": "Iniciar sesión con GitHub"
+    "signIn": "Iniciar sesión con GitHub",
+    "typescript": "TypeScript para React"
   },
   "Footer": {
     "madeWith": "Hecho con",
@@ -275,5 +276,22 @@
     "scoreLabel": "score",
     "ofTotal": "de {total}",
     "signInButton": "Iniciar sesión con GitHub"
+  },
+  "TypeScript": {
+    "sectionLabel": "TypeScript para React",
+    "title": "TypeScript para React",
+    "description": "Patrones concretos para tipar props, eventos, refs, genéricos y más. Copia el código y úsalo directamente en tus proyectos.",
+    "recipeCount": "{count} recetas",
+    "viewRecipe": "Ver receta",
+    "noRecipes": "No hay recetas en esta categoría.",
+    "backToRecipes": "Recetas TypeScript",
+    "tabCode": "Código",
+    "tabPlayground": "Uso",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "prev": "← anterior",
+    "next": "siguiente →",
+    "do": "Hazlo así",
+    "dont": "No hagas esto"
   }
 }

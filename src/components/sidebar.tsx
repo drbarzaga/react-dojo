@@ -14,6 +14,7 @@ import { useContent } from "@/providers/content-provider"
 import {
   Anchor,
   Boxes,
+  Code2,
   Check,
   ChevronDown,
   CircleCheck,
@@ -160,6 +161,7 @@ export function Sidebar({ initialState }: SidebarProps) {
   const isExerciseRoute = current.startsWith("learn/")
   const isQuizRoute = current.startsWith("quiz/")
   const isHooksRoute = current === "hooks" || current.startsWith("hooks/")
+  const isTypeScriptRoute = current === "typescript" || current.startsWith("typescript/")
   const isDirectoryRoute = current === "directory" || current.startsWith("directory/")
   const isProfileRoute = current === "profile"
   const activeExId = isExerciseRoute ? current.slice(6) : null
@@ -580,6 +582,37 @@ export function Sidebar({ initialState }: SidebarProps) {
                 strokeWidth={1.8}
               />
               <span className="truncate">{t("customHooks")}</span>
+              <span className="ml-auto shrink-0 rounded-sm border border-amber-500/30 bg-amber-500/15 px-1.5 py-px font-mono text-[8px] font-bold tracking-widest text-amber-400 uppercase">
+                beta
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => push("/typescript")}
+              className={cn(
+                "group/ts relative flex w-full items-center gap-2 rounded-md px-2 py-1.5 font-mono text-[11px] tracking-[0.08em] uppercase transition-colors",
+                isTypeScriptRoute
+                  ? "bg-sidebar-accent/70 text-sidebar-foreground/90"
+                  : "text-sidebar-foreground/45 hover:bg-sidebar-accent/45 hover:text-sidebar-foreground/85"
+              )}
+            >
+              <span
+                aria-hidden
+                className={cn(
+                  "absolute top-1/2 left-0 h-3.5 w-[2px] -translate-y-1/2 rounded-full transition-all duration-200",
+                  isTypeScriptRoute ? "scale-y-100 bg-blue-400/80" : "scale-y-0"
+                )}
+              />
+              <Code2
+                className={cn(
+                  "h-[12px] w-[12px] shrink-0 transition-colors",
+                  isTypeScriptRoute
+                    ? "text-sidebar-foreground/80"
+                    : "text-sidebar-foreground/40 group-hover/ts:text-sidebar-foreground/70"
+                )}
+                strokeWidth={1.8}
+              />
+              <span className="truncate">{t("typescript")}</span>
               <span className="ml-auto shrink-0 rounded-sm border border-amber-500/30 bg-amber-500/15 px-1.5 py-px font-mono text-[8px] font-bold tracking-widest text-amber-400 uppercase">
                 beta
               </span>
