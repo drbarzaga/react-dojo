@@ -16,10 +16,18 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET!,
   baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
   trustedOrigins: [process.env.BETTER_AUTH_URL ?? "http://localhost:3000"],
+  user: {
+    additionalFields: {
+      // Populated from the GitHub handle on sign-in (see mapProfileToUser below).
+      // Not user-editable; serves as the public profile slug.
+      username: { type: "string", required: false, input: false },
+    },
+  },
   socialProviders: {
     github: {
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      mapProfileToUser: (profile) => ({ username: profile.login }),
     },
   },
 })

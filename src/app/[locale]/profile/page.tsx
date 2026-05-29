@@ -1,13 +1,9 @@
 import { GitHubSignInButton } from "@/components/github-sign-in-button"
 import { ProfilePage } from "@/components/profile-page"
-import { getContentForLocale } from "@/content/loader"
-import { db } from "@/db"
-import { userProgress } from "@/db/schema"
 import type { Locale } from "@/i18n/routing"
 import { auth } from "@/lib/auth"
 import { buildPageMetadata } from "@/lib/metadata"
-import { calculateScore, getRank } from "@/lib/ranking"
-import { eq } from "drizzle-orm"
+import { buildProfileData } from "@/lib/profile-data"
 import { getTranslations } from "next-intl/server"
 import { headers } from "next/headers"
 import type { Metadata } from "next"
@@ -30,10 +26,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProfileRoute({ params }: Props) {
   const { locale } = await params
-  const [session, t, { allConcepts, allExercises, allQuizzes, categories }] = await Promise.all([
+  const [session, t] = await Promise.all([
     auth.api.getSession({ headers: await headers() }),
     getTranslations("Profile"),
-    getContentForLocale(locale as Locale),
   ])
 
   if (!session) {
@@ -63,75 +58,14 @@ export default async function ProfileRoute({ params }: Props) {
     )
   }
 
-  const progress = await db.query.userProgress.findFirst({
-    where: eq(userProgress.userId, session.user.id),
-  })
-
-  const visitedConcepts = new Set(progress?.visitedConcepts ?? [])
-  const completedExercises = new Set(progress?.completedExercises ?? [])
-  const quizScores = progress?.quizScores ?? {}
-
-  const totals = {
-    concepts: allConcepts.length,
-    exercises: allExercises.length,
-    quizzes: allQuizzes.length,
-  }
-
-  const rank = getRank(
-    visitedConcepts.size,
-    completedExercises.size,
-    Object.keys(quizScores).length,
-    totals
-  )
-  const score = calculateScore(
-    visitedConcepts.size,
-    completedExercises.size,
-    Object.keys(quizScores).length,
-    totals
+  const user = session.user as typeof session.user & { username?: string | null }
+  const data = await buildProfileData(
+    { id: user.id, name: user.name, image: user.image ?? null, createdAt: user.createdAt },
+    locale as Locale
   )
 
-  const categoryProgress = categories.map((cat) => {
-    const visited = cat.conceptIds.filter((id) => visitedConcepts.has(id)).length
-    return {
-      id: cat.id,
-      kicker: cat.kicker,
-      title: cat.title,
-      visited,
-      total: cat.conceptIds.length,
-    }
-  })
+  // Slug for the shareable public profile (GitHub handle, or id for older accounts)
+  const shareSlug = user.username ?? user.id
 
-  const completedByDifficulty = {
-    basic: allExercises.filter((e) => e.difficulty === "basic" && completedExercises.has(e.id)),
-    intermediate: allExercises.filter(
-      (e) => e.difficulty === "intermediate" && completedExercises.has(e.id)
-    ),
-    advanced: allExercises.filter(
-      (e) => e.difficulty === "advanced" && completedExercises.has(e.id)
-    ),
-  }
-
-  const attemptedQuizzes = allQuizzes
-    .filter((q) => quizScores[q.id] !== undefined)
-    .map((q) => ({ id: q.id, label: q.label, score: quizScores[q.id] }))
-    .sort((a, b) => b.score - a.score)
-
-  return (
-    <ProfilePage
-      user={{
-        name: session.user.name,
-        image: session.user.image ?? null,
-        createdAt: session.user.createdAt,
-      }}
-      rank={rank}
-      score={score}
-      totals={totals}
-      visited={visitedConcepts.size}
-      exercisesCompleted={completedExercises.size}
-      quizzesAttempted={Object.keys(quizScores).length}
-      categoryProgress={categoryProgress}
-      completedByDifficulty={completedByDifficulty}
-      attemptedQuizzes={attemptedQuizzes}
-    />
-  )
+  return <ProfilePage {...data} shareSlug={shareSlug} />
 }
