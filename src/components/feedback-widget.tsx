@@ -2,13 +2,21 @@
 
 import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { authClient, useSession } from "@/lib/auth-client"
 import { Loader2 } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useRef, useState } from "react"
+import Image from "next/image"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import { REACTION_SLUGS } from "@/db/schema"
 
 const REACTION_EMOJIS = ["😭", "😕", "🙂", "🤩"] as const
+
+interface Participant {
+  name: string
+  image: string | null
+  username: string | null
+}
 
 interface FeedbackWidgetProps {
   contentType: "concept" | "exercise" | "quiz" | "hook"
@@ -17,11 +25,32 @@ interface FeedbackWidgetProps {
 
 export function FeedbackWidget({ contentType, contentId }: FeedbackWidgetProps) {
   const t = useTranslations("FeedbackWidget")
+  const { data: session } = useSession()
   const [reaction, setReaction] = useState<(typeof REACTION_SLUGS)[number] | null>(null)
   const [comment, setComment] = useState("")
   const [confirming, setConfirming] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [participants, setParticipants] = useState<Participant[]>([])
+  const [total, setTotal] = useState(0)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  const loadParticipants = useCallback(async () => {
+    try {
+      const res = await fetch(
+        `/api/feedback?type=${encodeURIComponent(contentType)}&id=${encodeURIComponent(contentId)}`
+      )
+      if (!res.ok) return
+      const data = await res.json()
+      setParticipants(data.participants ?? [])
+      setTotal(data.total ?? 0)
+    } catch {}
+  }, [contentType, contentId])
+
+  useEffect(() => {
+    // Fetch on mount; setState runs after the awaited fetch, not synchronously.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadParticipants()
+  }, [loadParticipants])
 
   useEffect(() => {
     if (reaction !== null) textareaRef.current?.focus()
@@ -39,11 +68,21 @@ export function FeedbackWidget({ contentType, contentId }: FeedbackWidgetProps) 
     return () => window.removeEventListener("keydown", handler)
   }, [reaction, confirming])
 
+  const handleReactionClick = (slug: (typeof REACTION_SLUGS)[number]) => {
+    if (confirming) return
+    // Feedback requires a signed-in user — send them to sign in first.
+    if (!session) {
+      authClient.signIn.social({ provider: "github" })
+      return
+    }
+    setReaction(slug)
+  }
+
   const handleSubmit = async () => {
     if (reaction === null || submitting) return
     setSubmitting(true)
     try {
-      await fetch("/api/feedback", {
+      const res = await fetch("/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -53,12 +92,15 @@ export function FeedbackWidget({ contentType, contentId }: FeedbackWidgetProps) 
           comment: comment.trim() || undefined,
         }),
       })
-      setConfirming(true)
-      setTimeout(() => {
-        setConfirming(false)
-        setReaction(null)
-        setComment("")
-      }, 2500)
+      if (res.ok) {
+        setConfirming(true)
+        loadParticipants()
+        setTimeout(() => {
+          setConfirming(false)
+          setReaction(null)
+          setComment("")
+        }, 2500)
+      }
     } catch {}
     setSubmitting(false)
   }
@@ -81,7 +123,7 @@ export function FeedbackWidget({ contentType, contentId }: FeedbackWidgetProps) 
                     render={
                       <button
                         type="button"
-                        onClick={() => !confirming && setReaction(slug)}
+                        onClick={() => handleReactionClick(slug)}
                         className={[
                           "flex h-9 w-9 items-center justify-center rounded-full transition-all duration-150",
                           confirming ? "cursor-default" : "cursor-pointer",
@@ -104,6 +146,27 @@ export function FeedbackWidget({ contentType, contentId }: FeedbackWidgetProps) 
             })}
           </TooltipProvider>
         </div>
+
+        {/* Who gave feedback — stacked avatars */}
+        {total > 0 && (
+          <div className="border-line flex items-center justify-center gap-2 border-t px-4 py-2.5">
+            <div className="flex -space-x-2">
+              {participants.map((p, i) => (
+                <ParticipantAvatar key={`${p.username ?? p.name}-${i}`} participant={p} />
+              ))}
+            </div>
+            <span className="text-fg-dim text-[11px]">
+              {total > participants.length && `+${total - participants.length} · `}
+              {t("gaveFeedback", { count: total })}
+            </span>
+          </div>
+        )}
+
+        {!session && total === 0 && (
+          <div className="border-line border-t px-4 py-2.5 text-center">
+            <span className="text-fg-dim text-[11px]">{t("signInToVote")}</span>
+          </div>
+        )}
 
         {confirming && (
           <div className="border-line flex flex-col items-center gap-2 border-t px-4 py-6 text-center">
@@ -147,6 +210,27 @@ export function FeedbackWidget({ contentType, contentId }: FeedbackWidgetProps) 
           </>
         )}
       </div>
+    </div>
+  )
+}
+
+function ParticipantAvatar({ participant }: { participant: Participant }) {
+  const ring = "ring-2 ring-bg"
+  return participant.image ? (
+    <Image
+      src={participant.image}
+      alt={participant.name}
+      title={participant.name}
+      width={24}
+      height={24}
+      className={`h-6 w-6 rounded-full ${ring}`}
+    />
+  ) : (
+    <div
+      title={participant.name}
+      className={`bg-bg-raise text-fg-muted flex h-6 w-6 items-center justify-center rounded-full font-mono text-[10px] font-bold ${ring}`}
+    >
+      {participant.name[0]?.toUpperCase()}
     </div>
   )
 }

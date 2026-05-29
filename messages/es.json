@@ -96,7 +96,9 @@
     "placeholder": "Tu feedback...",
     "send": "Enviar",
     "confirmed": "¡Gracias por tu feedback!",
-    "confirmedSub": "Tu opinión nos ayuda a mejorar el contenido."
+    "confirmedSub": "Tu opinión nos ayuda a mejorar el contenido.",
+    "gaveFeedback": "{count, plural, one {# dio feedback} other {# dieron feedback}}",
+    "signInToVote": "Inicia sesión para dar feedback"
   },
   "ConceptPage": {
     "prev": "← anterior",
