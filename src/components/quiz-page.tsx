@@ -115,10 +115,15 @@ export function QuizPage({ quiz, allQuizzes }: QuizPageProps) {
   }, [timeLeft, timerEnabled, session.selected, session.finished, browsing, setSession])
 
   const { saveQuizScore, quizScores } = useProgress()
-  const { currentIndex, selected, score, finished } = session
+  const total = quiz.questions.length
+  const { selected, score, finished } = session
+  // Sessions persisted by older builds may lack `answers`, and a saved
+  // `currentIndex` can point past a quiz whose question set later shrank.
+  // Normalize both so a stale localStorage session never crashes the render.
+  const answers = session.answers ?? {}
+  const currentIndex = Math.min(Math.max(session.currentIndex ?? 0, 0), Math.max(total - 1, 0))
   const hasProgress = currentIndex > 0 || selected !== null || finished
   const question = quiz.questions[currentIndex]
-  const total = quiz.questions.length
   const answered = selected !== null
   const pct = total > 0 ? Math.round((score / total) * 100) : 0
   const bestScore = quizScores[quiz.id]
@@ -140,13 +145,13 @@ export function QuizPage({ quiz, allQuizzes }: QuizPageProps) {
       ...prev,
       selected: index,
       score: index === question.correctIndex ? prev.score + 1 : prev.score,
-      answers: { ...prev.answers, [prev.currentIndex]: index },
+      answers: { ...prev.answers, [currentIndex]: index },
     }))
   }
 
   function handleNext() {
     if (currentIndex < total - 1) {
-      setSession((prev) => ({ ...prev, currentIndex: prev.currentIndex + 1, selected: null }))
+      setSession((prev) => ({ ...prev, currentIndex: currentIndex + 1, selected: null }))
     } else {
       setSession((prev) => ({ ...prev, finished: true }))
     }
@@ -275,14 +280,14 @@ export function QuizPage({ quiz, allQuizzes }: QuizPageProps) {
 
         <p className="text-fg-muted mt-4 mb-10 text-[15px] leading-[1.6]">{quiz.description}</p>
 
-        {wasCompleted && Object.keys(session.answers).length === 0 && (
+        {wasCompleted && Object.keys(answers).length === 0 && (
           <p className="text-fg-dim mb-4 text-[13px]">{t("retakeForDetail")}</p>
         )}
 
         <div className="space-y-2">
           {quiz.questions.map((q, i) => {
-            const hasAnswerData = Object.keys(session.answers).length > 0
-            const userAnswer = session.answers[i]
+            const hasAnswerData = Object.keys(answers).length > 0
+            const userAnswer = answers[i]
             const wasAnswered = userAnswer !== undefined
             const correct = wasAnswered && userAnswer === q.correctIndex
             return (
