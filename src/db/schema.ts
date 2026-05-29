@@ -129,9 +129,17 @@ export const contentFeedback = pgTable(
     contentId: text("content_id").notNull(),
     reaction: text("reaction").notNull(),
     comment: text("comment"),
+    // Author of the feedback. Nullable so legacy anonymous rows remain valid;
+    // new feedback now requires a signed-in user.
+    userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
-  (t) => [index("feedback_content_idx").on(t.contentType, t.contentId)]
+  (t) => [
+    index("feedback_content_idx").on(t.contentType, t.contentId),
+    // One feedback per user per content item (enables upsert; null userId rows
+    // are exempt since Postgres treats nulls as distinct).
+    unique("feedback_user_content_unique").on(t.contentType, t.contentId, t.userId),
+  ]
 )
 
 export const userRelations = relations(user, ({ many }) => ({
