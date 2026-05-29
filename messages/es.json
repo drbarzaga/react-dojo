@@ -301,7 +301,8 @@
     "metaTitle": "{name} en React Dojo",
     "metaDesc": "Mira el progreso, rango y logros de {name} aprendiendo React en React Dojo.",
     "notFoundTitle": "Perfil no encontrado",
-    "notFoundDesc": "Este perfil de React Dojo no existe."
+    "notFoundDesc": "Este perfil de React Dojo no existe.",
+    "backToDirectory": "Volver al directorio"
   },
   "TypeScript": {
     "sectionLabel": "TypeScript para React",
