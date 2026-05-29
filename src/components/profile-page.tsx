@@ -3,10 +3,34 @@
 import { cn } from "@/lib/utils"
 import type { RankInfo } from "@/lib/ranking"
 import type { Exercise } from "@/content/exercises"
+import type { StreakInfo } from "@/lib/streak"
+import type { Heatmap } from "@/lib/heatmap"
+import { intensity } from "@/lib/heatmap"
+import type { EvaluatedAchievement, AchievementFamily } from "@/lib/achievements"
+import { TOTAL_ACHIEVEMENTS } from "@/lib/achievements"
+import { ShareProfileButton } from "@/components/share-profile-button"
 import { useCountUp } from "@/hooks/use-count-up"
 import { useTranslations } from "next-intl"
 import Image from "next/image"
 import { useEffect, useState } from "react"
+import {
+  Award,
+  BookOpen,
+  CalendarCheck,
+  Crown,
+  Dumbbell,
+  Flame,
+  FolderCheck,
+  Footprints,
+  GraduationCap,
+  Library,
+  ListChecks,
+  Lock,
+  Medal,
+  Target,
+  Trophy,
+  type LucideIcon,
+} from "lucide-react"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -35,6 +59,11 @@ interface ProfilePageProps {
   categoryProgress: CategoryProgress[]
   completedByDifficulty: { basic: Exercise[]; intermediate: Exercise[]; advanced: Exercise[] }
   attemptedQuizzes: AttemptedQuiz[]
+  streak: StreakInfo
+  heatmap: Heatmap
+  achievements: EvaluatedAchievement[]
+  /** When set, shows a "share" button linking to this user's public profile (own profile only). */
+  shareSlug?: string
 }
 
 // ── Rank ladder data ──────────────────────────────────────────────────────────
@@ -216,6 +245,208 @@ function AnimatedStat({
   )
 }
 
+// ── Activity heatmap + streak ───────────────────────────────────────────────────
+
+// Emerald intensity scale (index = bucket from `intensity()`)
+const HEAT_COLORS = [
+  "bg-white/6",
+  "bg-emerald-500/25",
+  "bg-emerald-500/45",
+  "bg-emerald-500/70",
+  "bg-emerald-400",
+] as const
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+function ActivitySection({ streak, heatmap }: { streak: StreakInfo; heatmap: Heatmap }) {
+  const t = useTranslations("Profile")
+
+  return (
+    <section className="border-line/60 mb-6 rounded-3xl border bg-white/[0.02] p-6">
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <h2 className="text-fg-dim text-[10px] font-semibold tracking-[0.18em] uppercase">
+          {t("activity")}
+        </h2>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5">
+            <Flame
+              className={cn("h-4 w-4", streak.current > 0 ? "text-orange-400" : "text-white/25")}
+              strokeWidth={2}
+            />
+            <span className="font-mono text-sm font-bold text-white">{streak.current}</span>
+            <span className="text-[11px] text-white/35">{t("dayStreak")}</span>
+          </div>
+          <div className="hidden items-center gap-1.5 sm:flex">
+            <span className="font-mono text-[11px] text-white/35">{t("longestStreak")}</span>
+            <span className="font-mono text-sm font-bold text-white/70">{streak.longest}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Heatmap (scrolls horizontally on narrow screens) */}
+      <div className="overflow-x-auto pb-1">
+        <div className="inline-flex min-w-full flex-col gap-1">
+          {/* Month axis */}
+          <div className="relative ml-0 h-3" style={{ width: heatmap.weeks.length * 14 }}>
+            {heatmap.monthLabels.map((m) => (
+              <span
+                key={`${m.weekIndex}-${m.month}`}
+                className="absolute text-[9px] text-white/30"
+                style={{ left: m.weekIndex * 14 }}
+              >
+                {MONTHS[m.month]}
+              </span>
+            ))}
+          </div>
+          {/* Grid */}
+          <div className="flex gap-[3px]">
+            {heatmap.weeks.map((week, wi) => (
+              <div key={wi} className="flex flex-col gap-[3px]">
+                {week.map((cell, di) =>
+                  cell ? (
+                    <div
+                      key={cell.date}
+                      title={`${cell.count} · ${cell.date}`}
+                      className={cn(
+                        "h-[11px] w-[11px] rounded-[2px]",
+                        HEAT_COLORS[intensity(cell.count)]
+                      )}
+                    />
+                  ) : (
+                    <div key={`${wi}-${di}`} className="h-[11px] w-[11px] rounded-[2px]" />
+                  )
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="mt-3 flex items-center justify-end gap-1.5">
+        <span className="text-[10px] text-white/30">{t("less")}</span>
+        {HEAT_COLORS.map((c, i) => (
+          <div key={i} className={cn("h-[10px] w-[10px] rounded-[2px]", c)} />
+        ))}
+        <span className="text-[10px] text-white/30">{t("more")}</span>
+      </div>
+    </section>
+  )
+}
+
+// ── Achievements ────────────────────────────────────────────────────────────────
+
+const ACHIEVEMENT_ICONS: Record<string, LucideIcon> = {
+  Footprints,
+  BookOpen,
+  Library,
+  Dumbbell,
+  Award,
+  ListChecks,
+  Target,
+  FolderCheck,
+  Flame,
+  GraduationCap,
+  CalendarCheck,
+  Medal,
+  Trophy,
+  Crown,
+}
+
+const FAMILY_ACCENT: Record<AchievementFamily, { icon: string; bg: string; ring: string }> = {
+  milestone: { icon: "text-blue-400", bg: "bg-blue-500/15", ring: "ring-blue-500/30" },
+  mastery: { icon: "text-purple-400", bg: "bg-purple-500/15", ring: "ring-purple-500/30" },
+  streak: { icon: "text-orange-400", bg: "bg-orange-500/15", ring: "ring-orange-500/30" },
+  rank: { icon: "text-amber-400", bg: "bg-amber-500/15", ring: "ring-amber-500/30" },
+}
+
+const FAMILY_ORDER: AchievementFamily[] = ["milestone", "mastery", "streak", "rank"]
+
+function AchievementBadge({ a }: { a: EvaluatedAchievement }) {
+  const t = useTranslations("Achievements")
+  const Icon = ACHIEVEMENT_ICONS[a.icon] ?? Award
+  const accent = FAMILY_ACCENT[a.family]
+  const showProgress = !a.unlocked && a.target > 1
+
+  return (
+    <div
+      title={t(`items.${a.id}.desc`)}
+      className={cn(
+        "flex flex-col items-center gap-2 rounded-2xl border p-3 text-center transition-colors",
+        a.unlocked
+          ? cn("border-transparent ring-1", accent.bg, accent.ring)
+          : "border-line/40 bg-white/[0.015]"
+      )}
+    >
+      <div
+        className={cn(
+          "relative flex h-10 w-10 items-center justify-center rounded-xl",
+          a.unlocked ? accent.bg : "bg-white/5"
+        )}
+      >
+        <Icon
+          className={cn("h-5 w-5", a.unlocked ? accent.icon : "text-white/25")}
+          strokeWidth={1.75}
+        />
+        {!a.unlocked && (
+          <span className="absolute -right-1 -bottom-1 rounded-full bg-[#0d0d0d] p-0.5">
+            <Lock className="h-2.5 w-2.5 text-white/40" strokeWidth={2.5} />
+          </span>
+        )}
+      </div>
+      <span
+        className={cn(
+          "text-[11px] leading-tight font-medium",
+          a.unlocked ? "text-fg-muted" : "text-white/35"
+        )}
+      >
+        {t(`items.${a.id}.title`)}
+      </span>
+      {showProgress && (
+        <span className="font-mono text-[9px] text-white/30">
+          {a.current}/{a.target}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function AchievementsSection({ achievements }: { achievements: EvaluatedAchievement[] }) {
+  const t = useTranslations("Achievements")
+  const unlocked = achievements.filter((a) => a.unlocked).length
+
+  return (
+    <section className="mb-6">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-fg-dim text-[10px] font-semibold tracking-[0.18em] uppercase">
+          {t("sectionTitle")}
+        </h2>
+        <span className="font-mono text-[11px] text-white/40">
+          {t("unlockedOf", { unlocked, total: TOTAL_ACHIEVEMENTS })}
+        </span>
+      </div>
+      <div className="space-y-4">
+        {FAMILY_ORDER.map((family) => {
+          const items = achievements.filter((a) => a.family === family)
+          if (items.length === 0) return null
+          return (
+            <div key={family}>
+              <h3 className="mb-2 text-[10px] font-semibold tracking-[0.14em] text-white/25 uppercase">
+                {t(`family.${family}`)}
+              </h3>
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
+                {items.map((a) => (
+                  <AchievementBadge key={a.id} a={a} />
+                ))}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function ProfilePage({
@@ -229,6 +460,10 @@ export function ProfilePage({
   categoryProgress,
   completedByDifficulty,
   attemptedQuizzes,
+  streak,
+  heatmap,
+  achievements,
+  shareSlug,
 }: ProfilePageProps) {
   const t = useTranslations("Profile")
   const [mounted, setMounted] = useState(false)
@@ -322,33 +557,40 @@ export function ProfilePage({
           }}
         />
 
+        {shareSlug && (
+          <div className="absolute top-4 right-4 z-10">
+            <ShareProfileButton slug={shareSlug} />
+          </div>
+        )}
+
         <div className="relative flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:p-8">
           {/* Avatar */}
-          <div className="relative shrink-0 self-start">
+          <div className="relative shrink-0 self-start sm:self-center">
             {user.image ? (
               <Image
                 src={user.image}
                 alt={user.name}
-                width={80}
-                height={80}
-                className={cn("rounded-2xl ring-2", avatarRing)}
+                width={112}
+                height={112}
+                className={cn("h-28 w-28 rounded-full object-cover ring-2", avatarRing)}
               />
             ) : (
               <div
                 className={cn(
-                  "flex h-20 w-20 items-center justify-center rounded-2xl bg-white/8 font-mono text-3xl font-bold text-white/60 ring-2",
+                  "flex h-28 w-28 items-center justify-center rounded-full bg-white/8 font-mono text-4xl font-bold text-white/60 ring-2",
                   avatarRing
                 )}
               >
                 {user.name[0].toUpperCase()}
               </div>
             )}
-            {/* Rank badge */}
+            {/* Rank badge — overlaps the avatar's bottom edge with a solid backdrop
+                so it reads as attached and stays legible over any photo */}
             <span
               className={cn(
-                "absolute -right-2 -bottom-2 rounded-full border-2 border-[#0d0d0d] px-2 py-0.5 font-mono text-[9px] font-bold tracking-wide",
-                rank.color,
-                rank.textColor
+                "absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full border-2 border-[#0d0d0d] bg-[#1c1c1c] px-2 py-0.5 font-mono text-[9px] font-bold tracking-wide whitespace-nowrap shadow-md ring-1",
+                rank.textColor,
+                avatarRing
               )}
             >
               {rank.label}
@@ -486,6 +728,12 @@ export function ProfilePage({
           accent="#fbbf24"
         />
       </div>
+
+      {/* ── Activity (streak + heatmap) ───────────────────────────── */}
+      <ActivitySection streak={streak} heatmap={heatmap} />
+
+      {/* ── Achievements ──────────────────────────────────────────── */}
+      <AchievementsSection achievements={achievements} />
 
       {/* ── Category + Quizzes ────────────────────────────────────── */}
       <div className="mb-6 grid gap-4 md:grid-cols-2">

@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/db"
 import { userProgress } from "@/db/schema"
+import { logActivity } from "@/lib/activity"
 import { eq } from "drizzle-orm"
 
 export async function GET(req: Request) {
@@ -67,6 +68,10 @@ export async function PATCH(req: Request) {
       quizScores: patch.quizScores ?? {},
     })
   }
+
+  // PATCH is the per-action sync (concept visited / exercise / quiz), so it's the
+  // signal that the user studied today — record it for streaks and the heatmap.
+  await logActivity(userId)
 
   return Response.json({ ok: true })
 }

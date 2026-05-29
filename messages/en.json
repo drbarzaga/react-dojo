@@ -234,7 +234,19 @@
     "kyuInfoFormula": "Score formula",
     "kyuInfoConcepts": "Concepts visited",
     "kyuInfoExercises": "Exercises completed",
-    "kyuInfoQuizzes": "Quizzes attempted"
+    "kyuInfoQuizzes": "Quizzes attempted",
+    "concepts": "Concepts",
+    "exercises": "Exercises",
+    "quizzes": "Quizzes",
+    "sortLabel": "Sort by",
+    "sort_score": "Rank",
+    "sort_streak": "Streak",
+    "sort_recent": "Recent",
+    "you": "You",
+    "activeToday": "Active today",
+    "streakLabel": "Current streak",
+    "achievementsLabel": "Achievements unlocked",
+    "mostActive": "Most active this week"
   },
   "DonateDialog": {
     "tooltip": "Donate to React Dojo",
@@ -275,7 +287,21 @@
     "maxRank": "Maximum rank reached",
     "scoreLabel": "score",
     "ofTotal": "of {total}",
-    "signInButton": "Sign in with GitHub"
+    "signInButton": "Sign in with GitHub",
+    "activity": "Activity",
+    "dayStreak": "day streak",
+    "longestStreak": "Longest",
+    "less": "Less",
+    "more": "More",
+    "share": "Share",
+    "shareTitle": "My React Dojo profile",
+    "copied": "Copied"
+  },
+  "PublicProfile": {
+    "metaTitle": "{name} on React Dojo",
+    "metaDesc": "See {name}'s React learning progress, rank and achievements on React Dojo.",
+    "notFoundTitle": "Profile not found",
+    "notFoundDesc": "This React Dojo profile doesn't exist."
   },
   "TypeScript": {
     "sectionLabel": "TypeScript for React",
@@ -293,5 +319,39 @@
     "next": "next →",
     "do": "Do this",
     "dont": "Don't do this"
+  },
+  "Achievements": {
+    "sectionTitle": "Achievements",
+    "unlockedOf": "{unlocked}/{total}",
+    "locked": "Locked",
+    "family": {
+      "milestone": "Milestones",
+      "mastery": "Mastery",
+      "streak": "Consistency",
+      "rank": "Rank"
+    },
+    "items": {
+      "first-concept": { "title": "First Steps", "desc": "Visit your first concept" },
+      "concepts-10": { "title": "Curious Mind", "desc": "Visit 10 concepts" },
+      "concepts-25": { "title": "Knowledge Seeker", "desc": "Visit 25 concepts" },
+      "first-exercise": { "title": "Hands On", "desc": "Complete your first exercise" },
+      "exercises-10": { "title": "Practitioner", "desc": "Complete 10 exercises" },
+      "first-quiz": { "title": "Quiz Taker", "desc": "Attempt your first quiz" },
+      "perfect-quiz": { "title": "Flawless", "desc": "Score 100% on a quiz" },
+      "category-complete": {
+        "title": "Category Cleared",
+        "desc": "Visit every concept in a category"
+      },
+      "all-advanced": { "title": "Advanced Master", "desc": "Complete every advanced exercise" },
+      "all-concepts": { "title": "Scholar", "desc": "Visit every concept" },
+      "streak-3": { "title": "Warming Up", "desc": "Reach a 3-day streak" },
+      "streak-7": { "title": "On Fire", "desc": "Reach a 7-day streak" },
+      "streak-14": { "title": "Unstoppable", "desc": "Reach a 14-day streak" },
+      "streak-30": { "title": "Dedicated", "desc": "Reach a 30-day streak" },
+      "rank-5kyu": { "title": "5 KYU", "desc": "Reach the 5 KYU rank" },
+      "rank-3kyu": { "title": "3 KYU", "desc": "Reach the 3 KYU rank" },
+      "rank-1kyu": { "title": "1 KYU", "desc": "Reach the 1 KYU rank" },
+      "rank-dan": { "title": "DAN", "desc": "Reach the DAN rank" }
+    }
   }
 }

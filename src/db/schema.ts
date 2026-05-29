@@ -20,6 +20,9 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
+  // GitHub handle, captured on sign-in. Used as the public profile slug (/u/<username>).
+  // Nullable: users created before this column fall back to their id in the URL.
+  username: text("username").unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()

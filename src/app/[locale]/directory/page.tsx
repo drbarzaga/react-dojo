@@ -1,18 +1,15 @@
+import { DirectoryList } from "@/components/directory-list"
 import { GitHubSignInButton } from "@/components/github-sign-in-button"
 import { KyuInfoButton } from "@/components/kyu-info-button"
+import { Link } from "@/i18n/navigation"
 import { getContentForLocale } from "@/content/loader"
 import type { Locale } from "@/i18n/routing"
 import { auth } from "@/lib/auth"
 import { getDevelopers } from "@/lib/get-developers"
-import { calculateScore, getRank } from "@/lib/ranking"
-import { Crown } from "lucide-react"
+import { Crown, Flame } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import { headers } from "next/headers"
 import Image from "next/image"
-
-function formatDate(date: Date) {
-  return date.toLocaleDateString("en-US", { month: "short", year: "numeric" })
-}
 
 interface Props {
   params: Promise<{ locale: string }>
@@ -20,7 +17,7 @@ interface Props {
 
 export default async function DirectoryPage({ params }: Props) {
   const { locale } = await params
-  const [session, t, { allConcepts, allExercises, allQuizzes }] = await Promise.all([
+  const [session, t, { allConcepts, allExercises, allQuizzes, categories }] = await Promise.all([
     auth.api.getSession({ headers: await headers() }),
     getTranslations("Directory"),
     getContentForLocale(locale as Locale),
@@ -55,7 +52,13 @@ export default async function DirectoryPage({ params }: Props) {
     )
   }
 
-  const developers = await getDevelopers()
+  const developers = await getDevelopers({ totals, exercises: allExercises, categories })
+
+  // "Most active this week": active within the last 7 days, ranked by streak then score.
+  const mostActive = developers
+    .filter((d) => d.activeThisWeek)
+    .sort((a, b) => b.streak - a.streak || b.score - a.score)
+    .slice(0, 5)
 
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-12">
@@ -74,123 +77,52 @@ export default async function DirectoryPage({ params }: Props) {
           <p className="text-fg-dim text-sm">{t("empty")}</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {developers.map((dev, index) => {
-            const rank = getRank(dev.concepts, dev.exercises, dev.quizzes, totals)
-            const score = calculateScore(dev.concepts, dev.exercises, dev.quizzes, totals)
-
-            return (
-              <div
-                key={dev.id}
-                className="border-line bg-bg hover:border-line-strong rounded-lg border p-4 transition-colors"
-              >
-                {/* Top row */}
-                <div className="flex items-center gap-3">
-                  {/* Rank number */}
-                  <span className="text-fg-dim w-5 shrink-0 text-right font-mono text-[11px]">
-                    {index + 1}
-                  </span>
-
-                  {/* Avatar */}
-                  {dev.image ? (
-                    <Image
-                      src={dev.image}
-                      alt={dev.name}
-                      width={38}
-                      height={38}
-                      className="shrink-0 rounded-full"
-                    />
-                  ) : (
-                    <div className="bg-bg-raise text-fg-muted flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full font-mono text-sm font-bold">
-                      {dev.name[0].toUpperCase()}
-                    </div>
-                  )}
-
-                  {/* Name + joined */}
-                  <div className="min-w-0 flex-1">
-                    <p className="text-fg truncate font-mono text-[13px] font-medium">{dev.name}</p>
-                    <p className="text-fg-dim text-[11px]">
-                      {t("memberSince")} {formatDate(dev.createdAt)}
-                    </p>
-                  </div>
-
-                  {/* KYU Badge */}
-                  <span
-                    className={`shrink-0 rounded-full px-2.5 py-0.5 font-mono text-[11px] font-semibold ${rank.color} ${rank.textColor}`}
+        <>
+          {/* Most active this week */}
+          {mostActive.length > 0 && (
+            <section className="border-line/60 mb-6 rounded-2xl border bg-white/[0.02] p-4">
+              <h2 className="text-fg-dim mb-3 flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.16em] uppercase">
+                <Flame className="h-3.5 w-3.5 text-orange-400" strokeWidth={2} />
+                {t("mostActive")}
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {mostActive.map((dev) => (
+                  <Link
+                    key={dev.id}
+                    href={`/u/${dev.username ?? dev.id}`}
+                    className="border-line/60 hover:border-line-strong flex items-center gap-2 rounded-full border bg-white/[0.02] py-1 pr-3 pl-1 transition-colors"
                   >
-                    {rank.label}
-                  </span>
-                </div>
-
-                {/* Progress bar */}
-                <div className="mt-3 pl-8">
-                  <div className="mb-1 flex items-center justify-between">
-                    <span className="text-fg-dim font-mono text-[10px]">
-                      {t("overallProgress")}
+                    {dev.image ? (
+                      <Image
+                        src={dev.image}
+                        alt={dev.name}
+                        width={22}
+                        height={22}
+                        className="rounded-full"
+                      />
+                    ) : (
+                      <div className="bg-bg-raise text-fg-muted flex h-[22px] w-[22px] items-center justify-center rounded-full font-mono text-[10px] font-bold">
+                        {dev.name[0].toUpperCase()}
+                      </div>
+                    )}
+                    <span className="text-fg-muted max-w-[120px] truncate font-mono text-[12px]">
+                      {dev.name}
                     </span>
-                    <span className="text-fg-muted font-mono text-[10px]">{score}%</span>
-                  </div>
-                  <div className="bg-bg-hover h-1 w-full overflow-hidden rounded-full">
-                    <div
-                      className={`h-full rounded-full transition-all ${rank.color.replace("bg-", "bg-").replace("/20", "/70")}`}
-                      style={{ width: `${score}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Stats row */}
-                <div className="mt-3 grid grid-cols-3 gap-2 pl-8">
-                  <StatBar
-                    label="Concepts"
-                    value={dev.concepts}
-                    total={totals.concepts}
-                    colorClass="bg-blue-400/60"
-                  />
-                  <StatBar
-                    label="Exercises"
-                    value={dev.exercises}
-                    total={totals.exercises}
-                    colorClass="bg-emerald-400/60"
-                  />
-                  <StatBar
-                    label="Quizzes"
-                    value={dev.quizzes}
-                    total={totals.quizzes}
-                    colorClass="bg-amber-400/60"
-                  />
-                </div>
+                    {dev.streak > 0 && (
+                      <span className="flex items-center gap-0.5 font-mono text-[11px] text-orange-400">
+                        <Flame className="h-3 w-3" strokeWidth={2} />
+                        {dev.streak}
+                      </span>
+                    )}
+                  </Link>
+                ))}
               </div>
-            )
-          })}
-        </div>
-      )}
-    </div>
-  )
-}
+            </section>
+          )}
 
-function StatBar({
-  label,
-  value,
-  total,
-  colorClass,
-}: {
-  label: string
-  value: number
-  total: number
-  colorClass: string
-}) {
-  const pct = Math.min((value / total) * 100, 100)
-  return (
-    <div>
-      <div className="mb-1 flex items-center justify-between">
-        <span className="text-fg-dim text-[10px]">{label}</span>
-        <span className="text-fg-muted font-mono text-[10px]">
-          {value}/{total}
-        </span>
-      </div>
-      <div className="bg-bg-hover h-1 w-full overflow-hidden rounded-full">
-        <div className={`h-full rounded-full ${colorClass}`} style={{ width: `${pct}%` }} />
-      </div>
+          <DirectoryList developers={developers} currentUserId={session.user.id} totals={totals} />
+        </>
+      )}
     </div>
   )
 }

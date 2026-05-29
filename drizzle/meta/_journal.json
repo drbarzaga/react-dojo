@@ -36,6 +36,13 @@
       "when": 1778082994443,
       "tag": "0004_reaction_slug",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1780014798796,
+      "tag": "0005_rich_cloak",
+      "breakpoints": true
     }
   ]
 }
