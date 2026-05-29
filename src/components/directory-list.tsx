@@ -120,7 +120,7 @@ function DeveloperRow({
           {dev.activeToday && (
             <span
               title={t("activeToday")}
-              className="absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-[#0d0d0d] bg-emerald-400"
+              className="border-bg absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 bg-emerald-400"
             />
           )}
         </div>

@@ -1,10 +1,12 @@
 import { ProfilePage } from "@/components/profile-page"
 import { db } from "@/db"
 import { user as userTable } from "@/db/schema"
+import { Link } from "@/i18n/navigation"
 import type { Locale } from "@/i18n/routing"
 import { buildPageMetadata } from "@/lib/metadata"
 import { buildProfileData, type ProfileUser } from "@/lib/profile-data"
 import { eq, or } from "drizzle-orm"
+import { ArrowLeft } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
@@ -52,6 +54,23 @@ export default async function PublicProfileRoute({ params }: Props) {
   const found = await resolveUser(username)
   if (!found) notFound()
 
-  const data = await buildProfileData(found, locale as Locale)
-  return <ProfilePage {...data} />
+  const [data, t] = await Promise.all([
+    buildProfileData(found, locale as Locale),
+    getTranslations({ locale, namespace: "PublicProfile" }),
+  ])
+
+  return (
+    <div>
+      <div className="mx-auto max-w-[820px] px-5 pt-6 md:px-10">
+        <Link
+          href="/directory"
+          className="text-fg-dim hover:text-fg-muted inline-flex items-center gap-1.5 font-mono text-[12px] transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} />
+          {t("backToDirectory")}
+        </Link>
+      </div>
+      <ProfilePage {...data} />
+    </div>
+  )
 }

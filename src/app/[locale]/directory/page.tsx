@@ -80,7 +80,7 @@ export default async function DirectoryPage({ params }: Props) {
         <>
           {/* Most active this week */}
           {mostActive.length > 0 && (
-            <section className="border-line/60 mb-6 rounded-2xl border bg-white/[0.02] p-4">
+            <section className="border-line/60 bg-bg-raise mb-6 rounded-2xl border p-4">
               <h2 className="text-fg-dim mb-3 flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.16em] uppercase">
                 <Flame className="h-3.5 w-3.5 text-orange-400" strokeWidth={2} />
                 {t("mostActive")}
@@ -90,7 +90,7 @@ export default async function DirectoryPage({ params }: Props) {
                   <Link
                     key={dev.id}
                     href={`/u/${dev.username ?? dev.id}`}
-                    className="border-line/60 hover:border-line-strong flex items-center gap-2 rounded-full border bg-white/[0.02] py-1 pr-3 pl-1 transition-colors"
+                    className="border-line/60 hover:border-line-strong bg-bg-raise flex items-center gap-2 rounded-full border py-1 pr-3 pl-1 transition-colors"
                   >
                     {dev.image ? (
                       <Image

@@ -10,7 +10,7 @@ import type { EvaluatedAchievement, AchievementFamily } from "@/lib/achievements
 import { TOTAL_ACHIEVEMENTS } from "@/lib/achievements"
 import { ShareProfileButton } from "@/components/share-profile-button"
 import { useCountUp } from "@/hooks/use-count-up"
-import { useTranslations } from "next-intl"
+import { useFormatter, useTranslations } from "next-intl"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import {
@@ -158,7 +158,7 @@ function ScoreRing({
         fill="none"
         stroke="currentColor"
         strokeWidth="8"
-        className="text-white/8"
+        className="text-fg-faint"
       />
       <circle
         cx="56"
@@ -189,7 +189,7 @@ function MiniRing({ pct, done }: { pct: number; done: boolean }) {
         fill="none"
         stroke="currentColor"
         strokeWidth="2.5"
-        className="text-white/10"
+        className="text-fg-faint"
       />
       <circle
         cx="10"
@@ -224,18 +224,16 @@ function AnimatedStat({
   const pct = Math.min((value / total) * 100, 100)
 
   return (
-    <div className="border-line/50 flex flex-col gap-1.5 rounded-2xl border bg-white/[0.025] p-5 transition-colors hover:bg-white/[0.04]">
-      <span className="text-[10px] font-semibold tracking-[0.18em] text-white/35 uppercase">
+    <div className="border-line/50 bg-bg-raise hover:bg-bg-hover flex flex-col gap-1.5 rounded-2xl border p-5 transition-colors">
+      <span className="text-fg-muted text-[10px] font-semibold tracking-[0.18em] uppercase">
         {label}
       </span>
       <div className="flex items-end gap-1.5">
-        <span className="font-mono text-4xl leading-none font-bold text-white">{animated}</span>
-        <span className="mb-0.5 font-mono text-[13px] text-white/25">
-          {t("ofTotal", { total })}
-        </span>
+        <span className="text-fg font-mono text-4xl leading-none font-bold">{animated}</span>
+        <span className="text-fg-dim mb-0.5 font-mono text-[13px]">{t("ofTotal", { total })}</span>
       </div>
-      <span className="text-[11px] text-white/30">{sublabel}</span>
-      <div className="mt-2.5 h-[3px] w-full overflow-hidden rounded-full bg-white/8">
+      <span className="text-fg-dim text-[11px]">{sublabel}</span>
+      <div className="bg-bg-hover mt-2.5 h-[3px] w-full overflow-hidden rounded-full">
         <div
           className="h-full rounded-full transition-all duration-1000"
           style={{ width: `${pct}%`, background: accent, boxShadow: `0 0 8px ${accent}80` }}
@@ -249,7 +247,7 @@ function AnimatedStat({
 
 // Emerald intensity scale (index = bucket from `intensity()`)
 const HEAT_COLORS = [
-  "bg-white/6",
+  "bg-bg-hover",
   "bg-emerald-500/25",
   "bg-emerald-500/45",
   "bg-emerald-500/70",
@@ -262,7 +260,7 @@ function ActivitySection({ streak, heatmap }: { streak: StreakInfo; heatmap: Hea
   const t = useTranslations("Profile")
 
   return (
-    <section className="border-line/60 mb-6 rounded-3xl border bg-white/[0.02] p-6">
+    <section className="border-line/60 bg-bg-raise mb-6 rounded-3xl border p-6">
       <div className="mb-4 flex items-center justify-between gap-4">
         <h2 className="text-fg-dim text-[10px] font-semibold tracking-[0.18em] uppercase">
           {t("activity")}
@@ -270,15 +268,15 @@ function ActivitySection({ streak, heatmap }: { streak: StreakInfo; heatmap: Hea
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <Flame
-              className={cn("h-4 w-4", streak.current > 0 ? "text-orange-400" : "text-white/25")}
+              className={cn("h-4 w-4", streak.current > 0 ? "text-orange-400" : "text-fg-dim")}
               strokeWidth={2}
             />
-            <span className="font-mono text-sm font-bold text-white">{streak.current}</span>
-            <span className="text-[11px] text-white/35">{t("dayStreak")}</span>
+            <span className="text-fg font-mono text-sm font-bold">{streak.current}</span>
+            <span className="text-fg-muted text-[11px]">{t("dayStreak")}</span>
           </div>
           <div className="hidden items-center gap-1.5 sm:flex">
-            <span className="font-mono text-[11px] text-white/35">{t("longestStreak")}</span>
-            <span className="font-mono text-sm font-bold text-white/70">{streak.longest}</span>
+            <span className="text-fg-muted font-mono text-[11px]">{t("longestStreak")}</span>
+            <span className="text-fg-muted font-mono text-sm font-bold">{streak.longest}</span>
           </div>
         </div>
       </div>
@@ -291,7 +289,7 @@ function ActivitySection({ streak, heatmap }: { streak: StreakInfo; heatmap: Hea
             {heatmap.monthLabels.map((m) => (
               <span
                 key={`${m.weekIndex}-${m.month}`}
-                className="absolute text-[9px] text-white/30"
+                className="text-fg-dim absolute text-[9px]"
                 style={{ left: m.weekIndex * 14 }}
               >
                 {MONTHS[m.month]}
@@ -324,11 +322,11 @@ function ActivitySection({ streak, heatmap }: { streak: StreakInfo; heatmap: Hea
 
       {/* Legend */}
       <div className="mt-3 flex items-center justify-end gap-1.5">
-        <span className="text-[10px] text-white/30">{t("less")}</span>
+        <span className="text-fg-dim text-[10px]">{t("less")}</span>
         {HEAT_COLORS.map((c, i) => (
           <div key={i} className={cn("h-[10px] w-[10px] rounded-[2px]", c)} />
         ))}
-        <span className="text-[10px] text-white/30">{t("more")}</span>
+        <span className="text-fg-dim text-[10px]">{t("more")}</span>
       </div>
     </section>
   )
@@ -375,35 +373,35 @@ function AchievementBadge({ a }: { a: EvaluatedAchievement }) {
         "flex flex-col items-center gap-2 rounded-2xl border p-3 text-center transition-colors",
         a.unlocked
           ? cn("border-transparent ring-1", accent.bg, accent.ring)
-          : "border-line/40 bg-white/[0.015]"
+          : "border-line/40 bg-bg-raise"
       )}
     >
       <div
         className={cn(
           "relative flex h-10 w-10 items-center justify-center rounded-xl",
-          a.unlocked ? accent.bg : "bg-white/5"
+          a.unlocked ? accent.bg : "bg-bg-raise"
         )}
       >
         <Icon
-          className={cn("h-5 w-5", a.unlocked ? accent.icon : "text-white/25")}
+          className={cn("h-5 w-5", a.unlocked ? accent.icon : "text-fg-dim")}
           strokeWidth={1.75}
         />
         {!a.unlocked && (
-          <span className="absolute -right-1 -bottom-1 rounded-full bg-[#0d0d0d] p-0.5">
-            <Lock className="h-2.5 w-2.5 text-white/40" strokeWidth={2.5} />
+          <span className="bg-bg absolute -right-1 -bottom-1 rounded-full p-0.5">
+            <Lock className="text-fg-muted h-2.5 w-2.5" strokeWidth={2.5} />
           </span>
         )}
       </div>
       <span
         className={cn(
           "text-[11px] leading-tight font-medium",
-          a.unlocked ? "text-fg-muted" : "text-white/35"
+          a.unlocked ? "text-fg-muted" : "text-fg-muted"
         )}
       >
         {t(`items.${a.id}.title`)}
       </span>
       {showProgress && (
-        <span className="font-mono text-[9px] text-white/30">
+        <span className="text-fg-dim font-mono text-[9px]">
           {a.current}/{a.target}
         </span>
       )}
@@ -421,7 +419,7 @@ function AchievementsSection({ achievements }: { achievements: EvaluatedAchievem
         <h2 className="text-fg-dim text-[10px] font-semibold tracking-[0.18em] uppercase">
           {t("sectionTitle")}
         </h2>
-        <span className="font-mono text-[11px] text-white/40">
+        <span className="text-fg-muted font-mono text-[11px]">
           {t("unlockedOf", { unlocked, total: TOTAL_ACHIEVEMENTS })}
         </span>
       </div>
@@ -431,7 +429,7 @@ function AchievementsSection({ achievements }: { achievements: EvaluatedAchievem
           if (items.length === 0) return null
           return (
             <div key={family}>
-              <h3 className="mb-2 text-[10px] font-semibold tracking-[0.14em] text-white/25 uppercase">
+              <h3 className="text-fg-dim mb-2 text-[10px] font-semibold tracking-[0.14em] uppercase">
                 {t(`family.${family}`)}
               </h3>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
@@ -466,6 +464,7 @@ export function ProfilePage({
   shareSlug,
 }: ProfilePageProps) {
   const t = useTranslations("Profile")
+  const format = useFormatter()
   const [mounted, setMounted] = useState(false)
   const animatedScore = useCountUp(score, mounted, 1200)
 
@@ -522,13 +521,14 @@ export function ProfilePage({
     "text-green-400": "ring-green-400/50",
     "text-emerald-400": "ring-emerald-400/50",
     "text-emerald-500": "ring-emerald-500/50",
-    "text-zinc-400": "ring-white/15",
-    "text-zinc-500": "ring-white/10",
+    "text-zinc-400": "ring-line-strong",
+    "text-zinc-500": "ring-line-strong",
   }
-  const avatarRing = avatarRingMap[rank.textColor] ?? "ring-white/15"
+  const avatarRing = avatarRingMap[rank.textColor] ?? "ring-line-strong"
 
+  // Exact join date, formatted in the active locale (e.g. "28 de mayo de 2026").
   const formatDate = (d: Date | string) =>
-    new Date(d).toLocaleDateString(undefined, { month: "long", year: "numeric" })
+    format.dateTime(new Date(d), { day: "numeric", month: "long", year: "numeric" })
 
   const quizScoreColor = (s: number) =>
     s >= 80 ? "text-emerald-400" : s >= 50 ? "text-amber-400" : "text-rose-400"
@@ -577,7 +577,7 @@ export function ProfilePage({
             ) : (
               <div
                 className={cn(
-                  "flex h-28 w-28 items-center justify-center rounded-full bg-white/8 font-mono text-4xl font-bold text-white/60 ring-2",
+                  "bg-bg-hover text-fg-muted flex h-28 w-28 items-center justify-center rounded-full font-mono text-4xl font-bold ring-2",
                   avatarRing
                 )}
               >
@@ -588,7 +588,7 @@ export function ProfilePage({
                 so it reads as attached and stays legible over any photo */}
             <span
               className={cn(
-                "absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full border-2 border-[#0d0d0d] bg-[#1c1c1c] px-2 py-0.5 font-mono text-[9px] font-bold tracking-wide whitespace-nowrap shadow-md ring-1",
+                "border-bg bg-bg-raise absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full border-2 px-2 py-0.5 font-mono text-[9px] font-bold tracking-wide whitespace-nowrap shadow-md ring-1",
                 rank.textColor,
                 avatarRing
               )}
@@ -600,8 +600,8 @@ export function ProfilePage({
           {/* Name + meta + next rank */}
           <div className="min-w-0 flex-1 space-y-3">
             <div>
-              <h1 className="font-mono text-2xl leading-tight font-bold text-white">{user.name}</h1>
-              <p className="mt-0.5 font-mono text-[12px] text-white/35">
+              <h1 className="text-fg font-mono text-2xl leading-tight font-bold">{user.name}</h1>
+              <p className="text-fg-muted mt-0.5 font-mono text-[12px]">
                 {t("memberSince")} {formatDate(user.createdAt)}
               </p>
             </div>
@@ -610,17 +610,17 @@ export function ProfilePage({
             {nextRank ? (
               <div>
                 <div className="mb-1.5 flex items-center justify-between">
-                  <span className="text-[11px] text-white/40">
+                  <span className="text-fg-muted text-[11px]">
                     {t("nextRank")}:
                     <span className={cn("ml-1.5 font-semibold", nextRank.color)}>
                       {nextRank.label}
                     </span>
                   </span>
-                  <span className="font-mono text-[11px] text-white/35">
+                  <span className="text-fg-muted font-mono text-[11px]">
                     {score} / {nextMin}
                   </span>
                 </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/8">
+                <div className="bg-bg-hover h-1.5 w-full overflow-hidden rounded-full">
                   <div
                     className={cn(
                       "h-full rounded-full transition-all duration-1000",
@@ -655,19 +655,19 @@ export function ProfilePage({
           >
             <ScoreRing score={score} color={strokeColor} animated={mounted} />
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="font-mono text-3xl leading-none font-bold text-white">
+              <span className="text-fg font-mono text-3xl leading-none font-bold">
                 {animatedScore}
               </span>
-              <span className="mt-0.5 font-mono text-[10px] text-white/30">{t("scoreLabel")}</span>
+              <span className="text-fg-dim mt-0.5 font-mono text-[10px]">{t("scoreLabel")}</span>
             </div>
           </div>
         </div>
 
         {/* Rank ladder strip */}
-        <div className="border-t border-white/6 px-6 py-5 sm:px-8">
+        <div className="border-line border-t px-6 py-5 sm:px-8">
           <div className="relative flex justify-between">
             {/* Track line */}
-            <div className="absolute inset-x-0 top-[8px] h-px bg-white/8" />
+            <div className="bg-bg-hover absolute inset-x-0 top-[8px] h-px" />
             {[...RANK_LADDER].reverse().map((r) => {
               const isActive = r.label === rank.label
               const isPast = RANK_LADDER.findIndex((x) => x.label === r.label) > currentIdx
@@ -679,8 +679,8 @@ export function ProfilePage({
                       isActive
                         ? cn(r.bg, r.border, "scale-[1.25] shadow-sm")
                         : isPast
-                          ? "border-white/20 bg-white/12"
-                          : "border-white/12 bg-transparent"
+                          ? "border-line-strong bg-bg-hover"
+                          : "border-line bg-transparent"
                     )}
                   >
                     {isActive && (
@@ -692,7 +692,7 @@ export function ProfilePage({
                   <span
                     className={cn(
                       "font-mono text-[7.5px] font-bold whitespace-nowrap",
-                      isActive ? r.color : isPast ? "text-white/22" : "text-white/30"
+                      isActive ? r.color : isPast ? "text-fg-dim" : "text-fg-dim"
                     )}
                   >
                     {r.label}
@@ -742,7 +742,7 @@ export function ProfilePage({
           <h2 className="text-fg-dim mb-3 text-[10px] font-semibold tracking-[0.18em] uppercase">
             {t("byCategory")}
           </h2>
-          <div className="border-line/60 divide-line/40 divide-y rounded-2xl border bg-white/2">
+          <div className="border-line/60 divide-line/40 bg-bg-raise divide-y rounded-2xl border">
             {categoryProgress.map((cat) => {
               const pct = cat.total === 0 ? 0 : Math.round((cat.visited / cat.total) * 100)
               const done = cat.visited === cat.total && cat.total > 0
@@ -780,7 +780,7 @@ export function ProfilePage({
             {t("quizScores")}
           </h2>
           {attemptedQuizzes.length === 0 ? (
-            <div className="border-line/60 flex h-32 items-center justify-center rounded-2xl border bg-white/2">
+            <div className="border-line/60 bg-bg-raise flex h-32 items-center justify-center rounded-2xl border">
               <p className="text-fg-dim text-[12px]">{t("noQuizzes")}</p>
             </div>
           ) : (
@@ -788,11 +788,11 @@ export function ProfilePage({
               {attemptedQuizzes.map((q) => (
                 <div
                   key={q.id}
-                  className="border-line/60 hover:border-line flex items-center justify-between rounded-xl border bg-white/2 px-4 py-2.5 transition-colors"
+                  className="border-line/60 hover:border-line bg-bg-raise flex items-center justify-between rounded-xl border px-4 py-2.5 transition-colors"
                 >
                   <span className="text-fg-muted min-w-0 truncate text-[12px]">{q.label}</span>
                   <div className="ml-3 flex shrink-0 items-center gap-2">
-                    <div className="h-[3px] w-16 overflow-hidden rounded-full bg-white/8">
+                    <div className="bg-bg-hover h-[3px] w-16 overflow-hidden rounded-full">
                       <div
                         className={cn(
                           "h-full rounded-full",
@@ -827,7 +827,7 @@ export function ProfilePage({
           {t("completedExercises")}
         </h2>
         {exercisesCompleted === 0 ? (
-          <div className="border-line/60 flex h-24 items-center justify-center rounded-2xl border bg-white/2">
+          <div className="border-line/60 bg-bg-raise flex h-24 items-center justify-center rounded-2xl border">
             <p className="text-fg-dim text-[12px]">{t("noExercises")}</p>
           </div>
         ) : (
@@ -848,7 +848,7 @@ export function ProfilePage({
                     {exs.map((ex) => (
                       <div
                         key={ex.id}
-                        className="border-line/50 flex items-center gap-2 rounded-xl border bg-white/2 px-3 py-2"
+                        className="border-line/50 bg-bg-raise flex items-center gap-2 rounded-xl border px-3 py-2"
                       >
                         <span
                           className={cn("h-1.5 w-1.5 shrink-0 rounded-full", difficultyDot[level])}

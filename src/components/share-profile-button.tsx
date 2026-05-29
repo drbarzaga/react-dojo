@@ -42,7 +42,7 @@ export function ShareProfileButton({ slug }: { slug: string }) {
         "flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[11px] font-semibold transition-colors",
         copied
           ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-400"
-          : "border-line text-fg-muted hover:text-fg bg-white/[0.03] hover:bg-white/[0.06]"
+          : "border-line text-fg-muted hover:text-fg bg-bg-raise hover:bg-bg-hover"
       )}
       aria-label={t("share")}
     >
