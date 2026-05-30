@@ -130,6 +130,10 @@ export function QuizPage({ quiz, allQuizzes }: QuizPageProps) {
   const wasCompleted = bestScore !== undefined
 
   function restartAndStart() {
+    // Re-taking a quiz in the same visit must re-arm score saving + confetti,
+    // which the "finished" effect skips while this ref is still true from mount.
+    wasFinishedOnMount.current = false
+    confettiFiredRef.current = false
     removeSession()
     setBrowsing(false)
     try {
@@ -158,6 +162,9 @@ export function QuizPage({ quiz, allQuizzes }: QuizPageProps) {
   }
 
   function startQuiz() {
+    // Same re-arming as restartAndStart: a fresh run must record its score.
+    wasFinishedOnMount.current = false
+    confettiFiredRef.current = false
     setSession((prev) => ({ ...prev, currentIndex: 0, selected: null }))
     setBrowsing(false)
     try {
