@@ -36,7 +36,7 @@ import {
 import { ListChecks, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { createPortal } from "react-dom"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react"
 
 // ─── Editor theme definitions ────────────────────────────────────────────────
 
@@ -419,6 +419,19 @@ function TerminalIcon({ size = 13, strokeWidth = 2 }: { size?: number; strokeWid
   )
 }
 
+// Latest Sandpack API mirrored into a ref so the toolbar can call it from event
+// handlers without subscribing to per-keystroke `files` updates — keeping the
+// (heavy) toolbar out of the typing render path.
+export type SandpackApi = ReturnType<typeof useSandpack>["sandpack"]
+
+function SandpackApiBridge({ apiRef }: { apiRef: RefObject<SandpackApi | null> }) {
+  const { sandpack } = useSandpack()
+  useEffect(() => {
+    apiRef.current = sandpack
+  })
+  return null
+}
+
 // Updates only /styles.css when app theme changes — without resetting user code
 function ThemeSync({ appTheme }: { appTheme: Theme }) {
   const { sandpack } = useSandpack()
@@ -460,10 +473,11 @@ function CodeSync({
   }, [exerciseId, saveCode, onStateChange])
 
   useEffect(() => {
-    const next = Object.entries(sandpack.files).reduce<ExerciseFiles>((acc, [path, file]) => {
-      if (path.includes(THEME_FILE_NAME)) return acc
-      return { ...acc, [path]: file.code }
-    }, {})
+    const next: ExerciseFiles = {}
+    for (const [path, file] of Object.entries(sandpack.files)) {
+      if (path.includes(THEME_FILE_NAME)) continue
+      next[path] = file.code
+    }
 
     const prev = codeRef.current
 
@@ -599,6 +613,7 @@ export function Playground({
 
   const [internalMaximized, setInternalMaximized] = useState(false)
   const maximized = controlledMaximized !== undefined ? controlledMaximized : internalMaximized
+  const sandpackApiRef = useRef<SandpackApi | null>(null)
   const onMaximizeChangeRef = useRef(onMaximizeChange)
   useEffect(() => {
     onMaximizeChangeRef.current = onMaximizeChange
@@ -711,6 +726,16 @@ export function Playground({
     [dependencies]
   )
 
+  // Bundle the preview on a debounce so re-compiles don't compete with typing.
+  const sandpackOptions = useMemo(
+    () => ({
+      ...(externalResources ? { externalResources } : {}),
+      recompileMode: "delayed" as const,
+      recompileDelay: 500,
+    }),
+    [externalResources]
+  )
+
   const editorPaneStyle = useMemo(() => {
     if (maximized) {
       return layout === "vertical"
@@ -801,8 +826,9 @@ export function Playground({
           theme={themeWithFont}
           files={initialFiles}
           customSetup={sandpackCustomSetup}
-          options={externalResources ? { externalResources } : undefined}
+          options={sandpackOptions}
         >
+          <SandpackApiBridge apiRef={sandpackApiRef} />
           <ThemeSync appTheme={appTheme} />
           {enablePersistence && exerciseId && (
             <CodeSync exerciseId={exerciseId} onStateChange={setSaveState} />
@@ -815,6 +841,7 @@ export function Playground({
             maximized={maximized}
             onMaximizeToggle={handleMaximizeToggle}
             saveState={saveState}
+            sandpackRef={sandpackApiRef}
             starterFiles={files}
             enableReset={enablePersistence === true && Boolean(exerciseId)}
             showSolution={showSolution}
@@ -824,7 +851,6 @@ export function Playground({
             <SandpackLayout style={sandpackLayoutStyle}>
               <SandpackCodeEditor
                 showLineNumbers
-                showInlineErrors
                 showTabs={
                   Object.values(files).filter(
                     (f) => typeof f === "string" || !(f as { hidden?: boolean }).hidden

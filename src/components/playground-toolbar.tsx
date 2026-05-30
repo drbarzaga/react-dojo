@@ -12,8 +12,9 @@ import {
   THEME_FILE_NAME,
 } from "@/lib/constants"
 import { cn } from "@/lib/utils"
+import { type SandpackApi } from "@/components/playground"
 import { type PlaygroundLayout, type PlaygroundSaveState } from "@/types"
-import { useSandpack, type SandpackFiles } from "@codesandbox/sandpack-react"
+import { type SandpackFiles } from "@codesandbox/sandpack-react"
 import {
   Check,
   Columns2,
@@ -27,7 +28,7 @@ import {
   Undo2,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { memo, useCallback, useEffect, useRef, useState, type RefObject } from "react"
 
 interface PlaygroundToolbarProps {
   layout: PlaygroundLayout
@@ -37,13 +38,17 @@ interface PlaygroundToolbarProps {
   maximized: boolean
   onMaximizeToggle: () => void
   saveState: PlaygroundSaveState
+  sandpackRef: RefObject<SandpackApi | null>
   starterFiles: SandpackFiles
   enableReset: boolean
   showSolution?: boolean
   onSolutionToggle?: () => void
 }
 
-export function PlaygroundToolbar({
+// Memoized so it stays out of the per-keystroke render path: it reads Sandpack
+// through `sandpackRef` (set by SandpackApiBridge) instead of subscribing via
+// useSandpack, which would re-render the whole toolbar on every edit.
+export const PlaygroundToolbar = memo(function PlaygroundToolbar({
   layout,
   onLayoutChange,
   fontSize,
@@ -51,6 +56,7 @@ export function PlaygroundToolbar({
   maximized,
   onMaximizeToggle,
   saveState,
+  sandpackRef,
   starterFiles,
   enableReset,
   showSolution,
@@ -58,7 +64,6 @@ export function PlaygroundToolbar({
 }: PlaygroundToolbarProps) {
   const t = useTranslations("Playground")
   const tEx = useTranslations("ExercisePage")
-  const { sandpack } = useSandpack()
   const [copied, setCopied] = useState(false)
   const [formatted, setFormatted] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
@@ -76,6 +81,8 @@ export function PlaygroundToolbar({
   }, [confirmReset])
 
   const handleCopy = useCallback(async () => {
+    const sandpack = sandpackRef.current
+    if (!sandpack) return
     const code = sandpack.files[sandpack.activeFile]?.code ?? ""
     try {
       await navigator.clipboard.writeText(code)
@@ -84,9 +91,11 @@ export function PlaygroundToolbar({
     } catch (error) {
       console.warn("[playground] copy failed:", error)
     }
-  }, [sandpack])
+  }, [sandpackRef])
 
   const handleFormat = useCallback(async () => {
+    const sandpack = sandpackRef.current
+    if (!sandpack) return
     const path = sandpack.activeFile
     const code = sandpack.files[path]?.code ?? ""
     const next = await formatCode(code, path)
@@ -95,20 +104,22 @@ export function PlaygroundToolbar({
       setFormatted(true)
       setTimeout(() => setFormatted(false), 1500)
     }
-  }, [sandpack])
+  }, [sandpackRef])
 
   const handleReset = useCallback(() => {
     if (!confirmReset) {
       setConfirmReset(true)
       return
     }
+    const sandpack = sandpackRef.current
+    if (!sandpack) return
     Object.entries(starterFiles).forEach(([path, file]) => {
       if (path === THEME_FILE_NAME) return
       const code = typeof file === "string" ? file : file.code
       if (typeof code === "string") sandpack.updateFile(path, code)
     })
     setConfirmReset(false)
-  }, [confirmReset, sandpack, starterFiles])
+  }, [confirmReset, sandpackRef, starterFiles])
 
   const decreaseFont = useCallback(() => {
     const next = Math.max(PLAYGROUND_FONT_SIZE_MIN_PX, fontSize - PLAYGROUND_FONT_SIZE_STEP_PX)
@@ -144,14 +155,14 @@ export function PlaygroundToolbar({
       // Cmd+Enter — refresh preview
       if (event.key === "Enter") {
         event.preventDefault()
-        sandpack.runSandpack()
+        sandpackRef.current?.runSandpack()
         return
       }
     }
 
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
-  }, [handleFormat, sandpack])
+  }, [handleFormat, sandpackRef])
 
   return (
     <TooltipProvider delay={300}>
@@ -260,7 +271,7 @@ export function PlaygroundToolbar({
       </div>
     </TooltipProvider>
   )
-}
+})
 
 interface ToolbarButtonProps {
   label: string
