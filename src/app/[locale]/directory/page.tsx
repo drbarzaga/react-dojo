@@ -102,7 +102,7 @@ export default async function DirectoryPage({ params }: Props) {
                       />
                     ) : (
                       <div className="bg-bg-raise text-fg-muted flex h-[22px] w-[22px] items-center justify-center rounded-full font-mono text-[10px] font-bold">
-                        {dev.name[0].toUpperCase()}
+                        {dev.name[0]?.toUpperCase()}
                       </div>
                     )}
                     <span className="text-fg-muted max-w-[120px] truncate font-mono text-[12px]">

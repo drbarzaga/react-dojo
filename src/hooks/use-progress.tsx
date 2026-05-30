@@ -111,7 +111,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
   const resetProgress = useCallback(() => {
     setData(empty)
-  }, [setData])
+    // Push the cleared state so the server doesn't re-hydrate it on next login.
+    // The merge-on-login is additive only, so without this the reset is undone.
+    if (session) syncToServer({ ...empty })
+  }, [session, setData])
 
   const value = useMemo<ProgressCtx>(
     () => ({
