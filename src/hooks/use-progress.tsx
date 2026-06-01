@@ -18,21 +18,31 @@ interface ProgressData {
   visitedConcepts: string[]
   completedExercises: string[]
   quizScores: Record<string, number>
+  dailyStreak: number
+  bestStreak: number
+  lastDailyDate: string | null
 }
 
 const empty: ProgressData = {
   visitedConcepts: [],
   completedExercises: [],
   quizScores: {},
+  dailyStreak: 0,
+  bestStreak: 0,
+  lastDailyDate: null,
 }
 
 interface ProgressCtx {
   visitedConcepts: Set<string>
   completedExercises: Set<string>
   quizScores: Record<string, number>
+  dailyStreak: number
+  bestStreak: number
+  lastDailyDate: string | null
   markConceptVisited: (id: string) => void
   toggleExerciseCompleted: (id: string) => void
   saveQuizScore: (id: string, pct: number) => void
+  completeDailyChallenge: (date: string) => void
   resetProgress: () => void
 }
 
@@ -109,6 +119,37 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     [session, setData]
   )
 
+  const completeDailyChallenge = useCallback(
+    (date: string) => {
+      setData((prev) => {
+        // No-op if already completed today
+        if (prev.lastDailyDate === date) return prev
+
+        const yesterday = new Date(date)
+        yesterday.setUTCDate(yesterday.getUTCDate() - 1)
+        const yesterdayStr = yesterday.toISOString().slice(0, 10)
+
+        const newStreak = prev.lastDailyDate === yesterdayStr ? prev.dailyStreak + 1 : 1
+        const newBest = Math.max(prev.bestStreak, newStreak)
+
+        const next: ProgressData = {
+          ...prev,
+          dailyStreak: newStreak,
+          bestStreak: newBest,
+          lastDailyDate: date,
+        }
+        if (session)
+          syncToServer({
+            dailyStreak: next.dailyStreak,
+            bestStreak: next.bestStreak,
+            lastDailyDate: next.lastDailyDate,
+          })
+        return next
+      })
+    },
+    [session, setData]
+  )
+
   const resetProgress = useCallback(() => {
     setData(empty)
     // Push the cleared state so the server doesn't re-hydrate it on next login.
@@ -121,12 +162,23 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       visitedConcepts: new Set(data.visitedConcepts),
       completedExercises: new Set(data.completedExercises),
       quizScores: data.quizScores,
+      dailyStreak: data.dailyStreak ?? 0,
+      bestStreak: data.bestStreak ?? 0,
+      lastDailyDate: data.lastDailyDate ?? null,
       markConceptVisited,
       toggleExerciseCompleted,
       saveQuizScore,
+      completeDailyChallenge,
       resetProgress,
     }),
-    [data, markConceptVisited, toggleExerciseCompleted, saveQuizScore, resetProgress]
+    [
+      data,
+      markConceptVisited,
+      toggleExerciseCompleted,
+      saveQuizScore,
+      completeDailyChallenge,
+      resetProgress,
+    ]
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
