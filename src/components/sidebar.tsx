@@ -152,6 +152,14 @@ function DailyChallengeEntry({
   onNavigate: () => void
   t: ReturnType<typeof useTranslations<"Sidebar">>
 }) {
+  // Defer localStorage-derived values to after hydration to avoid mismatch
+  const [mounted, setMounted] = useState(false)
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: mount flag pattern to prevent SSR hydration mismatch
+  useEffect(() => setMounted(true), [])
+
+  const displayStreak = mounted ? streak : 0
+  const displayCompleted = mounted ? completedToday : false
+
   return (
     <div className="border-line border-b px-2 py-1.5">
       <button
@@ -175,14 +183,14 @@ function DailyChallengeEntry({
         <Flame
           className={cn(
             "h-3.5 w-3.5 shrink-0",
-            completedToday ? "text-orange-400" : "text-sidebar-foreground/40"
+            displayCompleted ? "text-orange-400" : "text-sidebar-foreground/40"
           )}
           strokeWidth={2}
         />
         <span className="flex-1 truncate">{t("dailyChallenge")}</span>
-        {streak > 0 && (
+        {displayStreak > 0 && (
           <span className="text-sidebar-foreground/50 shrink-0 font-mono text-[10px] tabular-nums">
-            {streak}🔥
+            {displayStreak}🔥
           </span>
         )}
       </button>
