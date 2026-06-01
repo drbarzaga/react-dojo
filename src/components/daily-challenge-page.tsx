@@ -47,14 +47,16 @@ export function DailyChallengePage({ challenge, today }: DailyChallengePageProps
 
           <div className="flex items-end gap-4 text-[13px]">
             <div className="text-center">
-              <div className="text-fg flex items-center gap-1 text-[20px] font-bold">
+              <div className="text-fg flex h-7 items-center justify-center gap-1 text-[20px] font-bold">
                 {displayStreak}
                 <Flame className="h-4 w-4 text-orange-400" />
               </div>
               <div className="text-fg-muted text-[11px]">{t("streak", { n: displayStreak })}</div>
             </div>
             <div className="text-center">
-              <div className="text-fg-muted text-[18px] font-semibold">{displayBest}</div>
+              <div className="text-fg-muted flex h-7 items-center justify-center text-[20px] font-bold">
+                {displayBest}
+              </div>
               <div className="text-fg-faint text-[11px]">{t("bestStreak", { n: displayBest })}</div>
             </div>
           </div>
