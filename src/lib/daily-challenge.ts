@@ -24,23 +24,20 @@ export function getDailyChallenge(
   quizzes: Quiz[],
   date: Date = new Date()
 ): DailyChallenge {
-  // Build flat pool: interleave exercise and question entries
+  // Build flat pool: interleave exercises and questions.
+  // Questions drive the length; exercises cycle (repeat) when exhausted.
+  // Result: strict 50/50 split — every other day is an exercise, no matter
+  // how many exercises vs questions exist.
   const pool: DailyChallenge[] = []
 
   const allQuestions: { item: QuizQuestion; quiz: Quiz }[] = quizzes.flatMap((quiz) =>
     quiz.questions.map((item) => ({ item, quiz }))
   )
 
-  const maxLen = Math.max(exercises.length, allQuestions.length)
-
-  for (let i = 0; i < maxLen; i++) {
-    if (i < exercises.length) {
-      pool.push({ type: "exercise", item: exercises[i] })
-    }
-    if (i < allQuestions.length) {
-      const { item, quiz } = allQuestions[i]
-      pool.push({ type: "question", item, quiz })
-    }
+  for (let i = 0; i < allQuestions.length; i++) {
+    pool.push({ type: "exercise", item: exercises[i % exercises.length] })
+    const { item, quiz } = allQuestions[i]
+    pool.push({ type: "question", item, quiz })
   }
 
   const index = getDayIndex(date) % pool.length
