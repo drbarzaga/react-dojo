@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { useTranslations } from "next-intl"
 import { Flame } from "lucide-react"
 import { ExercisePage } from "@/components/exercise-page"
@@ -15,7 +16,15 @@ interface DailyChallengePageProps {
 export function DailyChallengePage({ challenge, today }: DailyChallengePageProps) {
   const t = useTranslations("DailyChallenge")
   const { dailyStreak, bestStreak, lastDailyDate, completeDailyChallenge } = useProgress()
-  const completedToday = lastDailyDate === today
+
+  // Defer localStorage-derived values to after hydration to avoid SSR mismatch
+  const [mounted, setMounted] = useState(false)
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: mount flag pattern
+  useEffect(() => setMounted(true), [])
+
+  const displayStreak = mounted ? dailyStreak : 0
+  const displayBest = mounted ? bestStreak : 0
+  const completedToday = mounted ? lastDailyDate === today : false
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
@@ -39,14 +48,14 @@ export function DailyChallengePage({ challenge, today }: DailyChallengePageProps
           <div className="flex items-center gap-4 text-[13px]">
             <div className="text-center">
               <div className="text-fg flex items-center gap-1 text-[20px] font-bold">
-                {dailyStreak}
+                {displayStreak}
                 <Flame className="h-4 w-4 text-orange-400" />
               </div>
-              <div className="text-fg-muted text-[11px]">{t("streak", { n: dailyStreak })}</div>
+              <div className="text-fg-muted text-[11px]">{t("streak", { n: displayStreak })}</div>
             </div>
             <div className="text-center">
-              <div className="text-fg-muted text-[18px] font-semibold">{bestStreak}</div>
-              <div className="text-fg-faint text-[11px]">{t("bestStreak", { n: bestStreak })}</div>
+              <div className="text-fg-muted text-[18px] font-semibold">{displayBest}</div>
+              <div className="text-fg-faint text-[11px]">{t("bestStreak", { n: displayBest })}</div>
             </div>
           </div>
         </div>
