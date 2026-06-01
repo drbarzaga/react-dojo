@@ -179,7 +179,12 @@ export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
               maximized={maximized}
               onMaximizeChange={setMaximized}
               showSolution={showSolution}
-              onSolutionToggle={() => startTransition(() => setShowSolution(true))}
+              onSolutionToggle={() =>
+                startTransition(() => {
+                  setShowSolution(true)
+                  setMaximized(false)
+                })
+              }
             />
           )}
         </div>
