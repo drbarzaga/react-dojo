@@ -59,7 +59,8 @@
     "customHooks": "Librería de Hooks",
     "directory": "Directorio de Devs",
     "signIn": "Iniciar sesión con GitHub",
-    "typescript": "TypeScript para React"
+    "typescript": "TypeScript para React",
+    "dailyChallenge": "Reto diario"
   },
   "Footer": {
     "madeWith": "Hecho con",

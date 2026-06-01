@@ -59,7 +59,8 @@
     "customHooks": "Hooks Library",
     "directory": "Developer Directory",
     "signIn": "Sign in with GitHub",
-    "typescript": "TypeScript for React"
+    "typescript": "TypeScript for React",
+    "dailyChallenge": "Daily Challenge"
   },
   "Footer": {
     "madeWith": "Made with",

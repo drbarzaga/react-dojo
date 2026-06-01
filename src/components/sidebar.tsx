@@ -19,6 +19,7 @@ import {
   ChevronDown,
   CircleCheck,
   Component,
+  Flame,
   Gauge,
   Hourglass,
   LogOut,
@@ -138,6 +139,57 @@ function NavItem({
   )
 }
 
+function DailyChallengeEntry({
+  streak,
+  completedToday,
+  active,
+  onNavigate,
+  t,
+}: {
+  streak: number
+  completedToday: boolean
+  active: boolean
+  onNavigate: () => void
+  t: ReturnType<typeof useTranslations<"Sidebar">>
+}) {
+  return (
+    <div className="border-line border-b px-2 py-1.5">
+      <button
+        onClick={onNavigate}
+        className={cn(
+          "group/nav relative flex w-full min-w-0 items-center gap-2 rounded-md py-[6px] pr-2.5 pl-3.5 text-left font-mono text-[13px] transition-all duration-150",
+          active
+            ? "bg-sidebar-accent/70 text-sidebar-foreground"
+            : "text-sidebar-foreground/55 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground/90"
+        )}
+      >
+        <span
+          aria-hidden
+          className={cn(
+            "absolute top-1/2 left-1 h-3.5 w-[2px] -translate-y-1/2 rounded-full transition-all duration-200",
+            active
+              ? "scale-y-100 bg-emerald-400/80"
+              : "bg-sidebar-foreground/20 scale-y-0 group-hover/nav:scale-y-50"
+          )}
+        />
+        <Flame
+          className={cn(
+            "h-3.5 w-3.5 shrink-0",
+            completedToday ? "text-orange-400" : "text-sidebar-foreground/40"
+          )}
+          strokeWidth={2}
+        />
+        <span className="flex-1 truncate">{t("dailyChallenge")}</span>
+        {streak > 0 && (
+          <span className="text-sidebar-foreground/50 shrink-0 font-mono text-[10px] tabular-nums">
+            {streak}🔥
+          </span>
+        )}
+      </button>
+    </div>
+  )
+}
+
 interface SidebarProps {
   initialState: SidebarOpenState
 }
@@ -147,7 +199,8 @@ export function Sidebar({ initialState }: SidebarProps) {
   const pathname = usePathname()
   const { push } = useLocaleRouter()
   const { allConcepts, categories, conceptIndex, allExercises, allQuizzes } = useContent()
-  const { visitedConcepts, completedExercises, quizScores } = useProgress()
+  const { visitedConcepts, completedExercises, quizScores, dailyStreak, lastDailyDate } =
+    useProgress()
   const { data: session } = useSession()
 
   const difficultyLabel: Record<Difficulty, string> = {
@@ -261,6 +314,14 @@ export function Sidebar({ initialState }: SidebarProps) {
     >
       <TooltipProvider delay={300}>
         <SidebarContent className="gap-0 py-1">
+          {/* ── DAILY CHALLENGE ──────────────── */}
+          <DailyChallengeEntry
+            streak={dailyStreak}
+            completedToday={lastDailyDate === new Date().toISOString().slice(0, 10)}
+            active={current === "daily"}
+            onNavigate={() => push("/daily")}
+            t={t}
+          />
           {/* ── CONCEPTS ─────────────────────── */}
           <SectionLabel
             ring={
