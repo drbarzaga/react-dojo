@@ -115,6 +115,7 @@
     "reset": "reset",
     "backToStarter": "← back to starter",
     "viewSolution": "view solution →",
+    "openInEditor": "open in editor",
     "hint": "Hint",
     "relatedConcepts": "Related concepts",
     "prev": "← previous",
