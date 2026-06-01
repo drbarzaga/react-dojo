@@ -45,7 +45,7 @@ export function DailyChallengePage({ challenge, today }: DailyChallengePageProps
             </p>
           </div>
 
-          <div className="flex items-center gap-4 text-[13px]">
+          <div className="flex items-end gap-4 text-[13px]">
             <div className="text-center">
               <div className="text-fg flex items-center gap-1 text-[20px] font-bold">
                 {displayStreak}
