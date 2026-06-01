@@ -105,6 +105,9 @@ export const userProgress = pgTable("user_progress", {
     .$type<Record<string, number>>()
     .notNull()
     .default(sql`'{}'::jsonb`),
+  dailyStreak: integer("daily_streak").notNull().default(0),
+  bestStreak: integer("best_streak").notNull().default(0),
+  lastDailyDate: text("last_daily_date"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 })
 
