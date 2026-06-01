@@ -124,6 +124,17 @@
     "difficultyIntermediate": "intermedio",
     "difficultyAdvanced": "avanzado"
   },
+  "DailyChallenge": {
+    "title": "Reto diario",
+    "streak": "{n} días seguidos",
+    "bestStreak": "Récord: {n} días",
+    "dayNumber": "Día {n}",
+    "markDone": "Marcar como hecho ✓",
+    "completed": "Completado hoy ✓",
+    "comeBack": "Vuelve mañana para un nuevo reto.",
+    "exercise": "Ejercicio de hoy",
+    "question": "Pregunta de hoy"
+  },
   "QuizPage": {
     "quiz": "Quiz",
     "completed": "Completado · {pct}%",

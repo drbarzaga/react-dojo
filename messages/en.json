@@ -124,6 +124,17 @@
     "difficultyIntermediate": "intermediate",
     "difficultyAdvanced": "advanced"
   },
+  "DailyChallenge": {
+    "title": "Daily Challenge",
+    "streak": "{n} day streak",
+    "bestStreak": "Best: {n} days",
+    "dayNumber": "Day {n}",
+    "markDone": "Mark as done ✓",
+    "completed": "Completed today ✓",
+    "comeBack": "Come back tomorrow for a new challenge.",
+    "exercise": "Today's exercise",
+    "question": "Today's question"
+  },
   "QuizPage": {
     "quiz": "Quiz",
     "completed": "Completed · {pct}%",
