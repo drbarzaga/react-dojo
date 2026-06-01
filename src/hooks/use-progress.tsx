@@ -129,8 +129,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         yesterday.setUTCDate(yesterday.getUTCDate() - 1)
         const yesterdayStr = yesterday.toISOString().slice(0, 10)
 
-        const newStreak = prev.lastDailyDate === yesterdayStr ? prev.dailyStreak + 1 : 1
-        const newBest = Math.max(prev.bestStreak, newStreak)
+        const newStreak = prev.lastDailyDate === yesterdayStr ? (prev.dailyStreak ?? 0) + 1 : 1
+        const newBest = Math.max(prev.bestStreak ?? 0, newStreak)
 
         const next: ProgressData = {
           ...prev,
