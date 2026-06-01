@@ -1,5 +1,5 @@
 import { getContentForLocale } from "@/content/loader"
-import { getDailyChallenge, getDayIndex, getTodayString } from "@/lib/daily-challenge"
+import { getDailyChallenge, getTodayString } from "@/lib/daily-challenge"
 import { DailyChallengePage } from "@/components/daily-challenge-page"
 import { buildPageMetadata } from "@/lib/metadata"
 import { type Locale } from "@/i18n/routing"
@@ -29,7 +29,6 @@ export default async function DailyRoute({ params }: Props) {
   const today = new Date()
   const challenge = getDailyChallenge(allExercises, allQuizzes, today)
   const todayStr = getTodayString(today)
-  const dayNumber = getDayIndex(today) + 1
 
-  return <DailyChallengePage challenge={challenge} today={todayStr} dayNumber={dayNumber} />
+  return <DailyChallengePage challenge={challenge} today={todayStr} />
 }

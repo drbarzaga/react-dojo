@@ -18,7 +18,14 @@ export async function POST(req: Request) {
   const session = await auth.api.getSession({ headers: req.headers })
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 })
 
-  const { visitedConcepts, completedExercises, quizScores } = await req.json()
+  const {
+    visitedConcepts,
+    completedExercises,
+    quizScores,
+    dailyStreak,
+    bestStreak,
+    lastDailyDate,
+  } = await req.json()
   const userId = session.user.id
 
   const existing = await db.query.userProgress.findFirst({
@@ -30,6 +37,10 @@ export async function POST(req: Request) {
       visitedConcepts: [...new Set([...existing.visitedConcepts, ...visitedConcepts])],
       completedExercises: [...new Set([...existing.completedExercises, ...completedExercises])],
       quizScores: { ...existing.quizScores } as Record<string, number>,
+      // Streak: keep the highest values; lastDailyDate from client takes precedence (more recent)
+      dailyStreak: Math.max(existing.dailyStreak ?? 0, dailyStreak ?? 0),
+      bestStreak: Math.max(existing.bestStreak ?? 0, bestStreak ?? 0),
+      lastDailyDate: lastDailyDate ?? existing.lastDailyDate ?? null,
     }
     for (const [id, score] of Object.entries(quizScores as Record<string, number>)) {
       merged.quizScores[id] = Math.max(merged.quizScores[id] ?? 0, score)
@@ -40,10 +51,17 @@ export async function POST(req: Request) {
       .where(eq(userProgress.userId, userId))
     return Response.json(merged)
   } else {
-    await db
-      .insert(userProgress)
-      .values({ userId, visitedConcepts, completedExercises, quizScores })
-    return Response.json({ visitedConcepts, completedExercises, quizScores })
+    const values = {
+      userId,
+      visitedConcepts,
+      completedExercises,
+      quizScores,
+      dailyStreak: dailyStreak ?? 0,
+      bestStreak: bestStreak ?? 0,
+      lastDailyDate: lastDailyDate ?? null,
+    }
+    await db.insert(userProgress).values(values)
+    return Response.json(values)
   }
 }
 

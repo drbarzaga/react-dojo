@@ -10,10 +10,9 @@ import type { DailyChallenge } from "@/lib/daily-challenge"
 interface DailyChallengePageProps {
   challenge: DailyChallenge
   today: string
-  dayNumber: number
 }
 
-export function DailyChallengePage({ challenge, today, dayNumber }: DailyChallengePageProps) {
+export function DailyChallengePage({ challenge, today }: DailyChallengePageProps) {
   const t = useTranslations("DailyChallenge")
   const { dailyStreak, bestStreak, lastDailyDate, completeDailyChallenge } = useProgress()
   const completedToday = lastDailyDate === today
@@ -27,9 +26,6 @@ export function DailyChallengePage({ challenge, today, dayNumber }: DailyChallen
             <div className="flex items-center gap-2">
               <Flame className="text-fg h-5 w-5" />
               <h1 className="text-fg text-[17px] font-semibold">{t("title")}</h1>
-              <span className="text-fg-muted text-[13px]">
-                · {t("dayNumber", { n: dayNumber })}
-              </span>
             </div>
             <p className="text-fg-muted text-[13px]">
               {challenge.type === "exercise" ? t("exercise") : t("question")}
