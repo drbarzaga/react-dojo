@@ -1,5 +1,6 @@
 "use client"
 
+import { DiffViewer } from "@/components/diff-viewer"
 import { FeedbackWidget } from "@/components/feedback-widget"
 import { Playground } from "@/components/playground"
 import type { Difficulty, Exercise } from "@/content/exercises"
@@ -39,10 +40,11 @@ export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
   const t = useTranslations("ExercisePage")
   const { push, href, locale } = useLocaleRouter()
   const [showSolution, setShowSolution] = useState(false)
+  const [openInEditor, setOpenInEditor] = useState(false)
   const [resetCount, setResetCount] = useState(0)
   const [maximized, setMaximized] = useState(false)
   const { completedExercises, toggleExerciseCompleted } = useProgress()
-  const { clearCode } = useCodePersistence()
+  const { clearCode, getSavedCode } = useCodePersistence()
   const { allConcepts } = useContent()
   useKeyboardNav({
     prev: prev && `/learn/${prev.id}`,
@@ -117,7 +119,15 @@ export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
               </button>
             )}
             <button
-              onClick={() => setShowSolution((v) => !v)}
+              onClick={() => {
+                if (showSolution) {
+                  setShowSolution(false)
+                  setOpenInEditor(false)
+                } else {
+                  setShowSolution(true)
+                  setOpenInEditor(false)
+                }
+              }}
               className={cn(
                 "text-[11px] transition-colors",
                 showSolution ? "text-fg" : "text-fg-dim hover:text-fg"
@@ -128,7 +138,22 @@ export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
           </div>
         </div>
         <div>
-          {showSolution ? (
+          {showSolution && !openInEditor ? (
+            <div className="space-y-3">
+              <DiffViewer
+                before={getSavedCode(exercise.id) ?? exercise.starter}
+                after={exercise.solution}
+              />
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setOpenInEditor(true)}
+                  className="text-fg-dim hover:text-fg text-[11px] transition-colors"
+                >
+                  {t("openInEditor")} →
+                </button>
+              </div>
+            </div>
+          ) : showSolution && openInEditor ? (
             <Playground
               key={`${exercise.id}-sol`}
               files={exercise.solution}
@@ -136,7 +161,12 @@ export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
               maximized={maximized}
               onMaximizeChange={setMaximized}
               showSolution={showSolution}
-              onSolutionToggle={() => startTransition(() => setShowSolution(false))}
+              onSolutionToggle={() =>
+                startTransition(() => {
+                  setShowSolution(false)
+                  setOpenInEditor(false)
+                })
+              }
             />
           ) : (
             <Playground
