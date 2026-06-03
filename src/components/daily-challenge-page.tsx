@@ -74,24 +74,12 @@ export function DailyChallengePage({ challenge, today }: DailyChallengePageProps
 
       {/* Challenge content */}
       {challenge.type === "exercise" ? (
-        <div className="space-y-3">
-          <ExercisePage exercise={challenge.item} prev={undefined} next={undefined} />
-          {!completedToday && (
-            <div className="flex justify-end px-1">
-              <button
-                onClick={() => completeDailyChallenge(today)}
-                className="bg-fg text-bg hover:bg-fg/90 rounded-lg px-4 py-2 text-[13px] font-medium transition-colors"
-              >
-                {t("markDone")}
-              </button>
-            </div>
-          )}
-          {completedToday && (
-            <div className="flex justify-end px-1">
-              <span className="text-fg-muted text-[12px]">{t("completed")}</span>
-            </div>
-          )}
-        </div>
+        <ExercisePage
+          exercise={challenge.item}
+          prev={undefined}
+          next={undefined}
+          onComplete={() => completeDailyChallenge(today)}
+        />
       ) : (
         <div className="border-line bg-surface rounded-xl border p-6">
           <DailyChallengeQuestion
