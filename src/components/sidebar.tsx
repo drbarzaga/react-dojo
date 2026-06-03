@@ -183,7 +183,7 @@ function DailyChallengeEntry({
         <Flame
           className={cn(
             "h-3.5 w-3.5 shrink-0",
-            displayCompleted ? "text-orange-400" : "text-sidebar-foreground/40"
+            displayCompleted ? "flame-animate text-orange-400" : "text-sidebar-foreground/40"
           )}
           strokeWidth={2}
         />

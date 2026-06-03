@@ -6,6 +6,7 @@ import { Flame } from "lucide-react"
 import { ExercisePage } from "@/components/exercise-page"
 import { DailyChallengeQuestion } from "@/components/daily-challenge-question"
 import { useProgress } from "@/hooks/use-progress"
+import { cn } from "@/lib/utils"
 import type { DailyChallenge } from "@/lib/daily-challenge"
 
 interface DailyChallengePageProps {
@@ -33,7 +34,7 @@ export function DailyChallengePage({ challenge, today }: DailyChallengePageProps
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <Flame className="text-fg h-5 w-5" />
+              <Flame className="flame-animate h-5 w-5 text-orange-500" />
               <h1 className="text-fg text-[17px] font-semibold">{t("title")}</h1>
             </div>
             <p className="text-fg-muted text-[13px]">
@@ -49,7 +50,9 @@ export function DailyChallengePage({ challenge, today }: DailyChallengePageProps
             <div className="text-center">
               <div className="text-fg flex h-7 items-center justify-center gap-1 text-[20px] font-bold">
                 {displayStreak}
-                <Flame className="h-4 w-4 text-orange-400" />
+                <Flame
+                  className={cn("h-4 w-4 text-orange-400", displayStreak > 0 && "flame-animate")}
+                />
               </div>
               <div className="text-fg-muted text-[11px]">{t("streak", { n: displayStreak })}</div>
             </div>
