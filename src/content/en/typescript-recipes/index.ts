@@ -12,6 +12,7 @@ import { extendHtmlProps } from "./extend-html-props"
 import { discriminatedUnions } from "./discriminated-unions"
 import { forwardRef } from "./forward-ref"
 import { derivingProps } from "./deriving-props"
+import { satisfiesOperator } from "./satisfies-operator"
 
 export const allRecipes: TypeScriptRecipe[] = [
   typingProps,
@@ -22,6 +23,7 @@ export const allRecipes: TypeScriptRecipe[] = [
   typingCustomHooks,
   extendHtmlProps,
   derivingProps,
+  satisfiesOperator,
   discriminatedUnions,
   forwardRef,
 ]
