@@ -227,12 +227,17 @@ export function Sidebar({ initialState }: SidebarProps) {
   const isProfileRoute = current === "profile"
   const activeExId = isExerciseRoute ? current.slice(6) : null
 
+  // Defer progress-derived values to after hydration to avoid SSR mismatch
+  const [sidebarMounted, setSidebarMounted] = useState(false)
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: mount flag pattern
+  useEffect(() => setSidebarMounted(true), [])
+
   const totalConcepts = allConcepts.length
-  const visitedCount = visitedConcepts.size
+  const visitedCount = sidebarMounted ? visitedConcepts.size : 0
   const totalQuizzes = allQuizzes.length
-  const attemptedQuizzes = Object.keys(quizScores).length
+  const attemptedQuizzes = sidebarMounted ? Object.keys(quizScores).length : 0
   const totalExercises = allExercises.length
-  const completedCount = completedExercises.size
+  const completedCount = sidebarMounted ? completedExercises.size : 0
 
   const activeCatId = categories.find((c) => c.conceptIds.includes(current))?.id ?? null
   const activeDifficulty = activeExId
