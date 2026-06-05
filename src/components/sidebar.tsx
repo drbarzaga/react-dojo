@@ -227,12 +227,21 @@ export function Sidebar({ initialState }: SidebarProps) {
   const isProfileRoute = current === "profile"
   const activeExId = isExerciseRoute ? current.slice(6) : null
 
+  // Defer all progress-derived values to after hydration to avoid SSR mismatch
+  const [sidebarMounted, setSidebarMounted] = useState(false)
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: mount flag pattern
+  useEffect(() => setSidebarMounted(true), [])
+
+  const displayVisited = sidebarMounted ? visitedConcepts : new Set<string>()
+  const displayCompleted = sidebarMounted ? completedExercises : new Set<string>()
+  const displayScores = sidebarMounted ? quizScores : ({} as Record<string, number>)
+
   const totalConcepts = allConcepts.length
-  const visitedCount = visitedConcepts.size
+  const visitedCount = displayVisited.size
   const totalQuizzes = allQuizzes.length
-  const attemptedQuizzes = Object.keys(quizScores).length
+  const attemptedQuizzes = Object.keys(displayScores).length
   const totalExercises = allExercises.length
-  const completedCount = completedExercises.size
+  const completedCount = displayCompleted.size
 
   const activeCatId = categories.find((c) => c.conceptIds.includes(current))?.id ?? null
   const activeDifficulty = activeExId
@@ -350,7 +359,7 @@ export function Sidebar({ initialState }: SidebarProps) {
             {categories.map((cat) => {
               const Icon = categoryIcon[cat.id]
               const isOpen = openCats.has(cat.id)
-              const visited = cat.conceptIds.filter((id) => visitedConcepts.has(id)).length
+              const visited = cat.conceptIds.filter((id) => displayVisited.has(id)).length
               const total = cat.conceptIds.length
 
               const allDone = total > 0 && visited === total
@@ -407,7 +416,7 @@ export function Sidebar({ initialState }: SidebarProps) {
                           const concept = conceptIndex[id]
                           if (!concept) return null
                           const active = !isExerciseRoute && !isQuizRoute && current === id
-                          const seen = visitedConcepts.has(id)
+                          const seen = displayVisited.has(id)
                           return (
                             <NavItem
                               key={id}
@@ -497,7 +506,7 @@ export function Sidebar({ initialState }: SidebarProps) {
                       <div className="border-sidebar-border/40 ml-[15px] border-l pb-1 pl-1.5">
                         {exs.map((ex) => {
                           const active = isExerciseRoute && activeExId === ex.id
-                          const completed = completedExercises.has(ex.id)
+                          const completed = displayCompleted.has(ex.id)
                           return (
                             <NavItem
                               key={ex.id}
@@ -587,7 +596,7 @@ export function Sidebar({ initialState }: SidebarProps) {
                       <div className="border-sidebar-border/40 ml-[15px] border-l pb-1 pl-1.5">
                         {quizzes.map((quiz) => {
                           const active = current === `quiz/${quiz.id}`
-                          const score = quizScores[quiz.id]
+                          const score = displayScores[quiz.id]
                           const attempted = score !== undefined
                           const checkColor =
                             score >= 80

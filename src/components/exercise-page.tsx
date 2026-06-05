@@ -13,12 +13,13 @@ import { useContent } from "@/providers/content-provider"
 import { renderObjective } from "@/lib/render-objective"
 import { BookOpen, CheckCircle2, Circle, Lightbulb } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { startTransition, useState } from "react"
+import { startTransition, useCallback, useState } from "react"
 
 interface ExercisePageProps {
   exercise: Exercise
   prev?: Exercise
   next?: Exercise
+  onComplete?: () => void
 }
 
 const difficultyColor: Record<Difficulty, string> = {
@@ -36,7 +37,7 @@ const difficultyKey: Record<
   advanced: "difficultyAdvanced",
 }
 
-export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
+export function ExercisePage({ exercise, prev, next, onComplete }: ExercisePageProps) {
   const t = useTranslations("ExercisePage")
   const { push, href, locale } = useLocaleRouter()
   const [showSolution, setShowSolution] = useState(false)
@@ -53,6 +54,11 @@ export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
   })
   const isCompleted = completedExercises.has(exercise.id)
 
+  const handleToggleCompleted = useCallback(() => {
+    toggleExerciseCompleted(exercise.id)
+    onComplete?.()
+  }, [toggleExerciseCompleted, exercise.id, onComplete])
+
   return (
     <article className="mx-auto max-w-[1000px] px-5 py-10 md:px-12 md:py-20">
       <div className="mb-4 flex items-center justify-between">
@@ -64,7 +70,7 @@ export function ExercisePage({ exercise, prev, next }: ExercisePageProps) {
           </span>
         </div>
         <button
-          onClick={() => toggleExerciseCompleted(exercise.id)}
+          onClick={handleToggleCompleted}
           className={cn(
             "flex items-center gap-2 rounded-md border px-3 py-1.5 text-[12px] transition-colors",
             isCompleted
