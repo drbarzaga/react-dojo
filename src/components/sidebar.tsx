@@ -141,13 +141,11 @@ function NavItem({
 
 function DailyChallengeEntry({
   streak,
-  completedToday,
   active,
   onNavigate,
   t,
 }: {
   streak: number
-  completedToday: boolean
   active: boolean
   onNavigate: () => void
   t: ReturnType<typeof useTranslations<"Sidebar">>
@@ -158,7 +156,6 @@ function DailyChallengeEntry({
   useEffect(() => setMounted(true), [])
 
   const displayStreak = mounted ? streak : 0
-  const displayCompleted = mounted ? completedToday : false
 
   return (
     <div className="border-line border-b px-2 py-1.5">
@@ -180,13 +177,7 @@ function DailyChallengeEntry({
               : "bg-sidebar-foreground/20 scale-y-0 group-hover/nav:scale-y-50"
           )}
         />
-        <Flame
-          className={cn(
-            "h-3.5 w-3.5 shrink-0",
-            displayCompleted ? "flame-animate text-orange-400" : "text-sidebar-foreground/40"
-          )}
-          strokeWidth={2}
-        />
+        <Flame className="flame-animate h-3.5 w-3.5 shrink-0 text-orange-500" strokeWidth={2} />
         <span className="flex-1 truncate">{t("dailyChallenge")}</span>
         {displayStreak > 0 && (
           <span className="text-sidebar-foreground/50 shrink-0 font-mono text-[10px] tabular-nums">
@@ -207,8 +198,7 @@ export function Sidebar({ initialState }: SidebarProps) {
   const pathname = usePathname()
   const { push } = useLocaleRouter()
   const { allConcepts, categories, conceptIndex, allExercises, allQuizzes } = useContent()
-  const { visitedConcepts, completedExercises, quizScores, dailyStreak, lastDailyDate } =
-    useProgress()
+  const { visitedConcepts, completedExercises, quizScores, dailyStreak } = useProgress()
   const { data: session } = useSession()
 
   const difficultyLabel: Record<Difficulty, string> = {
@@ -334,7 +324,6 @@ export function Sidebar({ initialState }: SidebarProps) {
           {/* ── DAILY CHALLENGE ──────────────── */}
           <DailyChallengeEntry
             streak={dailyStreak}
-            completedToday={lastDailyDate === new Date().toISOString().slice(0, 10)}
             active={current === "daily"}
             onNavigate={() => push("/daily")}
             t={t}
