@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation"
 import { ExercisePage } from "@/components/exercise-page"
 import { getContentForLocale } from "@/content/loader"
-import { routing, type Locale } from "@/i18n/routing"
+import { routing } from "@/i18n/routing"
+import { toLocale } from "@/lib/to-locale"
 import { buildPageMetadata } from "@/lib/metadata"
 import type { Metadata } from "next"
 
@@ -21,7 +22,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, exercise: id } = await params
-  const { exerciseIndex } = await getContentForLocale(locale as Locale)
+  const { exerciseIndex } = await getContentForLocale(toLocale(locale))
   const exercise = exerciseIndex[id]
   if (!exercise) return {}
   return buildPageMetadata({
@@ -34,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ExerciseRoute({ params }: Props) {
   const { locale, exercise: id } = await params
-  const { exerciseIndex, allExercises } = await getContentForLocale(locale as Locale)
+  const { exerciseIndex, allExercises } = await getContentForLocale(toLocale(locale))
   const exercise = exerciseIndex[id]
   if (!exercise) notFound()
 

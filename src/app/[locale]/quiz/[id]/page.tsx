@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation"
 import { QuizPage } from "@/components/quiz-page"
 import { getContentForLocale } from "@/content/loader"
-import { routing, type Locale } from "@/i18n/routing"
+import { routing } from "@/i18n/routing"
+import { toLocale } from "@/lib/to-locale"
 import { buildPageMetadata } from "@/lib/metadata"
 import type { Metadata } from "next"
 
@@ -21,7 +22,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, id } = await params
-  const { quizIndex } = await getContentForLocale(locale as Locale)
+  const { quizIndex } = await getContentForLocale(toLocale(locale))
   const quiz = quizIndex[id]
   if (!quiz) return {}
   return buildPageMetadata({
@@ -34,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function QuizRoute({ params }: Props) {
   const { locale, id } = await params
-  const { quizIndex, allQuizzes } = await getContentForLocale(locale as Locale)
+  const { quizIndex, allQuizzes } = await getContentForLocale(toLocale(locale))
   const quiz = quizIndex[id]
   if (!quiz) notFound()
 

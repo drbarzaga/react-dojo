@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
-import { routing, type Locale } from "@/i18n/routing"
+import { routing } from "@/i18n/routing"
+import { toLocale } from "@/lib/to-locale"
 import { allCustomHooks as allHooksEs } from "@/content/custom-hooks"
 import { getCustomHooksForLocale } from "@/content/custom-hooks/loader"
 import { HookDetailPage } from "@/components/hook-detail-page"
@@ -16,7 +17,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, id } = await params
-  const { customHookIndex } = await getCustomHooksForLocale(locale as Locale)
+  const { customHookIndex } = await getCustomHooksForLocale(toLocale(locale))
   const hook = customHookIndex[id]
   if (!hook) return {}
   return buildPageMetadata({
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function HookDetailRoute({ params }: Props) {
   const { locale, id } = await params
-  const { allCustomHooks, customHookIndex } = await getCustomHooksForLocale(locale as Locale)
+  const { allCustomHooks, customHookIndex } = await getCustomHooksForLocale(toLocale(locale))
   const hook = customHookIndex[id]
   if (!hook) notFound()
 

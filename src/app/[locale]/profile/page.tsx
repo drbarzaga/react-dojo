@@ -1,6 +1,6 @@
 import { GitHubSignInButton } from "@/components/github-sign-in-button"
 import { ProfilePage } from "@/components/profile-page"
-import type { Locale } from "@/i18n/routing"
+import { toLocale } from "@/lib/to-locale"
 import { auth } from "@/lib/auth"
 import { buildPageMetadata } from "@/lib/metadata"
 import { buildProfileData } from "@/lib/profile-data"
@@ -61,7 +61,7 @@ export default async function ProfileRoute({ params }: Props) {
   const user = session.user as typeof session.user & { username?: string | null }
   const data = await buildProfileData(
     { id: user.id, name: user.name, image: user.image ?? null, createdAt: user.createdAt },
-    locale as Locale
+    toLocale(locale)
   )
 
   // Slug for the shareable public profile (GitHub handle, or id for older accounts)
