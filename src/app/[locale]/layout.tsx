@@ -3,7 +3,8 @@ import type { Metadata } from "next"
 import { cookies } from "next/headers"
 import { NextIntlClientProvider } from "next-intl"
 import { getMessages, getTranslations } from "next-intl/server"
-import { routing, type Locale } from "@/i18n/routing"
+import { routing } from "@/i18n/routing"
+import { toLocale } from "@/lib/to-locale"
 import { AppProviders } from "@/providers/app-provider"
 import { AppShell } from "@/components/app-shell"
 import { ContentProvider } from "@/providers/content-provider"
@@ -56,9 +57,7 @@ export async function generateMetadata({
 
 export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {
   const { locale: rawLocale } = await params
-  const locale: Locale = (routing.locales as readonly string[]).includes(rawLocale)
-    ? (rawLocale as Locale)
-    : routing.defaultLocale
+  const locale = toLocale(rawLocale)
   const [messages, content, cookieStore] = await Promise.all([
     getMessages({ locale }),
     getContentForLocale(locale),

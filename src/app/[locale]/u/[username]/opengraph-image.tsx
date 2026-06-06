@@ -4,7 +4,7 @@ import path from "path"
 import { db } from "@/db"
 import { user as userTable } from "@/db/schema"
 import { buildProfileData } from "@/lib/profile-data"
-import type { Locale } from "@/i18n/routing"
+import { toLocale } from "@/lib/to-locale"
 import { eq, or } from "drizzle-orm"
 
 export const alt = "React Dojo profile"
@@ -44,7 +44,7 @@ export default async function Image({
   })
 
   // Fallback card when the profile can't be found.
-  const data = found ? await buildProfileData(found, locale as Locale) : null
+  const data = found ? await buildProfileData(found, toLocale(locale)) : null
   const rankHex = data ? (RANK_HEX[data.rank.textColor] ?? "#a1a1aa") : "#a1a1aa"
 
   const stats = data

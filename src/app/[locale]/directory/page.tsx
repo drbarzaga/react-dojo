@@ -3,7 +3,7 @@ import { GitHubSignInButton } from "@/components/github-sign-in-button"
 import { KyuInfoButton } from "@/components/kyu-info-button"
 import { Link } from "@/i18n/navigation"
 import { getContentForLocale } from "@/content/loader"
-import type { Locale } from "@/i18n/routing"
+import { toLocale } from "@/lib/to-locale"
 import { auth } from "@/lib/auth"
 import { getDevelopers } from "@/lib/get-developers"
 import { Crown, Flame } from "lucide-react"
@@ -20,7 +20,7 @@ export default async function DirectoryPage({ params }: Props) {
   const [session, t, { allConcepts, allExercises, allQuizzes, categories }] = await Promise.all([
     auth.api.getSession({ headers: await headers() }),
     getTranslations("Directory"),
-    getContentForLocale(locale as Locale),
+    getContentForLocale(toLocale(locale)),
   ])
 
   const totals = {

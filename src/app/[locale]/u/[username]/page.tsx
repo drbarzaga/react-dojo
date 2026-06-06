@@ -2,7 +2,7 @@ import { ProfilePage } from "@/components/profile-page"
 import { db } from "@/db"
 import { user as userTable } from "@/db/schema"
 import { Link } from "@/i18n/navigation"
-import type { Locale } from "@/i18n/routing"
+import { toLocale } from "@/lib/to-locale"
 import { buildPageMetadata } from "@/lib/metadata"
 import { buildProfileData, type ProfileUser } from "@/lib/profile-data"
 import { eq, or } from "drizzle-orm"
@@ -55,7 +55,7 @@ export default async function PublicProfileRoute({ params }: Props) {
   if (!found) notFound()
 
   const [data, t] = await Promise.all([
-    buildProfileData(found, locale as Locale),
+    buildProfileData(found, toLocale(locale)),
     getTranslations({ locale, namespace: "PublicProfile" }),
   ])
 

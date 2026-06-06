@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
-import { routing, type Locale } from "@/i18n/routing"
+import { routing } from "@/i18n/routing"
+import { toLocale } from "@/lib/to-locale"
 import { allRecipes as allRecipesEs } from "@/content/typescript-recipes"
 import { getRecipesForLocale } from "@/content/typescript-recipes/loader"
 import { TypeScriptDetailPage } from "@/components/typescript-detail-page"
@@ -16,7 +17,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, id } = await params
-  const { recipeIndex } = await getRecipesForLocale(locale as Locale)
+  const { recipeIndex } = await getRecipesForLocale(toLocale(locale))
   const recipe = recipeIndex[id]
   if (!recipe) return {}
   return buildPageMetadata({
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function TypeScriptDetailRoute({ params }: Props) {
   const { locale, id } = await params
-  const { allRecipes, recipeIndex } = await getRecipesForLocale(locale as Locale)
+  const { allRecipes, recipeIndex } = await getRecipesForLocale(toLocale(locale))
   const recipe = recipeIndex[id]
   if (!recipe) notFound()
 

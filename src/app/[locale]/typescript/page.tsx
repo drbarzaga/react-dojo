@@ -1,6 +1,7 @@
 import { TypeScriptListingPage } from "@/components/typescript-listing-page"
 import { getRecipesForLocale } from "@/content/typescript-recipes/loader"
-import { routing, type Locale } from "@/i18n/routing"
+import { routing } from "@/i18n/routing"
+import { toLocale } from "@/lib/to-locale"
 import { buildPageMetadata } from "@/lib/metadata"
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
@@ -27,6 +28,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function TypeScriptPage({ params }: Props) {
   const { locale } = await params
-  const { allRecipes } = await getRecipesForLocale(locale as Locale)
+  const { allRecipes } = await getRecipesForLocale(toLocale(locale))
   return <TypeScriptListingPage recipes={allRecipes} />
 }

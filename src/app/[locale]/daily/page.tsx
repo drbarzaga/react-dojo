@@ -2,7 +2,7 @@ import { getContentForLocale } from "@/content/loader"
 import { getDailyChallenge, getTodayString } from "@/lib/daily-challenge"
 import { DailyChallengePage } from "@/components/daily-challenge-page"
 import { buildPageMetadata } from "@/lib/metadata"
-import { type Locale } from "@/i18n/routing"
+import { toLocale } from "@/lib/to-locale"
 import type { Metadata } from "next"
 
 // Recompute on every request so the challenge rotates at midnight UTC
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function DailyRoute({ params }: Props) {
   const { locale } = await params
-  const { allExercises, allQuizzes } = await getContentForLocale(locale as Locale)
+  const { allExercises, allQuizzes } = await getContentForLocale(toLocale(locale))
 
   const today = new Date()
   const challenge = getDailyChallenge(allExercises, allQuizzes, today)
