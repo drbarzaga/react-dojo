@@ -50,6 +50,13 @@
       "when": 1780018105503,
       "tag": "0006_huge_madelyne_pryor",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1780964424125,
+      "tag": "0007_lyrical_wonder_man",
+      "breakpoints": true
     }
   ]
 }
