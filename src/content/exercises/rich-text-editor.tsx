@@ -92,7 +92,7 @@ export default function App() {
             overflowY: "auto",
             boxSizing: "border-box",
             pointerEvents: "none",
-            color: "#1f2937",
+            color: "inherit",
           }}
         />
         {/* Textarea transparente (encima) */}
@@ -115,7 +115,7 @@ export default function App() {
             boxSizing: "border-box",
             background: "transparent",
             color: "transparent",
-            caretColor: "#1f2937",
+            caretColor: "inherit",
             outline: "none",
           }}
         />
@@ -288,7 +288,7 @@ export default function App() {
             overflowY: "auto",
             boxSizing: "border-box",
             pointerEvents: "none",
-            color: "#1f2937",
+            color: "inherit",
           }}
         />
         <textarea
@@ -310,7 +310,7 @@ export default function App() {
             boxSizing: "border-box",
             background: "transparent",
             color: "transparent",
-            caretColor: "#1f2937",
+            caretColor: "inherit",
             outline: "none",
           }}
         />
