@@ -1610,6 +1610,139 @@ const errorBoundaryQuestions: QuizQuestion[] = [
   },
 ]
 
+const typescriptReactQuestions: QuizQuestion[] = [
+  {
+    id: "ts-1",
+    question: "¿Cuál es la forma correcta de tipar las props de un componente en TypeScript?",
+    options: [
+      "Usando PropTypes importado de 'prop-types'",
+      "Definiendo una interface o type antes del componente y usándola como tipo del parámetro",
+      "Agregando tipos directamente en JSX con as: <div as={string}>",
+      "TypeScript infiere las props automáticamente, no se necesita tipado explícito",
+    ],
+    correctIndex: 1,
+    explanation:
+      "La forma idiomática en TypeScript es definir una interface (para shapes de objeto) o type (para uniones) y usarla como el tipo del parámetro props. Ejemplo: interface ButtonProps { label: string } — function Button({ label }: ButtonProps). PropTypes es la alternativa en JavaScript puro, no en TypeScript.",
+  },
+  {
+    id: "ts-2",
+    question: "¿Cuál es el tipo correcto para un evento onChange de un <input> en React con TypeScript?",
+    options: [
+      "React.ChangeEvent<HTMLInputElement>",
+      "Event<HTMLInputElement>",
+      "InputEvent",
+      "React.SyntheticEvent",
+    ],
+    correctIndex: 0,
+    explanation:
+      "React envuelve los eventos nativos en SyntheticEvent. Para un input, el tipo correcto es React.ChangeEvent<HTMLInputElement>. El genérico <HTMLInputElement> da acceso a e.target.value con tipado seguro. React.SyntheticEvent es la base no tipada — demasiado genérica para leer target.value sin cast.",
+  },
+  {
+    id: "ts-3",
+    question: "¿Cómo se tipa un useRef que apuntará a un elemento <input> del DOM?",
+    options: [
+      "useRef<Element>(null)",
+      "useRef<HTMLInputElement>(null)",
+      "useRef(HTMLInputElement)",
+      "useRef<Input>(undefined)",
+    ],
+    correctIndex: 1,
+    explanation:
+      "useRef<HTMLInputElement>(null) crea una ref tipada cuyo .current puede ser HTMLInputElement | null. El genérico debe ser el tipo exacto del elemento DOM (HTMLInputElement, HTMLDivElement, etc.). Inicializar con null es necesario porque antes de que el componente monte, ref.current es null.",
+  },
+  {
+    id: "ts-4",
+    question: "¿Qué ventaja tienen las Discriminated Unions para tipar props en React?",
+    options: [
+      "Permiten que TypeScript infiera automáticamente las props sin declarar la interfaz",
+      "Permiten que ciertas props solo existan (o sean requeridas) según el valor de otra prop discriminante",
+      "Son más rápidas en runtime que las interfaces normales",
+      "Eliminan la necesidad de usar generics en los componentes",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Con una discriminated union puedes modelar componentes que tienen formas distintas: type Props = { kind: 'link'; href: string } | { kind: 'button'; onClick: () => void }. TypeScript narrowing garantiza que si kind === 'link', href existe y onClick no está disponible. Es ideal para componentes polimórficos.",
+  },
+  {
+    id: "ts-5",
+    question: "¿Cuál es la diferencia entre React.FC<Props> y declarar la función directamente con su tipo de retorno?",
+    options: [
+      "No hay diferencia, son equivalentes en TypeScript moderno",
+      "React.FC agrega children implícitamente y tiene algunas restricciones que la firma directa no tiene",
+      "La firma directa no admite generics; React.FC sí",
+      "React.FC es solo para componentes de clase; la firma directa para funcionales",
+    ],
+    correctIndex: 1,
+    explanation:
+      "React.FC (alias de React.FunctionComponent) fue popular pero hoy se desaconseja: agregaba children implícitamente en versiones antiguas, no funciona bien con generics en el componente, y restringe el tipo de retorno. La recomendación actual es function Button({ label }: ButtonProps): JSX.Element (o ReactElement/ReactNode según el caso).",
+  },
+  {
+    id: "ts-6",
+    question: "¿Cómo se crea un Context tipado correctamente para evitar el uso de 'as' y null checks en cada consumidor?",
+    options: [
+      "createContext<MyContextValue | null>(null) y lanzar error en el hook si el valor es null",
+      "createContext<MyContextValue>({} as MyContextValue)",
+      "createContext(undefined) y hacer cast con as MyContextValue en useContext",
+      "No se puede tipar Context sin usar any",
+    ],
+    correctIndex: 0,
+    explanation:
+      "El patrón correcto es createContext<MyContextValue | null>(null) con un hook personalizado que valida: const ctx = useContext(MyCtx); if (!ctx) throw new Error('Fuera del Provider'); return ctx. Así el hook retorna MyContextValue (sin null) y los consumidores quedan seguros sin casts. Usar {} as MyContextValue es un anti-patrón que oculta errores.",
+  },
+  {
+    id: "ts-7",
+    question: "¿Cómo se tipa correctamente un componente genérico en React con TypeScript?",
+    options: [
+      "No es posible, los componentes React no admiten generics",
+      "function List<T>(props: { items: T[]; renderItem: (item: T) => ReactNode }): ReactElement",
+      "function List(props: { items: any[]; renderItem: Function }): ReactElement",
+      "Los generics solo funcionan con React.FC, no con funciones normales",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Los componentes genéricos son totalmente válidos: function List<T>({ items, renderItem }: { items: T[]; renderItem: (item: T) => ReactNode }) { ... }. TypeScript infiere T al llamar <List items={users} renderItem={(u) => u.name} /> sin necesidad de pasarlo explícitamente. Es el patrón para componentes reutilizables como Table, Select o Combobox.",
+  },
+  {
+    id: "ts-8",
+    question: "¿Qué hace el operador 'satisfies' de TypeScript y cuándo es útil con objetos de configuración en React?",
+    options: [
+      "Es un alias de 'as', realiza un type cast sin validación",
+      "Valida que un valor cumple un tipo sin cambiar el tipo inferido del valor",
+      "Convierte un tipo union en un tipo intersection",
+      "Solo funciona con tipos primitivos, no con objetos",
+    ],
+    correctIndex: 1,
+    explanation:
+      "satisfies valida sin ampliar el tipo. Con const routes = { home: '/', about: '/about' } satisfies Record<string, string>, TypeScript verifica que los valores son strings pero infiere routes.home como el literal '/' — no como string genérico. Útil para objetos de configuración, paletas de colores o mapas de rutas donde quieres autocompletado preciso.",
+  },
+  {
+    id: "ts-9",
+    question: "¿Cómo se extienden las props HTML nativas de un elemento en un componente wrapper?",
+    options: [
+      "Importando HTMLAttributes<HTMLButtonElement> y usando extends o & en la interfaz de props",
+      "Usando PropTypes.element para heredar los tipos del DOM",
+      "Pasando ...rest sin tipar, TypeScript lo infiere automáticamente",
+      "No es posible mezclar props custom con props HTML nativas",
+    ],
+    correctIndex: 0,
+    explanation:
+      "interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> { variant?: 'primary' | 'ghost' }. Así el componente acepta todas las props nativas del botón (disabled, onClick, type, aria-*, etc.) más las propias. El spread {...rest} pasa las nativas al elemento DOM y TypeScript valida que solo lleguen atributos válidos.",
+  },
+  {
+    id: "ts-10",
+    question: "¿Cuál es la forma correcta de tipar un custom hook que devuelve múltiples valores?",
+    options: [
+      "Siempre retornar un objeto { value, setValue } — las tuplas no son idiomáticas en TypeScript",
+      "Retornar un array y usar 'as const' para que TypeScript infiera una tupla en lugar de un array",
+      "Usar any[] como tipo de retorno para máxima flexibilidad",
+      "TypeScript infiere las tuplas automáticamente sin necesidad de 'as const'",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Sin as const, TypeScript infiere el retorno como (string | Dispatch<...>)[] — un array de unión, no una tupla. Con return [value, setValue] as const, TypeScript infiere [string, Dispatch<SetStateAction<string>>] preservando la posición y el tipo exacto de cada elemento. Así el consumidor obtiene tipado correcto al desestructurar const [val, setVal] = useMyHook().",
+  },
+]
+
 export const allQuizzes: Quiz[] = [
   {
     id: "fundamentos",
@@ -1695,6 +1828,14 @@ export const allQuizzes: Quiz[] = [
       "Captura de errores en React: getDerivedStateFromError, componentDidCatch y estrategias de recuperación",
     difficulty: "advanced",
     questions: errorBoundaryQuestions,
+  },
+  {
+    id: "typescript-react",
+    label: "TypeScript + React",
+    description:
+      "Tipado de props, eventos, refs, generics, discriminated unions y patrones avanzados de TypeScript con React",
+    difficulty: "advanced",
+    questions: typescriptReactQuestions,
   },
 ]
 
