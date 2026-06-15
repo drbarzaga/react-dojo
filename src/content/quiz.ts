@@ -1626,7 +1626,8 @@ const typescriptReactQuestions: QuizQuestion[] = [
   },
   {
     id: "ts-2",
-    question: "¿Cuál es el tipo correcto para un evento onChange de un <input> en React con TypeScript?",
+    question:
+      "¿Cuál es el tipo correcto para un evento onChange de un <input> en React con TypeScript?",
     options: [
       "React.ChangeEvent<HTMLInputElement>",
       "Event<HTMLInputElement>",
@@ -1665,7 +1666,8 @@ const typescriptReactQuestions: QuizQuestion[] = [
   },
   {
     id: "ts-5",
-    question: "¿Cuál es la diferencia entre React.FC<Props> y declarar la función directamente con su tipo de retorno?",
+    question:
+      "¿Cuál es la diferencia entre React.FC<Props> y declarar la función directamente con su tipo de retorno?",
     options: [
       "No hay diferencia, son equivalentes en TypeScript moderno",
       "React.FC agrega children implícitamente y tiene algunas restricciones que la firma directa no tiene",
@@ -1678,7 +1680,8 @@ const typescriptReactQuestions: QuizQuestion[] = [
   },
   {
     id: "ts-6",
-    question: "¿Cómo se crea un Context tipado correctamente para evitar el uso de 'as' y null checks en cada consumidor?",
+    question:
+      "¿Cómo se crea un Context tipado correctamente para evitar el uso de 'as' y null checks en cada consumidor?",
     options: [
       "createContext<MyContextValue | null>(null) y lanzar error en el hook si el valor es null",
       "createContext<MyContextValue>({} as MyContextValue)",
@@ -1704,7 +1707,8 @@ const typescriptReactQuestions: QuizQuestion[] = [
   },
   {
     id: "ts-8",
-    question: "¿Qué hace el operador 'satisfies' de TypeScript y cuándo es útil con objetos de configuración en React?",
+    question:
+      "¿Qué hace el operador 'satisfies' de TypeScript y cuándo es útil con objetos de configuración en React?",
     options: [
       "Es un alias de 'as', realiza un type cast sin validación",
       "Valida que un valor cumple un tipo sin cambiar el tipo inferido del valor",
