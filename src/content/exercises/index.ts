@@ -22,6 +22,7 @@ import { colorPicker } from "./color-picker"
 import { accordionComponent } from "./accordion-component"
 import { compoundAccordion } from "./compound-accordion"
 import { errorBoundary } from "./error-boundary"
+import { richTextEditor } from "./rich-text-editor"
 import type { Exercise } from "./types"
 
 export type { Exercise, Difficulty } from "./types"
@@ -51,6 +52,7 @@ export const allExercises: Exercise[] = [
   accordionComponent,
   compoundAccordion,
   errorBoundary,
+  richTextEditor,
 ]
 
 export const exerciseIndex: Record<string, Exercise> = Object.fromEntries(
