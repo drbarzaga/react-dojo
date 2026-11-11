@@ -46,11 +46,20 @@ export async function generateMetadata({
       url: `${BASE_URL}/${locale}`,
       type: "website",
       siteName: "React Dojo",
+      images: [
+        {
+          url: `${BASE_URL}/og-image.png`,
+          width: 1200,
+          height: 630,
+          alt: "React Dojo — Learn React the easy way",
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: "React Dojo",
       description,
+      images: [`${BASE_URL}/og-image.png`],
     },
   }
 }

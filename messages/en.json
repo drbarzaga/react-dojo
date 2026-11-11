@@ -202,7 +202,7 @@
   "Metadata": {
     "titleDefault": "React Dojo - Learn React the easy way",
     "titleTemplate": "%s — React Dojo",
-    "description": "Interactive platform to master React: clear concepts, real exercises, and quizzes in the browser."
+    "description": "Interactive platform to master React: clear concepts, real exercises, and interactive quizzes in the browser."
   },
   "CustomHooks": {
     "sectionLabel": "Hooks Library",
